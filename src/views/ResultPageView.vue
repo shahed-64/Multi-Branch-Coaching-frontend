@@ -469,14 +469,15 @@ const fetchSingleResult = async () => {
 
   if (!resultId) {
     console.error('No result ID provided in query params.')
-
     return
   }
 
   try {
     const response = await api.get(`/results/${resultId}`)
 
-    resultData.value = response.data.result
+    console.log('RESULT SHOW RESPONSE:', response.data)
+
+    resultData.value = response.data.data
   } catch (error) {
     console.error('Error fetching result details:', error)
   }

@@ -63,7 +63,7 @@
           <div class="row align-items-center">
             <div class="col-2 text-start ps-4"></div>
 
-            <div class="col-8">
+            <div class="col-8 font-size-institute">
               <h3 class="fw-bold font-size text-dark mb-1 tracking-normal font-sans">
                 {{ instituteName }}
               </h3>
@@ -614,36 +614,174 @@ const downloadPdf = async () => {
 
     const element = resultPdf.value
 
+    // =========================
+    // WAIT FOR ALL IMAGES
+    // =========================
+
+    const images = element.querySelectorAll('img')
+
+    await Promise.all(
+      Array.from(images).map((img) => {
+        return new Promise((resolve) => {
+          if (img.complete && img.naturalWidth > 0) {
+            resolve()
+            return
+          }
+
+          img.onload = () => resolve()
+          img.onerror = () => resolve()
+        })
+      }),
+    )
+
+    // =========================
+    // HTML TO CANVAS
+    // =========================
+
     const canvas = await html2canvas(element, {
       scale: 2,
+
       useCORS: true,
       allowTaint: false,
+
       backgroundColor: '#ffffff',
       logging: false,
+
       windowWidth: element.scrollWidth,
 
       onclone: (clonedDoc) => {
-        const headers = clonedDoc.querySelectorAll('thead th')
+        // =========================
+        // RESULT TABLE
+        // =========================
+
+        const resultTables = clonedDoc.querySelectorAll('.custom-result-table')
+
+        resultTables.forEach((table) => {
+          table.style.setProperty('width', '100%', 'important')
+
+          table.style.setProperty('max-width', '100%', 'important')
+
+          // Content অনুযায়ী column width
+          table.style.setProperty('table-layout', 'auto', 'important')
+
+          table.style.setProperty('border-collapse', 'collapse', 'important')
+
+          table.style.setProperty('border-spacing', '0', 'important')
+        })
+
+        // =========================
+        // TABLE HEADER
+        // =========================
+
+        const headers = clonedDoc.querySelectorAll('.custom-result-table thead th')
 
         headers.forEach((th) => {
-          th.style.cssText = `
-            background-color: rgba(248, 249, 250, 0.9) !important;
-            color: #000000 !important;
-            border: 1px solid #dee2e6 !important;
-            padding: 8px !important;
-            font-weight: 600 !important;
-          `
+          th.style.setProperty('background', 'transparent', 'important')
+
+          th.style.setProperty('background-color', 'transparent', 'important')
+
+          th.style.setProperty('color', '#000000', 'important')
+
+          th.style.setProperty('border', '1.5px solid #000000', 'important')
+
+          th.style.setProperty('padding', '7px 6px', 'important')
+
+          th.style.setProperty('font-weight', '600', 'important')
+
+          // Comfortable PDF font
+          th.style.setProperty('font-size', '16px', 'important')
+
+          th.style.setProperty('white-space', 'normal', 'important')
         })
+
+        // =========================
+        // HEADER ROW
+        // =========================
+
+        const headerRows = clonedDoc.querySelectorAll('.custom-result-table thead tr')
+
+        headerRows.forEach((tr) => {
+          tr.style.setProperty('background', 'transparent', 'important')
+
+          tr.style.setProperty('background-color', 'transparent', 'important')
+        })
+
+        // =========================
+        // TABLE CELLS
+        // =========================
+
+        const resultCells = clonedDoc.querySelectorAll(
+          '.custom-result-table th, .custom-result-table td',
+        )
+
+        resultCells.forEach((cell) => {
+          cell.style.setProperty('font-size', '16px', 'important')
+
+          cell.style.setProperty('border', '1.5px solid #000000', 'important')
+
+          cell.style.setProperty('background-color', 'transparent', 'important')
+
+          cell.style.setProperty('vertical-align', 'middle', 'important')
+
+          // Long subject/name can wrap naturally
+          cell.style.setProperty('white-space', 'normal', 'important')
+
+          cell.style.setProperty('word-break', 'normal', 'important')
+
+          cell.style.setProperty('overflow-wrap', 'break-word', 'important')
+
+          cell.style.setProperty('line-height', '1.25', 'important')
+        })
+
+        // =========================
+        // FIRST COLUMN
+        // =========================
+
+        const firstColumnCells = clonedDoc.querySelectorAll(
+          '.custom-result-table th:first-child, .custom-result-table td:first-child',
+        )
+
+        firstColumnCells.forEach((cell) => {
+          cell.style.setProperty('min-width', '180px', 'important')
+
+          cell.style.setProperty('white-space', 'normal', 'important')
+
+          cell.style.setProperty('word-break', 'normal', 'important')
+        })
+
+        // =========================
+        // STUDENT IMAGE
+        // =========================
+
+        const studentImages = clonedDoc.querySelectorAll('.student-photo-image')
+
+        studentImages.forEach((img) => {
+          img.style.display = 'block'
+          img.style.visibility = 'visible'
+          img.style.opacity = '1'
+        })
+
+        // =========================
+        // TABLES
+        // =========================
 
         const tables = clonedDoc.querySelectorAll('table')
 
-        tables.forEach((t) => {
-          t.style.borderCollapse = 'collapse'
+        tables.forEach((table) => {
+          table.style.borderCollapse = 'collapse'
         })
       },
     })
 
+    // =========================
+    // CANVAS → IMAGE
+    // =========================
+
     const imageData = canvas.toDataURL('image/jpeg', 0.95)
+
+    // =========================
+    // A4 LANDSCAPE
+    // =========================
 
     const pdf = new jsPDF({
       orientation: 'landscape',
@@ -655,30 +793,19 @@ const downloadPdf = async () => {
 
     const pageHeight = pdf.internal.pageSize.getHeight()
 
-    const margin = 4
+    // =========================
+    // FULL A4 PAGE
+    // =========================
 
-    const availableWidth = pageWidth - margin * 2
+    // No margin
+    // Full page width + height
+    const sideCrop = 4
 
-    const availableHeight = pageHeight - margin * 2
+    pdf.addImage(imageData, 'JPEG', -sideCrop, 0, pageWidth + sideCrop * 2, pageHeight)
 
-    const imgWidth = availableWidth
-
-    const imgHeight = (canvas.height * imgWidth) / canvas.width
-
-    let finalHeight = imgHeight
-    let finalWidth = imgWidth
-
-    if (finalHeight > availableHeight) {
-      finalHeight = availableHeight
-
-      finalWidth = (canvas.width * finalHeight) / canvas.height
-    }
-
-    const posX = (pageWidth - finalWidth) / 2
-
-    const posY = (pageHeight - finalHeight) / 2
-
-    pdf.addImage(imageData, 'JPEG', posX, posY, finalWidth, finalHeight)
+    // =========================
+    // FILE NAME
+    // =========================
 
     const safeStudentId = String(
       student.value.studentId || student.value.student_id || selectedStudentId.value || 'student',
@@ -687,6 +814,10 @@ const downloadPdf = async () => {
     const safeYear = String(selectedYear.value || 'year').replace(/[^a-zA-Z0-9-_]/g, '-')
 
     const fileName = `Result-${safeStudentId}-${safeYear}.pdf`
+
+    // =========================
+    // SAVE
+    // =========================
 
     pdf.save(fileName)
   } catch (error) {
@@ -697,7 +828,6 @@ const downloadPdf = async () => {
     downloading.value = false
   }
 }
-
 onMounted(async () => {
   await Promise.all([loadInstituteInfo(), loadFinalResult()])
 })
@@ -741,10 +871,11 @@ onMounted(async () => {
 }
 
 .watermark-img {
-  width: 350px;
-  height: 350px;
+  width: 900px;
+  height: 780px;
+  margin-top: 300px;
   object-fit: contain;
-  opacity: 0.05;
+  opacity: 0.08;
 }
 
 .tiny {
@@ -752,6 +883,8 @@ onMounted(async () => {
 }
 
 .student-info-bar {
+  font-size: 23px !important;
+  line-height: 1.5;
   background-color: transparent !important;
   border: 2px solid #000000 !important;
   border-radius: 4px;
@@ -772,7 +905,7 @@ onMounted(async () => {
 }
 
 .custom-result-table {
-  font-size: 0.85rem;
+  font-size: 1rem;
   border-color: #000000 !important;
 }
 .custom-result-table th,
@@ -834,10 +967,6 @@ onMounted(async () => {
     overflow: visible !important;
   }
 
-  .custom-result-table {
-    font-size: 10px;
-  }
-
   .custom-result-table th,
   .custom-result-table td {
     padding: 5px 4px;
@@ -859,5 +988,11 @@ onMounted(async () => {
 }
 .font-size {
   font-size: 80px !important;
+}
+.font-size-institute {
+  margin-top: -50px;
+}
+.font-size-institute p {
+  font-size: 20px;
 }
 </style>

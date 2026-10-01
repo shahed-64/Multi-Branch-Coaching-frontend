@@ -35,6 +35,8 @@
                     <tr class="small text-secondary fw-semibold">
                       <th class="ps-4 py-3">TITLE / REASON</th>
 
+                      <th v-if="role === 'Manager'" class="py-3">BRANCH</th>
+
                       <th class="py-3">DATE RANGE</th>
 
                       <th class="py-3">DESCRIPTION</th>
@@ -45,7 +47,7 @@
 
                   <tbody>
                     <tr v-if="loading">
-                      <td colspan="4" class="text-center py-4 text-muted">
+                      <td :colspan="role === 'Manager' ? 5 : 4" class="text-center py-4 text-muted">
                         <div class="spinner-border spinner-border-sm me-2" role="status"></div>
 
                         Loading holidays...
@@ -59,6 +61,13 @@
                     >
                       <td class="ps-4 fw-bold text-dark">
                         {{ holiday.title }}
+                      </td>
+
+                      <!-- Manager Branch -->
+                      <td v-if="role === 'Manager'">
+                        <span class="badge bg-primary bg-opacity-10 text-primary border">
+                          {{ getBranchName(holiday.branch_id) }}
+                        </span>
                       </td>
 
                       <td>
@@ -86,7 +95,9 @@
                     </tr>
 
                     <tr v-else>
-                      <td colspan="4" class="text-center py-4 text-muted">No holidays found.</td>
+                      <td :colspan="role === 'Manager' ? 5 : 4" class="text-center py-4 text-muted">
+                        No holidays found.
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -98,7 +109,6 @@
     </div>
 
     <!-- Modal for Adding Holiday -->
-
     <div class="modal fade" id="holidayModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
@@ -115,6 +125,20 @@
 
           <form @submit.prevent="saveHoliday">
             <div class="modal-body">
+              <!-- Branch Select - Manager Only -->
+              <div v-if="role === 'Manager'" class="mb-3">
+                <label class="form-label fw-semibold small"> Branch </label>
+
+                <select v-model="form.branch_id" class="form-select" required>
+                  <option value="" disabled>Select Branch</option>
+
+                  <option v-for="branch in branches" :key="branch.id" :value="branch.id">
+                    {{ branch.name }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Holiday Title -->
               <div class="mb-3">
                 <label class="form-label fw-semibold small"> Holiday Title </label>
 
@@ -127,6 +151,7 @@
                 />
               </div>
 
+              <!-- Dates -->
               <div class="row">
                 <div class="col-md-6 mb-3">
                   <label class="form-label fw-semibold small"> Start Date </label>
@@ -141,6 +166,7 @@
                 </div>
               </div>
 
+              <!-- Description -->
               <div class="mb-3">
                 <label class="form-label fw-semibold small"> Description (Optional) </label>
 
@@ -173,34 +199,65 @@
 
 <script setup>
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
-
 import * as bootstrap from 'bootstrap'
-
 import dashPageView from './dashPageView.vue'
-
 import api from '@/services/api'
+
+// =======================
+// ROLE
+// =======================
+
+const role = localStorage.getItem('role')
 
 // =======================
 // STATES
 // =======================
 
 const holidays = ref([])
+const branches = ref([])
 
 const loading = ref(false)
-
 const saving = ref(false)
 
 const form = reactive({
+  branch_id: '',
   title: '',
-
   start_date: '',
-
   end_date: '',
-
   description: '',
 })
 
 let holidayModal = null
+
+// =======================
+// FETCH BRANCHES
+// =======================
+
+const fetchBranches = async () => {
+  if (role !== 'Manager') {
+    return
+  }
+
+  try {
+    const response = await api.get('/branches')
+
+    branches.value = response.data.branches || []
+  } catch (error) {
+    console.error('Error fetching branches:', error)
+
+    alert(error.response?.data?.message || 'Failed to fetch branches.')
+  }
+}
+
+// =======================
+// GET BRANCH NAME
+// =======================
+
+const getBranchName = (branchId) => {
+  const branch = branches.value.find((item) => Number(item.id) === Number(branchId))
+
+  return branch?.name || 'Unknown Branch'
+}
 
 // =======================
 // FETCH HOLIDAYS
@@ -231,12 +288,10 @@ const fetchHolidays = async () => {
 // =======================
 
 const openAddModal = () => {
+  form.branch_id = ''
   form.title = ''
-
   form.start_date = ''
-
   form.end_date = ''
-
   form.description = ''
 
   const modalEl = document.getElementById('holidayModal')
@@ -253,10 +308,32 @@ const openAddModal = () => {
 // =======================
 
 const saveHoliday = async () => {
+  /*
+  |--------------------------------------------------------------------------
+  | Manager must select a branch
+  |--------------------------------------------------------------------------
+  */
+
+  if (role === 'Manager' && !form.branch_id) {
+    alert('Please select a branch.')
+
+    return
+  }
+
   saving.value = true
 
   try {
-    await api.post('/holidays', form)
+    await api.post('/holidays', {
+      branch_id: role === 'Manager' ? Number(form.branch_id) : undefined,
+
+      title: form.title,
+
+      start_date: form.start_date,
+
+      end_date: form.end_date,
+
+      description: form.description,
+    })
 
     if (holidayModal) {
       holidayModal.hide()
@@ -369,6 +446,8 @@ const handleBrowserBack = () => {
 onMounted(() => {
   fetchHolidays()
 
+  fetchBranches()
+
   const modalEl = document.getElementById('holidayModal')
 
   if (modalEl) {
@@ -376,9 +455,11 @@ onMounted(() => {
   }
 
   // Browser / Mobile Back
+
   window.addEventListener('popstate', handleBrowserBack)
 
   // Browser restore
+
   window.addEventListener('pageshow', handleBrowserBack)
 })
 
@@ -400,14 +481,12 @@ onBeforeUnmount(() => {
 <style scoped>
 .main-wrapper {
   margin-left: 260px;
-
   width: calc(100% - 260px);
 }
 
 @media (max-width: 768px) {
   .main-wrapper {
     margin-left: 0;
-
     width: 100%;
   }
 }

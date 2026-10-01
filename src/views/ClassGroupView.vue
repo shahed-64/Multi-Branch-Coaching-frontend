@@ -2,377 +2,239 @@
   <dashPageView />
 
   <div class="container-fluid body py-4">
-    <!-- =====================================================
-         PAGE HEADER
-    ====================================================== -->
-    <div class="row mb-4 align-items-center">
-      <div class="col">
-        <h2 class="fw-bold text-dark mb-1">Class Group Management</h2>
-        <p class="text-muted mb-0">
-          Manage student groups and assign optional and group subjects easily.
-        </p>
-      </div>
+    <!-- Unauthorized -->
+    <div v-if="!hasAcademicAccess" class="alert alert-danger">
+      You are not authorized to access Class Groups.
+    </div>
 
-      <div class="col-auto">
-        <button
-          @click="openAddModal"
-          class="btn btn-primary d-flex align-items-center gap-2 shadow-sm"
-        >
-          <i class="bi bi-plus-lg"></i>
+    <template v-else>
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold mb-0">Class Group Management</h3>
+
+        <button class="btn btn-primary" @click="openAddModal">
+          <i class="bi bi-plus-lg me-1"></i>
           Add New Group
         </button>
       </div>
-    </div>
 
-    <!-- =====================================================
-         ALERT MESSAGE
-    ====================================================== -->
-    <div
-      v-if="message"
-      class="alert alert-dismissible fade show shadow-sm"
-      :class="isError ? 'alert-danger' : 'alert-success'"
-      role="alert"
-    >
-      {{ message }}
+      <!-- Message -->
+      <div v-if="message" class="alert" :class="isError ? 'alert-danger' : 'alert-success'">
+        {{ message }}
+      </div>
 
-      <button type="button" class="btn-close" @click="message = ''"></button>
-    </div>
+      <!-- Loading -->
+      <div v-if="loadingGroups" class="text-center py-5">
+        <div class="spinner-border text-primary"></div>
+      </div>
 
-    <!-- =====================================================
-         GROUPS TABLE
-    ====================================================== -->
-    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-      <div class="card-body p-0">
-        <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0">
-            <thead class="table-light text-uppercase fs-7 text-secondary">
-              <tr>
-                <th class="py-3 ps-4">#ID</th>
-                <th class="py-3">Group Name</th>
-                <th class="py-3">Optional Subjects</th>
-                <th class="py-3">Group Subjects</th>
-                <th class="py-3 text-end pe-4">Actions</th>
-              </tr>
-            </thead>
+      <!-- Table -->
+      <div v-else class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th class="ps-4">#ID</th>
+                  <th>Group Name</th>
+                  <th>Optional Subjects</th>
+                  <th>Group Subjects</th>
+                  <th class="text-center">Actions</th>
+                </tr>
+              </thead>
 
-            <tbody>
-              <!-- LOADING -->
-              <tr v-if="loadingGroups">
-                <td colspan="5" class="text-center py-5 text-muted">
-                  <div class="spinner-border spinner-border-sm me-2" role="status"></div>
-                  Loading groups...
-                </td>
-              </tr>
+              <tbody>
+                <tr v-if="groups.length === 0">
+                  <td colspan="5" class="text-center py-4 text-muted">No class groups found.</td>
+                </tr>
 
-              <!-- EMPTY -->
-              <tr v-else-if="groups.length === 0">
-                <td colspan="5" class="text-center py-5 text-muted">
-                  <i class="bi bi-collection fs-3 d-block mb-2"></i>
-                  No groups found.
-                </td>
-              </tr>
+                <tr v-for="group in groups" :key="group.id">
+                  <td class="ps-4">
+                    {{ group.id }}
+                  </td>
 
-              <!-- GROUP ROW -->
-              <tr v-for="(group, index) in groups" :key="group.id">
-                <!-- ID -->
-                <td class="ps-4 fw-semibold text-secondary">
-                  {{ group.id || index + 1 }}
-                </td>
-
-                <!-- GROUP NAME -->
-                <td class="fw-bold text-dark">
-                  {{ group.group_name || 'N/A' }}
-                </td>
-
-                <!-- OPTIONAL SUBJECTS -->
-                <td>
-                  <div
-                    v-if="group.subjects && group.subjects.length"
-                    class="d-flex flex-wrap gap-1"
-                  >
-                    <span
-                      v-for="subject in group.subjects"
-                      :key="subject.id"
-                      class="badge bg-primary-subtle text-primary border border-primary-subtle"
-                    >
-                      {{ subject.name }}
-
-                      <span v-if="subject.code" class="ms-1"> ({{ subject.code }}) </span>
+                  <td>
+                    <span class="fw-semibold">
+                      {{ group.group_name }}
                     </span>
-                  </div>
+                  </td>
 
-                  <span v-else class="text-muted small"> No optional subjects assigned </span>
-                </td>
-
-                <!-- GROUP SUBJECTS -->
-                <td>
-                  <div
-                    v-if="group.groupSubjectMappings && group.groupSubjectMappings.length"
-                    class="d-flex flex-wrap gap-1"
-                  >
-                    <span
-                      v-for="mapping in group.groupSubjectMappings"
-                      :key="mapping.id"
-                      class="badge bg-success-subtle text-success border border-success-subtle"
-                    >
-                      {{ mapping.subject?.name }}
-
-                      <span v-if="mapping.subject?.code" class="ms-1">
-                        ({{ mapping.subject.code }})
+                  <!-- Optional Subjects -->
+                  <td>
+                    <template v-if="group.subjects && group.subjects.length">
+                      <span
+                        v-for="subject in group.subjects"
+                        :key="subject.id"
+                        class="badge bg-primary-subtle text-primary me-1 mb-1"
+                      >
+                        {{ subject.name }}
                       </span>
-                    </span>
-                  </div>
+                    </template>
 
-                  <span v-else class="text-muted small"> No group subjects assigned </span>
-                </td>
+                    <span v-else class="text-muted"> - </span>
+                  </td>
 
-                <!-- ACTIONS -->
-                <td class="text-end pe-4">
-                  <button
-                    @click="openEditModal(group)"
-                    class="btn btn-sm btn-outline-primary me-2 px-3"
-                  >
-                    <i class="bi bi-pencil me-1"></i>
-                    Edit
-                  </button>
+                  <!-- Group Subjects -->
+                  <td>
+                    <template
+                      v-if="group.group_subject_mappings && group.group_subject_mappings.length"
+                    >
+                      <span
+                        v-for="mapping in group.group_subject_mappings"
+                        :key="mapping.id"
+                        class="badge bg-success-subtle text-success me-1 mb-1"
+                      >
+                        {{ mapping.subject?.name }}
+                      </span>
+                    </template>
 
-                  <button @click="deleteGroup(group.id)" class="btn btn-sm btn-outline-danger px-3">
-                    <i class="bi bi-trash me-1"></i>
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                    <span v-else class="text-muted"> - </span>
+                  </td>
+
+                  <!-- Actions -->
+                  <td class="text-center">
+                    <button
+                      class="btn btn-sm btn-outline-primary me-1"
+                      @click="openEditModal(group)"
+                    >
+                      <i class="bi bi-pencil"></i>
+                    </button>
+
+                    <button class="btn btn-sm btn-outline-danger" @click="deleteGroup(group.id)">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-    </div>
+    </template>
 
-    <!-- =====================================================
-         ADD / EDIT GROUP MODAL
-    ====================================================== -->
+    <!-- ================= MODAL ================= -->
+
     <div
       v-if="showModal"
       class="modal fade show d-block"
       tabindex="-1"
-      style="background-color: rgba(0, 0, 0, 0.5)"
+      style="background: rgba(0, 0, 0, 0.5)"
     >
-      <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow-lg rounded-4">
-          <!-- =================================================
-               MODAL HEADER
-          ================================================== -->
-          <div class="modal-header border-0 pb-0">
-            <div>
-              <h5 class="modal-title fw-bold text-dark">
-                {{ isEditMode ? 'Edit Group' : 'Add New Group' }}
-              </h5>
-
-              <p class="text-muted small mb-0">
-                {{
-                  isEditMode
-                    ? 'Update group information and assigned subjects.'
-                    : 'Create a group and assign subjects.'
-                }}
-              </p>
-            </div>
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow">
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold">
+              {{ isEditMode ? 'Edit Class Group' : 'Add New Class Group' }}
+            </h5>
 
             <button type="button" class="btn-close" @click="closeModal"></button>
           </div>
 
-          <!-- =================================================
-               FORM
-          ================================================== -->
-          <form @submit.prevent="saveGroup">
-            <div class="modal-body py-4">
-              <!-- =================================================
-                   GROUP NAME
-              ================================================== -->
+          <!-- Modal Body -->
+          <div class="modal-body">
+            <!-- Manager Branch -->
+            <div v-if="role === 'Manager'" class="mb-3">
+              <label class="form-label fw-semibold"> Branch </label>
+
+              <select v-model="form.branch_id" class="form-select">
+                <option value="">Select Branch</option>
+
+                <option v-for="branch in branches" :key="branch.id" :value="branch.id">
+                  {{ branch.name }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Group Name -->
+            <div class="mb-4">
+              <label class="form-label fw-semibold"> Group Name </label>
+
+              <input
+                v-model="form.group_name"
+                type="text"
+                class="form-control"
+                placeholder="Enter group name"
+              />
+            </div>
+
+            <!-- Loading Subjects -->
+            <div v-if="subjectsLoading" class="text-center py-4">
+              <div class="spinner-border text-primary"></div>
+              <div class="small text-muted mt-2">Loading subjects...</div>
+            </div>
+
+            <template v-else>
+              <!-- ================= GROUP SUBJECTS ================= -->
+
               <div class="mb-4">
-                <label class="form-label fw-semibold text-secondary">
-                  Group Name
-                  <span class="text-danger">*</span>
-                </label>
+                <label class="form-label fw-semibold"> Group Subjects </label>
 
-                <input
-                  type="text"
-                  v-model="form.group_name"
-                  placeholder="e.g. Science"
-                  required
-                  class="form-control form-control-lg fs-6"
-                />
-              </div>
+                <div v-if="availableSubjects.length" class="subject-grid">
+                  <label
+                    v-for="subject in availableSubjects"
+                    :key="'group-' + subject.id"
+                    class="subject-card"
+                  >
+                    <input type="checkbox" :value="subject.id" v-model="form.group_subject_ids" />
 
-              <!-- =================================================
-                   GROUP SUBJECTS
-              ================================================== -->
-              <div class="mb-4">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                  <div>
-                    <label class="form-label fw-semibold text-secondary mb-0">
-                      Group Subjects
-                    </label>
-
-                    <div class="small text-muted">
-                      Subjects specifically assigned to this group.
-                    </div>
-                  </div>
-
-                  <span class="badge bg-success-subtle text-success">
-                    {{ form.group_subject_ids.length }} Selected
-                  </span>
-                </div>
-
-                <div class="border rounded-3 p-3 group-subject-selection-box">
-                  <!-- LOADING -->
-                  <div v-if="subjectsLoading" class="text-center py-4 text-muted">
-                    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
-
-                    Loading subjects...
-                  </div>
-
-                  <!-- NO SUBJECT -->
-                  <div v-else-if="subjects.length === 0" class="text-center py-4 text-muted">
-                    <i class="bi bi-book fs-3 d-block mb-2"></i>
-
-                    No group subjects available.
-                  </div>
-
-                  <!-- GROUP SUBJECT CHECKBOXES -->
-                  <div v-else class="row g-2">
-                    <div
-                      v-for="subject in subjects"
-                      :key="subject.id"
-                      class="col-12 col-sm-6 col-md-4"
-                    >
-                      <div
-                        class="form-check subject-check-card border rounded-3 p-3"
-                        :class="{
-                          'selected-group-subject': form.group_subject_ids.includes(
-                            Number(subject.id),
-                          ),
-                        }"
-                      >
-                        <input
-                          class="form-check-input ms-0 me-2"
-                          type="checkbox"
-                          :id="'group-subject-' + subject.id"
-                          :value="Number(subject.id)"
-                          v-model="form.group_subject_ids"
-                        />
-
-                        <label
-                          class="form-check-label fw-semibold"
-                          :for="'group-subject-' + subject.id"
-                        >
-                          {{ subject.name }}
-
-                          <span v-if="subject.code" class="d-block text-muted small mt-1">
-                            {{ subject.code }}
-                          </span>
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="form-text mt-2">
-                  Select subjects that belong specifically to this group.
-                </div>
-              </div>
-
-              <!-- =================================================
-                   OPTIONAL SUBJECTS
-              ================================================== -->
-              <div>
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                  <label class="form-label fw-semibold text-secondary mb-0">
-                    Optional Subjects
+                    <span>
+                      {{ subject.name }}
+                    </span>
                   </label>
-
-                  <span class="badge bg-primary-subtle text-primary">
-                    {{ form.subject_ids.length }} Selected
-                  </span>
                 </div>
 
-                <div class="border rounded-3 p-3 subject-selection-box">
-                  <!-- LOADING -->
-                  <div v-if="subjectsLoading" class="text-center py-4 text-muted">
-                    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
-
-                    Loading subjects...
-                  </div>
-
-                  <!-- NO SUBJECT -->
-                  <div v-else-if="subjects.length === 0" class="text-center py-4 text-muted">
-                    <i class="bi bi-book fs-3 d-block mb-2"></i>
-
-                    No subjects found.
-
-                    <div class="small mt-1">Please create subjects first.</div>
-                  </div>
-
-                  <!-- SUBJECT CHECKBOXES -->
-                  <div v-else class="row g-2">
-                    <div
-                      v-for="subject in subjects"
-                      :key="subject.id"
-                      class="col-12 col-sm-6 col-md-4"
-                    >
-                      <div
-                        class="form-check subject-check-card border rounded-3 p-3"
-                        :class="{
-                          'selected-subject': form.subject_ids.includes(Number(subject.id)),
-                        }"
-                      >
-                        <input
-                          class="form-check-input ms-0 me-2"
-                          type="checkbox"
-                          :id="'subject-' + subject.id"
-                          :value="Number(subject.id)"
-                          v-model="form.subject_ids"
-                        />
-
-                        <label class="form-check-label fw-semibold" :for="'subject-' + subject.id">
-                          {{ subject.name }}
-
-                          <span v-if="subject.code" class="d-block text-muted small mt-1">
-                            {{ subject.code }}
-                          </span>
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="form-text mt-2">
-                  Select optional subjects that should be available for this group.
+                <div v-else class="text-muted small">
+                  {{
+                    role === 'Manager' && !form.branch_id
+                      ? 'Please select a branch first.'
+                      : 'No subjects found for this branch.'
+                  }}
                 </div>
               </div>
-            </div>
 
-            <!-- =================================================
-                 MODAL FOOTER
-            ================================================== -->
-            <div class="modal-footer border-0 pt-0">
-              <button
-                type="button"
-                @click="closeModal"
-                class="btn btn-light px-4"
-                :disabled="saving"
-              >
-                Cancel
-              </button>
+              <!-- ================= OPTIONAL SUBJECTS ================= -->
 
-              <button type="submit" class="btn btn-primary px-4" :disabled="saving">
-                <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
+              <div class="mb-3">
+                <label class="form-label fw-semibold"> Optional Subjects </label>
 
-                <i v-else class="bi" :class="isEditMode ? 'bi-check-lg' : 'bi-plus-lg'"></i>
+                <div v-if="availableSubjects.length" class="subject-grid">
+                  <label
+                    v-for="subject in availableSubjects"
+                    :key="'optional-' + subject.id"
+                    class="subject-card"
+                  >
+                    <input type="checkbox" :value="subject.id" v-model="form.subject_ids" />
 
-                {{ isEditMode ? 'Update Group' : 'Save Group' }}
-              </button>
-            </div>
-          </form>
+                    <span>
+                      {{ subject.name }}
+                    </span>
+                  </label>
+                </div>
+
+                <div v-else class="text-muted small">
+                  {{
+                    role === 'Manager' && !form.branch_id
+                      ? 'Please select a branch first.'
+                      : 'No subjects found for this branch.'
+                  }}
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" @click="closeModal">Cancel</button>
+
+            <button type="button" class="btn btn-primary" :disabled="saving" @click="saveGroup">
+              <span v-if="saving" class="spinner-border spinner-border-sm me-1"></span>
+
+              <i v-else class="bi bi-check-lg me-1"></i>
+
+              {{ isEditMode ? 'Update Group' : 'Save Group' }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -380,139 +242,216 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import api from '../services/api'
 import dashPageView from './dashPageView.vue'
 
-/* =========================================================
-   GROUPS
-========================================================= */
+const role = localStorage.getItem('role')
+
+/*
+|--------------------------------------------------------------------------
+| Academic Access
+|--------------------------------------------------------------------------
+*/
+
+const hasAcademicAccess = computed(() => {
+  return !['Branch Accountant', 'Accountant'].includes(role)
+})
+
+/*
+|--------------------------------------------------------------------------
+| Branches
+|--------------------------------------------------------------------------
+*/
+
+const branches = ref([])
+const branchesLoading = ref(false)
+
+/*
+|--------------------------------------------------------------------------
+| Class Groups
+|--------------------------------------------------------------------------
+*/
 
 const groups = ref([])
 const loadingGroups = ref(false)
 
-/* =========================================================
-   SUBJECTS
-========================================================= */
+/*
+|--------------------------------------------------------------------------
+| Subjects
+|--------------------------------------------------------------------------
+*/
 
 const subjects = ref([])
 const subjectsLoading = ref(false)
 
-/* =========================================================
-   MODAL
-========================================================= */
+/*
+|--------------------------------------------------------------------------
+| Modal
+|--------------------------------------------------------------------------
+*/
 
 const showModal = ref(false)
 const isEditMode = ref(false)
 const currentGroupID = ref(null)
 const saving = ref(false)
 
-/* =========================================================
-   FORM
-========================================================= */
+/*
+|--------------------------------------------------------------------------
+| Form
+|--------------------------------------------------------------------------
+*/
 
 const form = ref({
   group_name: '',
+  branch_id: '',
   subject_ids: [],
   group_subject_ids: [],
 })
 
-/* =========================================================
-   ALERT
-========================================================= */
+/*
+|--------------------------------------------------------------------------
+| Message
+|--------------------------------------------------------------------------
+*/
 
 const message = ref('')
 const isError = ref(false)
 
-/* =========================================================
-   OPEN ADD MODAL
-========================================================= */
+/*
+|--------------------------------------------------------------------------
+| Available Subjects
+|--------------------------------------------------------------------------
+|
+| Manager:
+|   branch select করার পর সেই branch-এর subject দেখাবে।
+|
+| Admin / Branch Manager:
+|   backend already own branch-এর subject পাঠাবে।
+|   তাই এখানে সব returned subject দেখানো হবে।
+|
+|--------------------------------------------------------------------------
+*/
 
-const openAddModal = async () => {
-  isEditMode.value = false
-  currentGroupID.value = null
+const availableSubjects = computed(() => {
+  if (role === 'Manager') {
+    if (!form.value.branch_id) {
+      return []
+    }
 
-  form.value = {
-    group_name: '',
-    subject_ids: [],
-    group_subject_ids: [],
+    return subjects.value.filter(
+      (subject) => Number(subject.branch_id) === Number(form.value.branch_id),
+    )
   }
 
-  message.value = ''
+  return subjects.value
+})
 
-  showModal.value = true
+/*
+|--------------------------------------------------------------------------
+| Fetch Branches
+|--------------------------------------------------------------------------
+*/
 
-  await fetchSubjects()
+const fetchBranches = async () => {
+  branchesLoading.value = true
+
+  try {
+    const response = await api.get('/branches')
+
+    if (Array.isArray(response.data)) {
+      branches.value = response.data
+    } else if (Array.isArray(response.data?.data)) {
+      branches.value = response.data.data
+    } else if (Array.isArray(response.data?.branches)) {
+      branches.value = response.data.branches
+    } else {
+      branches.value = []
+    }
+  } catch (error) {
+    console.error('Failed to fetch branches:', error)
+
+    branches.value = []
+
+    showMessage(error.response?.data?.message || 'Failed to load branches.', true)
+  } finally {
+    branchesLoading.value = false
+  }
 }
 
-/* =========================================================
-   OPEN EDIT MODAL
-========================================================= */
-
-const openEditModal = async (group) => {
-  isEditMode.value = true
-  currentGroupID.value = group.id
-
-  form.value.group_name = group.group_name || ''
-
-  form.value.subject_ids = Array.isArray(group.subjects)
-    ? group.subjects.map((subject) => Number(subject.id))
-    : []
-
-  form.value.group_subject_ids = Array.isArray(group.groupSubjectMappings)
-    ? group.groupSubjectMappings.map((mapping) => Number(mapping.subject_id))
-    : []
-
-  message.value = ''
-
-  showModal.value = true
-
-  await fetchSubjects()
-}
-
-/* =========================================================
-   FETCH GROUPS
-========================================================= */
+/*
+|--------------------------------------------------------------------------
+| Fetch Class Groups
+|--------------------------------------------------------------------------
+*/
 
 const fetchGroups = async () => {
   loadingGroups.value = true
 
   try {
-    const response = await api.get('/class_group')
+    const response = await api.get('/class-groups')
 
     if (Array.isArray(response.data)) {
       groups.value = response.data
-    } else if (response.data && Array.isArray(response.data.data)) {
+    } else if (Array.isArray(response.data?.data)) {
       groups.value = response.data.data
-    } else if (response.data && Array.isArray(response.data.groups)) {
-      groups.value = response.data.groups
+    } else if (Array.isArray(response.data?.class_groups)) {
+      groups.value = response.data.class_groups
     } else {
       groups.value = []
     }
   } catch (error) {
-    console.error('Failed to fetch groups:', error)
+    console.error('Failed to fetch class groups:', error)
 
-    showAlert(error.response?.data?.message || 'Failed to fetch groups.', true)
+    groups.value = []
+
+    showMessage(error.response?.data?.message || 'Failed to load class groups.', true)
   } finally {
     loadingGroups.value = false
   }
 }
 
-/* =========================================================
-   FETCH SUBJECTS
-========================================================= */
+/*
+|--------------------------------------------------------------------------
+| Fetch Subjects
+|--------------------------------------------------------------------------
+|
+| Manager:
+|   /subjects?branch_id=SELECTED_BRANCH
+|
+| Admin / Branch Manager:
+|   /subjects
+|   Backend automatically own branch-এর subject দেবে।
+|
+|--------------------------------------------------------------------------
+*/
 
 const fetchSubjects = async () => {
   subjectsLoading.value = true
 
   try {
-    const response = await api.get('/subjects')
+    let response
+
+    if (role === 'Manager') {
+      if (!form.value.branch_id) {
+        subjects.value = []
+        return
+      }
+
+      response = await api.get('/subjects', {
+        params: {
+          branch_id: Number(form.value.branch_id),
+        },
+      })
+    } else {
+      response = await api.get('/subjects')
+    }
 
     if (Array.isArray(response.data)) {
       subjects.value = response.data
-    } else if (response.data && Array.isArray(response.data.data)) {
+    } else if (Array.isArray(response.data?.data)) {
       subjects.value = response.data.data
-    } else if (response.data && Array.isArray(response.data.subjects)) {
+    } else if (Array.isArray(response.data?.subjects)) {
       subjects.value = response.data.subjects
     } else {
       subjects.value = []
@@ -522,23 +461,190 @@ const fetchSubjects = async () => {
 
     subjects.value = []
 
-    showAlert(error.response?.data?.message || 'Failed to fetch subjects.', true)
+    showMessage(error.response?.data?.message || 'Failed to load subjects.', true)
   } finally {
     subjectsLoading.value = false
   }
 }
 
-/* =========================================================
-   SAVE GROUP
-========================================================= */
+/*
+|--------------------------------------------------------------------------
+| Branch Change
+|--------------------------------------------------------------------------
+|
+| Manager branch change করলে নতুন branch-এর subjects reload হবে।
+|
+|--------------------------------------------------------------------------
+*/
+
+watch(
+  () => form.value.branch_id,
+  async (newBranchId) => {
+    if (!newBranchId) {
+      form.value.subject_ids = []
+      form.value.group_subject_ids = []
+
+      if (role === 'Manager') {
+        subjects.value = []
+      }
+
+      return
+    }
+
+    if (role === 'Manager') {
+      await fetchSubjects()
+    }
+
+    const branchId = Number(newBranchId)
+
+    /*
+    |--------------------------------------------------------------------------
+    | Remove previously selected subjects that do not belong
+    | to the newly selected branch.
+    |--------------------------------------------------------------------------
+    */
+
+    form.value.subject_ids = form.value.subject_ids.filter((subjectId) => {
+      const subject = subjects.value.find((item) => Number(item.id) === Number(subjectId))
+
+      return subject && Number(subject.branch_id) === branchId
+    })
+
+    form.value.group_subject_ids = form.value.group_subject_ids.filter((subjectId) => {
+      const subject = subjects.value.find((item) => Number(item.id) === Number(subjectId))
+
+      return subject && Number(subject.branch_id) === branchId
+    })
+  },
+)
+
+/*
+|--------------------------------------------------------------------------
+| Open Add Modal
+|--------------------------------------------------------------------------
+*/
+
+const openAddModal = async () => {
+  clearMessage()
+
+  isEditMode.value = false
+  currentGroupID.value = null
+
+  form.value = {
+    group_name: '',
+    branch_id: '',
+    subject_ids: [],
+    group_subject_ids: [],
+  }
+
+  subjects.value = []
+
+  showModal.value = true
+
+  /*
+  |--------------------------------------------------------------------------
+  | Manager
+  |--------------------------------------------------------------------------
+  | Branch select করার আগে subject load হবে না।
+  |--------------------------------------------------------------------------
+  */
+
+  if (role === 'Manager') {
+    await fetchBranches()
+  } else {
+    /*
+    |--------------------------------------------------------------------------
+    | Admin / Branch Manager
+    |--------------------------------------------------------------------------
+    | Backend own branch-এর subject দেবে।
+    |--------------------------------------------------------------------------
+    */
+
+    await fetchSubjects()
+  }
+}
+
+/*
+|--------------------------------------------------------------------------
+| Open Edit Modal
+|--------------------------------------------------------------------------
+*/
+
+const openEditModal = async (group) => {
+  clearMessage()
+
+  isEditMode.value = true
+  currentGroupID.value = group.id
+
+  form.value = {
+    group_name: group.group_name || '',
+    branch_id: group.branch_id || '',
+    subject_ids: group.subjects ? group.subjects.map((subject) => Number(subject.id)) : [],
+    group_subject_ids: group.group_subject_mappings
+      ? group.group_subject_mappings.map((mapping) => Number(mapping.subject_id)).filter(Boolean)
+      : [],
+  }
+
+  subjects.value = []
+
+  showModal.value = true
+
+  /*
+  |--------------------------------------------------------------------------
+  | Manager
+  |--------------------------------------------------------------------------
+  | Existing group-এর branch already form-এ আছে,
+  | তাই সেই branch-এর subjects load হবে।
+  |--------------------------------------------------------------------------
+  */
+
+  if (role === 'Manager') {
+    await fetchBranches()
+    await fetchSubjects()
+  } else {
+    await fetchSubjects()
+  }
+}
+
+/*
+|--------------------------------------------------------------------------
+| Close Modal
+|--------------------------------------------------------------------------
+*/
+
+const closeModal = () => {
+  showModal.value = false
+  isEditMode.value = false
+  currentGroupID.value = null
+
+  form.value = {
+    group_name: '',
+    branch_id: '',
+    subject_ids: [],
+    group_subject_ids: [],
+  }
+
+  subjects.value = []
+}
+
+/*
+|--------------------------------------------------------------------------
+| Save / Update Group
+|--------------------------------------------------------------------------
+*/
 
 const saveGroup = async () => {
-  if (saving.value) {
+  clearMessage()
+
+  if (!form.value.group_name.trim()) {
+    showMessage('Please enter group name.', true)
+
     return
   }
 
-  if (!form.value.group_name.trim()) {
-    showAlert('Please enter group name.', true)
+  if (role === 'Manager' && !form.value.branch_id) {
+    showMessage('Please select a branch.', true)
+
     return
   }
 
@@ -547,242 +653,170 @@ const saveGroup = async () => {
   try {
     const payload = {
       group_name: form.value.group_name.trim(),
-
-      /* Existing Optional Subjects */
-      subject_ids: form.value.subject_ids.map((id) => Number(id)),
-
-      /* Group Subjects */
-      group_subject_ids: form.value.group_subject_ids.map((id) => Number(id)),
+      subject_ids: form.value.subject_ids,
+      group_subject_ids: form.value.group_subject_ids,
     }
 
-    console.log('Group save payload:', payload)
+    /*
+    |--------------------------------------------------------------------------
+    | Only Manager sends branch_id.
+    |--------------------------------------------------------------------------
+    | Admin / Branch Manager-এর branch backend নিজে নির্ধারণ করবে।
+    |--------------------------------------------------------------------------
+    */
 
-    /* =====================================================
-       UPDATE
-    ====================================================== */
+    if (role === 'Manager') {
+      payload.branch_id = Number(form.value.branch_id)
+    }
 
     if (isEditMode.value) {
-      const response = await api.put(`/class_group/${currentGroupID.value}`, payload)
+      await api.put(`/class-groups/${currentGroupID.value}`, payload)
 
-      if (response.status === 200 || response.data?.success) {
-        showAlert(response.data?.message || 'Group updated successfully!')
-
-        /* AUTO CLOSE MODAL */
-        closeModal()
-
-        await fetchGroups()
-      }
+      showMessage('Class group updated successfully.', false)
     } else {
-      /* =====================================================
-         CREATE
-      ====================================================== */
+      await api.post('/class-groups', payload)
 
-      const response = await api.post('/class_group', payload)
-
-      if (response.status === 201 || response.status === 200 || response.data?.success) {
-        showAlert(response.data?.message || 'Group created successfully!')
-
-        /* AUTO CLOSE MODAL */
-        closeModal()
-
-        await fetchGroups()
-      }
+      showMessage('Class group created successfully.', false)
     }
+
+    closeModal()
+
+    await fetchGroups()
   } catch (error) {
-    console.error('Group save error:', error)
+    console.error('Failed to save class group:', error)
 
-    console.error('Validation errors:', error.response?.data?.errors)
+    const errors = error.response?.data?.errors
 
-    if (error.response?.status === 422) {
-      const validationErrors = error.response?.data?.errors || {}
+    if (errors) {
+      const firstError = Object.values(errors)[0]
 
-      const firstError = Object.values(validationErrors)[0]?.[0]
-
-      showAlert(
-        firstError || error.response?.data?.message || 'Please check the form fields.',
-        true,
-      )
+      showMessage(Array.isArray(firstError) ? firstError[0] : firstError, true)
     } else {
-      showAlert(error.response?.data?.message || 'Something went wrong!', true)
+      showMessage(error.response?.data?.message || 'Failed to save class group.', true)
     }
   } finally {
     saving.value = false
   }
 }
 
-/* =========================================================
-   CLOSE MODAL
-========================================================= */
-
-const closeModal = () => {
-  if (saving.value) {
-    return
-  }
-
-  showModal.value = false
-  isEditMode.value = false
-  currentGroupID.value = null
-
-  form.value = {
-    group_name: '',
-    subject_ids: [],
-    group_subject_ids: [],
-  }
-}
-
-/* =========================================================
-   DELETE GROUP
-========================================================= */
+/*
+|--------------------------------------------------------------------------
+| Delete Group
+|--------------------------------------------------------------------------
+*/
 
 const deleteGroup = async (id) => {
-  if (!confirm('Are you sure you want to delete this group?')) {
+  if (!confirm('Are you sure you want to delete this class group?')) {
     return
   }
 
+  clearMessage()
+
   try {
-    await api.delete(`/class_group/${id}`)
+    await api.delete(`/class-groups/${id}`)
 
-    groups.value = groups.value.filter((group) => group.id !== id)
+    showMessage('Class group deleted successfully.', false)
 
-    showAlert('Group deleted successfully!')
+    await fetchGroups()
   } catch (error) {
-    console.error('Failed to delete group:', error)
+    console.error('Failed to delete class group:', error)
 
-    showAlert(error.response?.data?.message || 'Failed to delete group.', true)
+    showMessage(error.response?.data?.message || 'Failed to delete class group.', true)
   }
 }
 
-/* =========================================================
-   SHOW ALERT
-========================================================= */
+/*
+|--------------------------------------------------------------------------
+| Message Helpers
+|--------------------------------------------------------------------------
+*/
 
-const showAlert = (msg, error = false) => {
-  message.value = msg
+const showMessage = (text, error = false) => {
+  message.value = text
   isError.value = error
 
   setTimeout(() => {
     message.value = ''
-  }, 3000)
+  }, 4000)
 }
 
-/* =========================================================
-   ON MOUNT
-========================================================= */
+const clearMessage = () => {
+  message.value = ''
+  isError.value = false
+}
 
-onMounted(() => {
-  fetchGroups()
+/*
+|--------------------------------------------------------------------------
+| Mounted
+|--------------------------------------------------------------------------
+*/
+
+onMounted(async () => {
+  if (!hasAcademicAccess.value) {
+    return
+  }
+
+  await fetchGroups()
 })
 </script>
 
 <style scoped>
-/* =========================================================
-   BODY
-========================================================= */
-
 .body {
   width: 86%;
   margin-left: 259px;
 }
 
-/* =========================================================
-   SUBJECT SELECTION BOX
-========================================================= */
+/* Subject Grid */
 
-.subject-selection-box,
-.group-subject-selection-box {
-  background-color: #f8f9fa;
-  max-height: 320px;
-  overflow-y: auto;
+.subject-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
 }
 
-/* =========================================================
-   SUBJECT CHECK CARD
-========================================================= */
+/* Subject Card */
 
-.subject-check-card {
-  background-color: #ffffff;
+.subject-card {
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+  padding: 12px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  min-height: 70px;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  gap: 8px;
+  transition: 0.2s;
+  background: #fff;
 }
 
-/* =========================================================
-   HOVER
-========================================================= */
-
-.subject-check-card:hover {
-  border-color: #86b7fe !important;
-  background-color: #f8fbff;
+.subject-card:hover {
+  border-color: #0d6efd;
+  background: #f8fbff;
 }
 
-/* =========================================================
-   OPTIONAL SUBJECT SELECTED
-========================================================= */
-
-.subject-check-card.selected-subject {
-  border-color: #0d6efd !important;
-  background-color: rgba(13, 110, 253, 0.06);
-}
-
-/* =========================================================
-   GROUP SUBJECT SELECTED
-========================================================= */
-
-.subject-check-card.selected-group-subject {
-  border-color: #198754 !important;
-  background-color: rgba(25, 135, 84, 0.06);
-}
-
-/* =========================================================
-   CHECKBOX
-========================================================= */
-
-.subject-check-card .form-check-input {
-  margin-top: 3px;
+.subject-card input {
   cursor: pointer;
 }
 
-/* =========================================================
-   LABEL
-========================================================= */
-
-.subject-check-card .form-check-label {
-  cursor: pointer;
-  flex: 1;
+.subject-card span {
+  font-size: 14px;
 }
 
-/* =========================================================
-   TABLE
-========================================================= */
+/* Mobile */
 
-.table th {
-  font-size: 0.8rem;
-  letter-spacing: 0.03em;
-}
-
-.table td {
-  vertical-align: middle;
-}
-
-/* =========================================================
-   MODAL
-========================================================= */
-
-.modal {
-  z-index: 1055;
-}
-
-/* =========================================================
-   MOBILE
-========================================================= */
-
-@media (max-width: 768px) {
+@media (max-width: 992px) {
   .body {
     width: 100%;
     margin-left: 0;
-    padding: 15px;
+  }
+
+  .subject-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .subject-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>

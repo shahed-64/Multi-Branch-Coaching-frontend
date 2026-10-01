@@ -134,6 +134,7 @@
             <div class="text-muted small">
               <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill">
                 Total Records:
+
                 <strong>
                   {{ filteredSubjects.length }}
                 </strong>
@@ -330,10 +331,42 @@
             {{ formError }}
           </div>
 
+          <!-- =================================================
+               BRANCH
+          ================================================== -->
+          <div v-if="role === 'Manager'" class="mb-3">
+            <label class="form-label fw-semibold">
+              Branch
+              <span class="text-danger">*</span>
+            </label>
+
+            <select
+              v-model="form.branch_id"
+              class="form-select"
+              :class="{
+                'is-invalid': errors.branch_id,
+              }"
+              :disabled="branchesLoading"
+            >
+              <option value="">
+                {{ branchesLoading ? 'Loading branches...' : 'Select Branch' }}
+              </option>
+
+              <option v-for="branch in branches" :key="branch.id" :value="branch.id">
+                {{ branch.name }}
+              </option>
+            </select>
+
+            <div v-if="errors.branch_id" class="invalid-feedback">
+              {{ errors.branch_id }}
+            </div>
+          </div>
+
           <!-- SUBJECT NAME -->
           <div class="mb-3">
             <label class="form-label fw-semibold">
               Subject Name
+
               <span class="text-danger">*</span>
             </label>
 
@@ -359,6 +392,7 @@
           <div class="mb-3">
             <label class="form-label fw-semibold">
               Subject Code
+
               <span class="text-danger">*</span>
             </label>
 
@@ -379,13 +413,14 @@
               {{ errors.code }}
             </div>
 
-            <div class="form-text">Use a unique code for each subject.</div>
+            <div class="form-text">Use a unique code for each subject in the branch.</div>
           </div>
 
           <!-- FULL MARK -->
           <div class="mb-3">
             <label class="form-label fw-semibold">
               Full Mark
+
               <span class="text-danger">*</span>
             </label>
 
@@ -444,18 +479,35 @@ import dashPageView from './dashPageView.vue'
 import api from '@/services/api'
 
 /* =========================================================
+   ROLE
+========================================================= */
+
+const role = localStorage.getItem('role')
+
+/* =========================================================
    STATES
 ========================================================= */
 
 const subjects = ref([])
 const loading = ref(false)
 const saving = ref(false)
+
 const searchQuery = ref('')
+
 const showModal = ref(false)
 const editingSubject = ref(null)
+
 const formError = ref('')
 const errors = ref({})
+
 const subjectNameInput = ref(null)
+
+/* =========================================================
+   BRANCH STATES
+========================================================= */
+
+const branches = ref([])
+const branchesLoading = ref(false)
 
 /* =========================================================
    FORM
@@ -465,7 +517,42 @@ const form = ref({
   name: '',
   code: '',
   full_mark: 100,
+  branch_id: '',
 })
+
+/* =========================================================
+   FETCH BRANCHES
+========================================================= */
+
+const fetchBranches = async () => {
+  if (role !== 'Manager') {
+    return
+  }
+
+  branchesLoading.value = true
+
+  try {
+    const response = await api.get('/branches')
+
+    if (response.data && Array.isArray(response.data.data)) {
+      branches.value = response.data.data
+    } else if (response.data && Array.isArray(response.data.branches)) {
+      branches.value = response.data.branches
+    } else if (Array.isArray(response.data)) {
+      branches.value = response.data
+    } else {
+      branches.value = []
+    }
+  } catch (error) {
+    console.error('Error fetching branches:', error)
+
+    branches.value = []
+
+    formError.value = error.response?.data?.message || 'Failed to fetch branches.'
+  } finally {
+    branchesLoading.value = false
+  }
+}
 
 /* =========================================================
    FETCH SUBJECTS
@@ -486,6 +573,7 @@ const fetchSubjects = async () => {
     }
   } catch (error) {
     console.error('Error fetching subjects:', error)
+
     subjects.value = []
   } finally {
     loading.value = false
@@ -521,6 +609,7 @@ const resetForm = () => {
     name: '',
     code: '',
     full_mark: 100,
+    branch_id: '',
   }
 
   errors.value = {}
@@ -537,6 +626,10 @@ const openCreateModal = async () => {
   resetForm()
 
   showModal.value = true
+
+  if (role === 'Manager') {
+    await fetchBranches()
+  }
 
   await nextTick()
 
@@ -555,11 +648,19 @@ const openEditModal = async (subject) => {
 
   form.value = {
     name: subject.name || '',
+
     code: subject.code || '',
+
     full_mark: subject.full_mark ?? 100,
+
+    branch_id: subject.branch_id ? Number(subject.branch_id) : '',
   }
 
   showModal.value = true
+
+  if (role === 'Manager') {
+    await fetchBranches()
+  }
 
   await nextTick()
 
@@ -576,6 +677,7 @@ const closeModal = () => {
   }
 
   showModal.value = false
+
   editingSubject.value = null
 
   resetForm()
@@ -590,7 +692,16 @@ const validateForm = () => {
 
   let valid = true
 
+  /* Branch */
+
+  if (role === 'Manager' && !form.value.branch_id) {
+    errors.value.branch_id = 'Branch is required.'
+
+    valid = false
+  }
+
   /* Subject Name */
+
   if (!form.value.name || !form.value.name.trim()) {
     errors.value.name = 'Subject name is required.'
 
@@ -598,6 +709,7 @@ const validateForm = () => {
   }
 
   /* Subject Code */
+
   if (!form.value.code || !form.value.code.trim()) {
     errors.value.code = 'Subject code is required.'
 
@@ -605,6 +717,7 @@ const validateForm = () => {
   }
 
   /* Full Mark */
+
   if (
     form.value.full_mark === '' ||
     form.value.full_mark === null ||
@@ -636,6 +749,7 @@ const saveSubject = async () => {
   }
 
   saving.value = true
+
   formError.value = ''
   errors.value = {}
 
@@ -650,6 +764,16 @@ const saveSubject = async () => {
       code: form.value.code.trim().toUpperCase(),
 
       full_mark: Number(form.value.full_mark),
+    }
+
+    /*
+     * Manager must send branch_id.
+     * Other roles are automatically assigned
+     * their branch by the backend.
+     */
+
+    if (role === 'Manager') {
+      payload.branch_id = Number(form.value.branch_id)
     }
 
     /* =====================================================
@@ -696,6 +820,10 @@ const saveSubject = async () => {
       const validationErrors = error.response.data?.errors || {}
 
       errors.value = {}
+
+      if (validationErrors.branch_id) {
+        errors.value.branch_id = validationErrors.branch_id[0]
+      }
 
       if (validationErrors.name) {
         errors.value.name = validationErrors.name[0]

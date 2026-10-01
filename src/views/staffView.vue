@@ -5,10 +5,12 @@
 
   <div class="content">
     <div class="staff-container">
-      <!-- HEADER -->
+      <!-- ================= HEADER ================= -->
+
       <div class="staff-header">
         <div>
           <h2>Staff Management</h2>
+
           <p>Manage your coaching team members and permissions</p>
         </div>
 
@@ -19,12 +21,14 @@
 
           <div>
             <h4>{{ staff.length }}</h4>
+
             <span>Total Staff</span>
           </div>
         </div>
       </div>
 
-      <!-- SEARCH + ACTION -->
+      <!-- ================= SEARCH + ACTION ================= -->
+
       <div class="staff-toolbar">
         <div class="search-box">
           <i class="fa-solid fa-magnifying-glass"></i>
@@ -33,13 +37,14 @@
         </div>
 
         <!-- ADD STAFF BUTTON -->
+
         <button
           class="btn btn-primary add-btn"
           data-bs-toggle="modal"
           data-bs-target="#addModal"
           @click="openAddModal"
           :disabled="!isManager"
-          :title="!isManager ? 'Only Super Manager can add staff' : ''"
+          :title="!isManager ? 'Only Manager can add staff' : ''"
         >
           <i class="fa-solid fa-user-plus me-1"></i>
 
@@ -47,7 +52,8 @@
         </button>
       </div>
 
-      <!-- TABLE CARD -->
+      <!-- ================= TABLE CARD ================= -->
+
       <div class="staff-table-card">
         <div class="table-responsive">
           <table class="table staff-table align-middle">
@@ -60,14 +66,16 @@
                 <th>Work Type</th>
                 <th>Email</th>
                 <th>Role</th>
+                <th>Branch</th>
                 <th width="220">Action</th>
               </tr>
             </thead>
 
             <tbody>
               <!-- Loading -->
+
               <tr v-if="loading">
-                <td colspan="8" class="text-center py-5">
+                <td colspan="9" class="text-center py-5">
                   <div class="spinner-border text-primary"></div>
 
                   <p class="mt-2 mb-0">Loading staff...</p>
@@ -75,13 +83,13 @@
               </tr>
 
               <!-- Data -->
+
               <tr v-for="(item, index) in paginatedStaff" :key="item.id">
                 <td>
                   {{ (currentPage - 1) * perPage + index + 1 }}
                 </td>
 
                 <td>
-                  <!-- Dynamic Staff Image -->
                   <img :src="getImageUrl(item.image)" class="staff-avatar" alt="Staff Image" />
                 </td>
 
@@ -108,35 +116,46 @@
                 </td>
 
                 <td>
-                  <span class="role-badge" :class="item.role?.toLowerCase()">
+                  <span class="role-badge" :class="item.role?.toLowerCase().replace(/\s+/g, '-')">
                     {{ item.role }}
                   </span>
                 </td>
 
+                <td>
+                  <span v-if="item.branch" class="branch-badge">
+                    {{ item.branch.name }}
+                  </span>
+
+                  <span v-else class="text-muted small"> Global </span>
+                </td>
+
                 <td class="action-buttons">
                   <!-- VIEW -->
+
                   <button class="action-btn view" @click="openView(item)" title="View Details">
                     <i class="fa-solid fa-eye"></i>
                   </button>
 
                   <!-- EDIT -->
+
                   <button
                     class="action-btn edit"
                     data-bs-toggle="modal"
                     data-bs-target="#editModal"
                     @click="openEdit(item)"
                     :disabled="!isManager"
-                    :title="!isManager ? 'Only Super Manager can edit' : 'Edit Staff'"
+                    :title="!isManager ? 'Only Manager can edit' : 'Edit Staff'"
                   >
                     <i class="fa-solid fa-pen"></i>
                   </button>
 
                   <!-- DELETE -->
+
                   <button
                     class="action-btn delete"
                     @click="deleteStaff(item.id)"
                     :disabled="!isManager"
-                    :title="!isManager ? 'Only Super Manager can delete' : 'Delete Staff'"
+                    :title="!isManager ? 'Only Manager can delete' : 'Delete Staff'"
                   >
                     <i class="fa-solid fa-trash"></i>
                   </button>
@@ -144,8 +163,9 @@
               </tr>
 
               <!-- Empty -->
+
               <tr v-if="!loading && paginatedStaff.length === 0">
-                <td colspan="8">
+                <td colspan="9">
                   <div class="empty-state">
                     <i class="fa-solid fa-users-slash"></i>
 
@@ -160,6 +180,7 @@
         </div>
 
         <!-- PAGINATION -->
+
         <div class="pagination-box" v-if="filteredStaff.length > 0">
           <button class="page-btn" @click="previousPage" :disabled="currentPage === 1">
             <i class="fa-solid fa-chevron-left"></i>
@@ -175,7 +196,10 @@
     </div>
   </div>
 
-  <!-- ADD STAFF / REGISTRATION MODAL -->
+  <!-- ===================================================== -->
+  <!-- ADD STAFF MODAL -->
+  <!-- ===================================================== -->
+
   <div class="modal fade" id="addModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content border-0 shadow">
@@ -197,6 +221,8 @@
         <form @submit.prevent="addStaff">
           <div class="modal-body p-4">
             <div class="row">
+              <!-- Name -->
+
               <div class="col-md-6 mb-3">
                 <label class="form-label font-semibold"> Name </label>
 
@@ -208,6 +234,8 @@
                   required
                 />
               </div>
+
+              <!-- User Name -->
 
               <div class="col-md-6 mb-3">
                 <label class="form-label font-semibold"> User Name </label>
@@ -221,6 +249,8 @@
                 />
               </div>
 
+              <!-- Work Type -->
+
               <div class="col-md-6 mb-3">
                 <label class="form-label font-semibold"> Work Type </label>
 
@@ -231,6 +261,8 @@
                   placeholder="Full-time, Part-time"
                 />
               </div>
+
+              <!-- Email -->
 
               <div class="col-md-6 mb-3">
                 <label class="form-label font-semibold"> Email </label>
@@ -244,21 +276,43 @@
                 />
               </div>
 
+              <!-- ROLE -->
+
               <div class="col-md-6 mb-3">
                 <label class="form-label font-semibold"> Role </label>
 
                 <select v-model="form.role" class="form-select" required>
                   <option value="" disabled>Select Role</option>
 
+                  <option value="Branch Manager">Branch Manager</option>
+
                   <option value="Admin">Admin</option>
 
                   <option value="Accountant">Accountant</option>
-
-                  <!-- <option value="Editor">Editor</option> -->
-
-                  <!-- <option value="Staff">Staff</option> -->
                 </select>
               </div>
+
+              <!-- BRANCH -->
+
+              <div class="col-md-6 mb-3">
+                <label class="form-label font-semibold"> Assign Branch </label>
+
+                <select
+                  v-model="form.branch_id"
+                  class="form-select"
+                  :required="['Branch Manager', 'Admin', 'Accountant'].includes(form.role)"
+                >
+                  <option value="" disabled>Select Branch</option>
+
+                  <option v-for="branch in branches" :key="branch.id" :value="branch.id">
+                    {{ branch.name }}
+
+                    <span v-if="branch.code"> ({{ branch.code }}) </span>
+                  </option>
+                </select>
+              </div>
+
+              <!-- SHIFT -->
 
               <div class="col-md-6 mb-3">
                 <label class="form-label font-semibold"> Assign Shift </label>
@@ -266,12 +320,18 @@
                 <select v-model="form.shift_id" class="form-select" required>
                   <option value="" disabled>Select Shift</option>
 
-                  <option v-for="shift in shifts" :key="shift.id" :value="shift.id">
+                  <!-- IMPORTANT:
+                       Only shifts belonging to selected branch -->
+
+                  <option v-for="shift in filteredAddShifts" :key="shift.id" :value="shift.id">
                     {{ shift.name }}
+
                     ({{ shift.start_time }} - {{ shift.end_time }})
                   </option>
                 </select>
               </div>
+
+              <!-- PHOTO -->
 
               <div class="col-md-6 mb-3">
                 <label class="form-label font-semibold"> Profile Photo </label>
@@ -284,6 +344,8 @@
                 />
               </div>
 
+              <!-- SALARY -->
+
               <div class="col-md-6 mb-3">
                 <label class="form-label font-semibold"> Salary </label>
 
@@ -291,10 +353,12 @@
                   v-model="form.salary"
                   type="text"
                   class="form-control"
-                  placeholder="Enter name"
+                  placeholder="Enter salary"
                   required
                 />
               </div>
+
+              <!-- PASSWORD -->
 
               <div class="col-md-6 mb-3">
                 <label class="form-label font-semibold"> Password </label>
@@ -307,6 +371,8 @@
                   required
                 />
               </div>
+
+              <!-- CONFIRM PASSWORD -->
 
               <div class="col-md-6 mb-3">
                 <label class="form-label font-semibold"> Confirm Password </label>
@@ -336,7 +402,10 @@
     </div>
   </div>
 
-  <!-- EDIT MODAL -->
+  <!-- ===================================================== -->
+  <!-- EDIT STAFF MODAL -->
+  <!-- ===================================================== -->
+
   <div class="modal fade" id="editModal" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -364,15 +433,37 @@
 
           <input v-model="selectedStaff.email" class="form-control mb-2" placeholder="Email" />
 
+          <!-- EDIT ROLE -->
+
           <select v-model="selectedStaff.role" class="form-select mb-2">
+            <option value="Branch Manager">Branch Manager</option>
+
             <option value="Admin">Admin</option>
 
-            <option value="Editor">Editor</option>
-
             <option value="Accountant">Accountant</option>
-
-            <option value="Staff">Staff</option>
           </select>
+
+          <!-- EDIT BRANCH -->
+
+          <div class="mb-2">
+            <label class="form-label font-semibold text-muted small mb-1"> Assign Branch </label>
+
+            <select
+              v-model="selectedStaff.branch_id"
+              class="form-select mb-2"
+              :required="['Branch Manager', 'Admin', 'Accountant'].includes(selectedStaff.role)"
+            >
+              <option value="" disabled>Select Branch</option>
+
+              <option v-for="branch in branches" :key="branch.id" :value="branch.id">
+                {{ branch.name }}
+
+                <span v-if="branch.code"> ({{ branch.code }}) </span>
+              </option>
+            </select>
+          </div>
+
+          <!-- SALARY -->
 
           <input
             v-model="selectedStaff.salary"
@@ -381,19 +472,26 @@
             placeholder="Salary"
           />
 
-          <!-- Edit Shift -->
+          <!-- SHIFT -->
+
           <div class="mb-2">
             <label class="form-label font-semibold text-muted small mb-1"> Assign Shift </label>
 
             <select v-model="selectedStaff.shift_id" class="form-select mb-2">
               <option value="" disabled>Select Shift</option>
 
-              <option v-for="shift in shifts" :key="shift.id" :value="shift.id">
+              <!-- IMPORTANT:
+                   Only shifts belonging to selected branch -->
+
+              <option v-for="shift in filteredEditShifts" :key="shift.id" :value="shift.id">
                 {{ shift.name }}
+
                 ({{ shift.start_time }} - {{ shift.end_time }})
               </option>
             </select>
           </div>
+
+          <!-- PHOTO -->
 
           <div class="mb-2">
             <label class="form-label font-semibold text-muted small mb-1">
@@ -407,6 +505,8 @@
               accept="image/*"
             />
           </div>
+
+          <!-- PASSWORD -->
 
           <input
             v-model="selectedStaff.password"
@@ -436,7 +536,10 @@
     </div>
   </div>
 
+  <!-- ===================================================== -->
   <!-- VIEW MODAL -->
+  <!-- ===================================================== -->
+
   <div class="modal fade" id="viewModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
@@ -461,30 +564,49 @@
           <div class="list-group">
             <div class="list-group-item">
               <strong>Name:</strong>
+
               {{ viewData.name }}
             </div>
 
             <div class="list-group-item">
               <strong>User Name:</strong>
+
               {{ viewData.user_name }}
             </div>
 
             <div class="list-group-item">
               <strong>Email:</strong>
+
               {{ viewData.email }}
             </div>
 
             <div class="list-group-item">
               <strong>Skill:</strong>
+
               {{ viewData.skill || 'N/A' }}
             </div>
 
             <div class="list-group-item">
               <strong>Role:</strong>
+
               {{ viewData.role }}
             </div>
+
+            <div class="list-group-item">
+              <strong>Branch:</strong>
+
+              <span v-if="viewData.branch">
+                {{ viewData.branch.name }}
+
+                <span v-if="viewData.branch.code"> ({{ viewData.branch.code }}) </span>
+              </span>
+
+              <span v-else> Global </span>
+            </div>
+
             <div class="list-group-item">
               <strong>Joining Date:</strong>
+
               {{
                 viewData.created_at
                   ? new Date(viewData.created_at).toLocaleDateString('en-GB')
@@ -514,6 +636,8 @@ import api from '@/services/api'
 // =======================
 
 const staff = ref([])
+
+const branches = ref([])
 
 const search = ref('')
 
@@ -564,6 +688,20 @@ const getShifts = async () => {
 }
 
 // =======================
+// GET BRANCHES
+// =======================
+
+const getBranches = async () => {
+  try {
+    const res = await api.get('/branches')
+
+    branches.value = res.data.branches || res.data.data || []
+  } catch (error) {
+    console.error('Error fetching branches:', error.response?.data)
+  }
+}
+
+// =======================
 // PERMISSIONS
 // =======================
 
@@ -577,25 +715,47 @@ const isManager = computed(() => {
 
 const form = reactive({
   name: '',
-
   user_name: '',
-
   skill: '',
-
   role: '',
-
   email: '',
-
   salary: '',
-
   image: null,
-
   shift_id: '',
-
+  branch_id: '',
   password: '',
-
   password_confirmation: '',
 })
+
+// =====================================================
+// ADD STAFF → BRANCH WISE SHIFTS
+// =====================================================
+
+const filteredAddShifts = computed(() => {
+  if (!form.branch_id) {
+    return []
+  }
+
+  return shifts.value.filter((shift) => Number(shift.branch_id) === Number(form.branch_id))
+})
+
+// =====================================================
+// EDIT STAFF → BRANCH WISE SHIFTS
+// =====================================================
+
+const filteredEditShifts = computed(() => {
+  if (!selectedStaff.value.branch_id) {
+    return []
+  }
+
+  return shifts.value.filter(
+    (shift) => Number(shift.branch_id) === Number(selectedStaff.value.branch_id),
+  )
+})
+
+// =====================================================
+// FILE CHANGE
+// =====================================================
 
 const handleFileChange = (event, type) => {
   const file = event.target.files[0]
@@ -606,6 +766,10 @@ const handleFileChange = (event, type) => {
     selectedStaff.value.imageFile = file
   }
 }
+
+// =======================
+// OPEN ADD MODAL
+// =======================
 
 const openAddModal = () => {
   if (!isManager.value) return
@@ -623,6 +787,8 @@ const openAddModal = () => {
   form.salary = ''
 
   form.shift_id = ''
+
+  form.branch_id = ''
 
   form.image = null
 
@@ -660,6 +826,10 @@ const addStaff = async () => {
     formData.append('salary', form.salary)
 
     formData.append('shift_id', form.shift_id)
+
+    if (form.branch_id) {
+      formData.append('branch_id', form.branch_id)
+    }
 
     formData.append('password', form.password)
 
@@ -703,22 +873,24 @@ const addStaff = async () => {
 
 const viewData = ref({
   name: '',
-
   user_name: '',
-
   email: '',
-
   skill: '',
-
   role: '',
-
   image: '',
-
   salary: '',
+  branch_id: '',
+  branch: null,
 })
 
+// =======================
+// OPEN VIEW
+// =======================
+
 const openView = (item) => {
-  viewData.value = { ...item }
+  viewData.value = {
+    ...item,
+  }
 
   const modalEl = document.getElementById('viewModal')
 
@@ -735,35 +907,31 @@ const openView = (item) => {
 
 const selectedStaff = ref({
   id: null,
-
   name: '',
-
   user_name: '',
-
   skill: '',
-
   email: '',
-
   role: '',
-
   salary: '',
-
   image: '',
-
   imageFile: null,
-
   shift_id: '',
-
+  branch_id: '',
   password: '',
-
   password_confirmation: '',
 })
+
+// =======================
+// OPEN EDIT
+// =======================
 
 const openEdit = (item) => {
   if (!isManager.value) return
 
   selectedStaff.value = {
     ...item,
+
+    branch_id: item.branch_id || '',
 
     imageFile: null,
 
@@ -772,6 +940,48 @@ const openEdit = (item) => {
     password_confirmation: '',
   }
 }
+
+// =====================================================
+// BRANCH CHANGE → RESET INVALID ADD SHIFT
+// =====================================================
+
+watch(
+  () => form.branch_id,
+  () => {
+    if (!form.shift_id) return
+
+    const validShift = shifts.value.some(
+      (shift) =>
+        Number(shift.id) === Number(form.shift_id) &&
+        Number(shift.branch_id) === Number(form.branch_id),
+    )
+
+    if (!validShift) {
+      form.shift_id = ''
+    }
+  },
+)
+
+// =====================================================
+// BRANCH CHANGE → RESET INVALID EDIT SHIFT
+// =====================================================
+
+watch(
+  () => selectedStaff.value.branch_id,
+  () => {
+    if (!selectedStaff.value.shift_id) return
+
+    const validShift = shifts.value.some(
+      (shift) =>
+        Number(shift.id) === Number(selectedStaff.value.shift_id) &&
+        Number(shift.branch_id) === Number(selectedStaff.value.branch_id),
+    )
+
+    if (!validShift) {
+      selectedStaff.value.shift_id = ''
+    }
+  },
+)
 
 // =======================
 // GET STAFF
@@ -808,7 +1018,8 @@ const filteredStaff = computed(() => {
       item.user_name?.toLowerCase().includes(keyword) ||
       item.email?.toLowerCase().includes(keyword) ||
       item.skill?.toLowerCase().includes(keyword) ||
-      item.role?.toLowerCase().includes(keyword)
+      item.role?.toLowerCase().includes(keyword) ||
+      item.branch?.name?.toLowerCase().includes(keyword)
     )
   })
 })
@@ -871,6 +1082,10 @@ const updateStaff = async () => {
 
     formData.append('shift_id', selectedStaff.value.shift_id)
 
+    if (selectedStaff.value.branch_id) {
+      formData.append('branch_id', selectedStaff.value.branch_id)
+    }
+
     if (selectedStaff.value.password) {
       formData.append('password', selectedStaff.value.password)
 
@@ -895,7 +1110,14 @@ const updateStaff = async () => {
   } catch (error) {
     console.error(error.response?.data)
 
-    alert('Something went wrong!')
+    const msg =
+      error.response?.data?.message ||
+      Object.values(error.response?.data?.errors || {})
+        .flat()
+        .join('\n') ||
+      'Something went wrong!'
+
+    alert(msg)
   } finally {
     submitting.value = false
   }
@@ -926,16 +1148,12 @@ const deleteStaff = async (id) => {
 // =====================================================
 // MODAL CLEANUP
 // =====================================================
-// IMPORTANT:
-// Mobile / Browser Back চাপলে Bootstrap-এর backdrop,
-// modal-open এবং body inline style আটকে গেলে এই function
-// পুরো modal state পরিষ্কার করবে.
-// =====================================================
 
 const cleanupModals = () => {
   // -----------------------------------------
   // 1. Dispose Bootstrap modal instances
   // -----------------------------------------
+
   document.querySelectorAll('.modal').forEach((modalEl) => {
     try {
       const instance = window.bootstrap?.Modal?.getInstance(modalEl)
@@ -1008,10 +1226,14 @@ onMounted(() => {
 
   getShifts()
 
+  getBranches()
+
   // Browser / Mobile Back
+
   window.addEventListener('popstate', handleBrowserBack)
 
   // Browser restore / mobile navigation restore
+
   window.addEventListener('pageshow', handleBrowserBack)
 })
 
@@ -1021,11 +1243,13 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   // Remove listeners
+
   window.removeEventListener('popstate', handleBrowserBack)
 
   window.removeEventListener('pageshow', handleBrowserBack)
 
   // Final modal cleanup
+
   cleanupModals()
 })
 </script>
@@ -1242,7 +1466,7 @@ onBeforeUnmount(() => {
 }
 
 /* =========================
-   TABLE CARD & HOVER ANIMATION
+   TABLE CARD
 ========================= */
 
 .staff-table-card {
@@ -1280,15 +1504,20 @@ onBeforeUnmount(() => {
 }
 
 .staff-table tbody tr {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    transform 0.25s ease,
+    background-color 0.25s ease,
+    box-shadow 0.25s ease;
+
+  will-change: transform;
 }
 
 .staff-table tbody tr:hover {
-  background: #f1f5f9;
+  background-color: #f8fafc;
 
-  transform: translateY(-2px) scale(1.002);
+  transform: translateY(-2px);
 
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
 }
 
 /* =========================
@@ -1307,12 +1536,12 @@ onBeforeUnmount(() => {
   border: 3px solid #dbeafe;
 
   transition:
-    transform 0.3s ease,
-    border-color 0.3s ease;
+    transform 0.25s ease,
+    border-color 0.25s ease;
 }
 
 .staff-table tbody tr:hover .staff-avatar {
-  transform: scale(1.12);
+  transform: scale(1.05);
 
   border-color: #2563eb;
 }
@@ -1322,7 +1551,7 @@ onBeforeUnmount(() => {
 }
 
 /* =========================
-   BADGES & HOVERS
+   BADGES
 ========================= */
 
 .skill-badge {
@@ -1340,15 +1569,15 @@ onBeforeUnmount(() => {
 
   display: inline-block;
 
-  transition: all 0.25s ease;
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
 }
 
 .staff-table tbody tr:hover .skill-badge {
-  background: #2563eb;
+  background-color: #2563eb;
 
   color: #ffffff;
-
-  transform: scale(1.05);
 }
 
 .role-badge {
@@ -1369,6 +1598,10 @@ onBeforeUnmount(() => {
   transform: scale(1.05);
 }
 
+/* =========================
+   ROLE COLORS
+========================= */
+
 .role-badge.admin {
   background: #dbeafe;
 
@@ -1381,10 +1614,10 @@ onBeforeUnmount(() => {
   color: #7c3aed;
 }
 
-.role-badge.editor {
-  background: #e0e7ff;
+.role-badge.branch-manager {
+  background: #ede9fe;
 
-  color: #4338ca;
+  color: #7c3aed;
 }
 
 .role-badge.accountant {
@@ -1393,10 +1626,26 @@ onBeforeUnmount(() => {
   color: #16a34a;
 }
 
-.role-badge.staff {
-  background: #fef3c7;
+/* =========================
+   BRANCH BADGE
+========================= */
 
-  color: #d97706;
+.branch-badge {
+  background: #f0fdf4;
+
+  color: #15803d;
+
+  padding: 6px 12px;
+
+  border-radius: 20px;
+
+  font-size: 12px;
+
+  font-weight: 600;
+
+  display: inline-block;
+
+  white-space: nowrap;
 }
 
 /* =========================
@@ -1609,50 +1858,5 @@ button:disabled {
   .action-buttons {
     flex-wrap: wrap;
   }
-}
-
-/* =========================
-   SMOOTH HOVER & ANIMATIONS
-========================= */
-
-.staff-table tbody tr {
-  transition:
-    transform 0.25s ease,
-    background-color 0.25s ease,
-    box-shadow 0.25s ease;
-
-  will-change: transform;
-}
-
-.staff-table tbody tr:hover {
-  background-color: #f8fafc;
-
-  transform: translateY(-2px);
-
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
-}
-
-.staff-avatar {
-  transition:
-    transform 0.25s ease,
-    border-color 0.25s ease;
-}
-
-.staff-table tbody tr:hover .staff-avatar {
-  transform: scale(1.05);
-
-  border-color: #2563eb;
-}
-
-.skill-badge {
-  transition:
-    background-color 0.25s ease,
-    color 0.25s ease;
-}
-
-.staff-table tbody tr:hover .skill-badge {
-  background-color: #2563eb;
-
-  color: #ffffff;
 }
 </style>

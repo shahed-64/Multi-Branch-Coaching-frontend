@@ -101,6 +101,7 @@
             <thead class="custom-blue-header">
               <tr>
                 <th width="50">#</th>
+                <th>Branch</th>
                 <th>Expense Type</th>
                 <th>Employee Name</th>
                 <th>Salary</th>
@@ -118,6 +119,13 @@
               <tr v-for="(expense, index) in paginatedExpenses" :key="expense.id">
                 <td class="fw-semibold text-muted">
                   {{ (currentPage - 1) * itemsPerPage + index + 1 }}
+                </td>
+
+                <!-- Branch -->
+                <td>
+                  <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                    {{ getBranchName(expense.branch_id) }}
+                  </span>
                 </td>
 
                 <td class="fw-bold text-dark">
@@ -187,7 +195,7 @@
               </tr>
 
               <tr v-if="filteredExpenses.length === 0">
-                <td colspan="11" class="text-center py-5 text-muted">No Expense Record Found</td>
+                <td colspan="12" class="text-center py-5 text-muted">No Expense Record Found</td>
               </tr>
             </tbody>
           </table>
@@ -246,8 +254,30 @@
 
               <div class="modal-body p-4">
                 <div class="row g-3">
-                  <!-- Expense Type -->
-                  <div class="col-md-6">
+                  <!-- ================================================= -->
+                  <!-- BRANCH -->
+                  <!-- Manager ONLY -->
+                  <!-- ================================================= -->
+                  <div v-if="isManager" class="col-md-6">
+                    <label class="form-label fw-semibold"> Branch </label>
+
+                    <select
+                      class="form-select rounded-3"
+                      v-model="form.branch_id"
+                      :required="isManager"
+                    >
+                      <option value="">Select Branch</option>
+
+                      <option v-for="branch in branchesList" :key="branch.id" :value="branch.id">
+                        {{ branch.name }}
+                      </option>
+                    </select>
+                  </div>
+
+                  <!-- ================================================= -->
+                  <!-- EXPENSE TYPE -->
+                  <!-- ================================================= -->
+                  <div :class="isManager ? 'col-md-6' : 'col-md-6'">
                     <label class="form-label fw-semibold"> Expense Type </label>
 
                     <select class="form-select rounded-3" v-model="form.expense_type" required>
@@ -388,23 +418,79 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
+
 import * as bootstrap from 'bootstrap'
+
 import api from '@/services/api'
+
 import AccountMenuView from './AccountMenuView.vue'
 
-// State
+// =====================================================
+// CURRENT USER / ROLE
+// =====================================================
+
+const currentUser = ref(null)
+
+const currentRole = ref('')
+
+const loadCurrentUser = () => {
+  try {
+    const storedUser = localStorage.getItem('user')
+
+    if (storedUser) {
+      currentUser.value = JSON.parse(storedUser)
+      currentRole.value = currentUser.value?.role || ''
+    }
+  } catch (error) {
+    console.error('Error loading current user:', error)
+
+    currentUser.value = null
+    currentRole.value = ''
+  }
+}
+
+// =====================================================
+// ROLE CHECK
+// =====================================================
+
+const isManager = computed(() => {
+  return currentRole.value === 'Manager'
+})
+
+const isBranchRestricted = computed(() => {
+  return currentRole.value === 'Branch Manager' || currentRole.value === 'Branch Accountant'
+})
+
+// =====================================================
+// STATE
+// =====================================================
+
 const expenses = ref([])
+
 const teachersList = ref([])
+
 const staffsList = ref([])
+
+const branchesList = ref([])
+
 const search = ref('')
+
 const isEditing = ref(false)
+
 const editingId = ref(null)
 
-// Pagination State
+// =====================================================
+// PAGINATION
+// =====================================================
+
 const currentPage = ref(1)
+
 const itemsPerPage = ref(10)
 
-// Form
+// =====================================================
+// FORM
+// =====================================================
+
 const form = ref({
   expense_type: '',
   employee_name: '',
@@ -413,112 +499,198 @@ const form = ref({
   due_amount: 0,
   payment_month: '',
   payment_method: '',
+  branch_id: '',
 })
 
-// Expense Types & Methods
+// =====================================================
+// EXPENSE TYPES
+// =====================================================
+
 const expenseTypes = [
-  { id: 1, name: 'Staff Payment' },
-  { id: 2, name: 'Teacher Payment' },
-  { id: 3, name: 'Rent' },
-  { id: 4, name: 'Electricity Bill' },
-  { id: 5, name: 'Internet Bill' },
-  { id: 6, name: 'Office Expense' },
-  { id: 7, name: 'Others' },
+  {
+    id: 1,
+    name: 'Staff Payment',
+  },
+  {
+    id: 2,
+    name: 'Teacher Payment',
+  },
+  {
+    id: 3,
+    name: 'Rent',
+  },
+  {
+    id: 4,
+    name: 'Electricity Bill',
+  },
+  {
+    id: 5,
+    name: 'Internet Bill',
+  },
+  {
+    id: 6,
+    name: 'Office Expense',
+  },
+  {
+    id: 7,
+    name: 'Others',
+  },
 ]
+
+// =====================================================
+// PAYMENT METHODS
+// =====================================================
 
 const paymentMethods = ['Cash', 'Bkash', 'Nagad', 'Bank']
 
-// Fetch Teachers
+// =====================================================
+// FETCH BRANCHES
+// =====================================================
+
+const fetchBranches = async () => {
+  try {
+    const response = await api.get('/branches')
+
+    branchesList.value = response.data.branches || []
+  } catch (error) {
+    console.error('Error fetching branches:', error)
+  }
+}
+
+// =====================================================
+// GET BRANCH NAME
+// =====================================================
+
+const getBranchName = (branchId) => {
+  if (!branchId) {
+    return '-'
+  }
+
+  const branch = branchesList.value.find((item) => Number(item.id) === Number(branchId))
+
+  return branch ? branch.name : `Branch #${branchId}`
+}
+
+// =====================================================
+// FETCH TEACHERS
+// =====================================================
+
 const fetchTeachers = async () => {
   try {
     const response = await api.get('/expense-teachers')
+
     teachersList.value = response.data.teachers || []
   } catch (error) {
     console.error('Error fetching teachers:', error)
   }
 }
 
-// Fetch Staffs
+// =====================================================
+// FETCH STAFFS
+// =====================================================
+
 const fetchStaffs = async () => {
   try {
     const response = await api.get('/expense-staffs')
+
     staffsList.value = response.data.staffs || []
   } catch (error) {
     console.error('Error fetching staffs:', error)
   }
 }
 
-// Previous Month
+// =====================================================
+// PREVIOUS MONTH
+// =====================================================
+
 const getPreviousMonth = () => {
   const date = new Date()
 
   date.setMonth(date.getMonth() - 1)
 
   const year = date.getFullYear()
+
   const month = String(date.getMonth() + 1).padStart(2, '0')
 
   return `${year}-${month}`
 }
 
-// Employee / Teacher Selection Handler
+// =====================================================
+// EMPLOYEE / TEACHER SELECTION
+// =====================================================
+
 const onEmployeeSelect = () => {
   let selectedPerson = null
 
   if (form.value.expense_type === 'Teacher Payment') {
-    selectedPerson = teachersList.value.find((t) => t.full_name === form.value.employee_name)
+    selectedPerson = teachersList.value.find(
+      (teacher) => teacher.full_name === form.value.employee_name,
+    )
   } else if (form.value.expense_type === 'Staff Payment') {
-    selectedPerson = staffsList.value.find((s) => s.user_name === form.value.employee_name)
+    selectedPerson = staffsList.value.find((staff) => staff.user_name === form.value.employee_name)
   }
 
   if (selectedPerson) {
     form.value.salary_amount = selectedPerson.salary
 
-    // Teacher / Staff payment হলে Paid Amount salary হবে
     form.value.paid_amount = selectedPerson.salary
 
-    // Teacher / Staff payment হলে Cash default হবে
     form.value.payment_method = 'Cash'
 
-    // Teacher / Staff select করার পর previous month হবে
     form.value.payment_month = getPreviousMonth()
   } else {
     form.value.salary_amount = ''
   }
 }
 
-// Auto-update salary
+// =====================================================
+// AUTO UPDATE SALARY
+// =====================================================
+
 watch(
   () => form.value.employee_name,
   (newName) => {
-    if (!newName) return
+    if (!newName) {
+      return
+    }
 
     if (form.value.expense_type === 'Teacher Payment') {
-      const selectedTeacher = teachersList.value.find((t) => t.full_name === newName)
+      const selectedTeacher = teachersList.value.find((teacher) => teacher.full_name === newName)
 
       if (selectedTeacher) {
         form.value.salary_amount = selectedTeacher.salary
+
         form.value.paid_amount = selectedTeacher.salary
+
         form.value.payment_method = 'Cash'
+
         form.value.payment_month = getPreviousMonth()
       }
     } else if (form.value.expense_type === 'Staff Payment') {
-      const selectedStaff = staffsList.value.find((s) => s.user_name === newName)
+      const selectedStaff = staffsList.value.find((staff) => staff.user_name === newName)
 
       if (selectedStaff) {
         form.value.salary_amount = selectedStaff.salary
+
         form.value.paid_amount = selectedStaff.salary
+
         form.value.payment_method = 'Cash'
+
         form.value.payment_month = getPreviousMonth()
       }
     }
   },
 )
 
-// Auto Calculate Due Amount
+// =====================================================
+// AUTO CALCULATE DUE
+// =====================================================
+
 watch(
   () => [form.value.salary_amount, form.value.paid_amount],
   () => {
     const salary = Number(form.value.salary_amount) || 0
+
     const paid = Number(form.value.paid_amount) || 0
 
     form.value.due_amount = salary - paid
@@ -529,23 +701,32 @@ watch(
   },
 )
 
-// Filter
+// =====================================================
+// FILTER
+// =====================================================
+
 const filteredExpenses = computed(() => {
   if (!search.value) {
     return expenses.value
   }
 
+  const searchText = search.value.toLowerCase()
+
   return expenses.value.filter(
     (expense) =>
-      expense.expense_type?.toLowerCase().includes(search.value.toLowerCase()) ||
-      expense.employee_name?.toLowerCase().includes(search.value.toLowerCase()) ||
-      expense.payment_method?.toLowerCase().includes(search.value.toLowerCase()),
+      expense.expense_type?.toLowerCase().includes(searchText) ||
+      expense.employee_name?.toLowerCase().includes(searchText) ||
+      expense.payment_method?.toLowerCase().includes(searchText),
   )
 })
 
-// Pagination
+// =====================================================
+// PAGINATION
+// =====================================================
+
 const paginatedExpenses = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage.value
+
   const end = start + itemsPerPage.value
 
   return filteredExpenses.value.slice(start, end)
@@ -569,7 +750,10 @@ const showingEnd = computed(() => {
   return end > filteredExpenses.value.length ? filteredExpenses.value.length : end
 })
 
-// Dashboard Cards
+// =====================================================
+// DASHBOARD CARDS
+// =====================================================
+
 const totalExpense = computed(() => {
   return expenses.value.reduce((total, expense) => total + Number(expense.salary_amount || 0), 0)
 })
@@ -584,6 +768,7 @@ const totalDue = computed(() => {
 
 const monthlyExpense = computed(() => {
   const currentMonth = new Date().getMonth()
+
   const currentYear = new Date().getFullYear()
 
   return expenses.value
@@ -599,9 +784,13 @@ const monthlyExpense = computed(() => {
     .reduce((total, expense) => total + Number(expense.salary_amount || 0), 0)
 })
 
-// Reset Form
+// =====================================================
+// RESET FORM
+// =====================================================
+
 const resetForm = () => {
   isEditing.value = false
+
   editingId.value = null
 
   form.value = {
@@ -610,17 +799,25 @@ const resetForm = () => {
     salary_amount: '',
     paid_amount: '',
     due_amount: 0,
-
-    // Add Expense খুললে month blank থাকবে
     payment_month: '',
-
     payment_method: '',
+
+    // Manager will select this.
+    // Branch Manager / Branch Accountant
+    // will leave this empty because backend
+    // automatically uses their own branch.
+    branch_id: '',
   }
 }
 
-// Format Payment Month
+// =====================================================
+// FORMAT PAYMENT MONTH
+// =====================================================
+
 const formatPaymentMonth = (monthStr) => {
-  if (!monthStr) return '-'
+  if (!monthStr) {
+    return '-'
+  }
 
   try {
     const dateObj = new Date(monthStr)
@@ -636,6 +833,7 @@ const formatPaymentMonth = (monthStr) => {
 
     if (parts.length >= 2) {
       const year = parts[0]
+
       const monthIndex = parseInt(parts[1], 10) - 1
 
       const date = new Date(year, monthIndex, 1)
@@ -645,19 +843,24 @@ const formatPaymentMonth = (monthStr) => {
         year: 'numeric',
       })
     }
-  } catch (e) {
-    console.error('Error formatting month:', e)
+  } catch (error) {
+    console.error('Error formatting month:', error)
   }
 
   return monthStr
 }
 
-// Fetch Expenses
+// =====================================================
+// FETCH EXPENSES
+// =====================================================
+
 const getExpenses = async () => {
   try {
     const response = await api.get('/expenses')
 
     expenses.value = [...(response.data.expenses || response.data || [])]
+
+    currentPage.value = 1
   } catch (error) {
     console.error('Error fetching expenses:', error)
   }
@@ -666,6 +869,7 @@ const getExpenses = async () => {
 // =====================================================
 // MODAL CLEANUP
 // =====================================================
+
 const cleanupModals = () => {
   document.querySelectorAll('.modal').forEach((modalEl) => {
     try {
@@ -679,10 +883,15 @@ const cleanupModals = () => {
     }
 
     modalEl.classList.remove('show')
+
     modalEl.style.removeProperty('display')
+
     modalEl.style.removeProperty('padding-right')
+
     modalEl.removeAttribute('aria-modal')
+
     modalEl.setAttribute('aria-hidden', 'true')
+
     modalEl.removeAttribute('role')
   })
 
@@ -691,17 +900,28 @@ const cleanupModals = () => {
   })
 
   document.body.classList.remove('modal-open')
+
   document.body.style.removeProperty('overflow')
+
   document.body.style.removeProperty('padding-right')
+
   document.documentElement.style.removeProperty('overflow')
+
   document.documentElement.style.removeProperty('padding-right')
 }
+
+// =====================================================
+// BROWSER BACK
+// =====================================================
 
 const handleBrowserBack = () => {
   cleanupModals()
 }
 
-// Close Modal
+// =====================================================
+// CLOSE MODAL
+// =====================================================
+
 const closeModal = () => {
   const modalElement = document.getElementById('expenseModal')
 
@@ -718,20 +938,74 @@ const closeModal = () => {
   }, 150)
 }
 
-// Save Expense
+// =====================================================
+// SAVE EXPENSE
+// =====================================================
+
 const saveExpense = async () => {
   try {
-    // Preserve editing state before resetForm()
     const wasEditing = isEditing.value
 
+    // =================================================
+    // MANAGER
+    // =================================================
+    // Manager MUST select a branch.
+    // =================================================
+
+    if (isManager.value && !form.value.branch_id) {
+      alert('Please select a branch.')
+
+      return
+    }
+
+    // =================================================
+    // BRANCH MANAGER / BRANCH ACCOUNTANT
+    // =================================================
+    // Do NOT send a manually selected branch.
+    // Backend will automatically use:
+    // $user->branch_id
+    // =================================================
+
+    const payload = {
+      expense_type: form.value.expense_type,
+
+      employee_name: form.value.employee_name,
+
+      salary_amount: form.value.salary_amount,
+
+      paid_amount: form.value.paid_amount,
+
+      due_amount: form.value.due_amount,
+
+      payment_month: form.value.payment_month,
+
+      payment_method: form.value.payment_method,
+    }
+
+    // Only Manager sends branch_id.
+    if (isManager.value) {
+      payload.branch_id = Number(form.value.branch_id)
+    }
+
+    // =================================================
+    // UPDATE
+    // =================================================
+
     if (wasEditing) {
-      await api.put(`/expenses/${editingId.value}`, form.value)
-    } else {
-      await api.post('/expenses', form.value)
+      await api.put(`/expenses/${editingId.value}`, payload)
+    }
+
+    // =================================================
+    // CREATE
+    // =================================================
+    else {
+      await api.post('/expenses', payload)
     }
 
     closeModal()
+
     resetForm()
+
     await getExpenses()
 
     alert(wasEditing ? 'Expense Updated Successfully' : 'Expense Added Successfully')
@@ -740,29 +1014,48 @@ const saveExpense = async () => {
 
     if (error.response?.data?.errors) {
       alert(Object.values(error.response.data.errors).flat().join('\n'))
+    } else if (error.response?.data?.message) {
+      alert(error.response.data.message)
     } else {
       alert('Something went wrong.')
     }
   }
 }
 
-// Edit Expense
+// =====================================================
+// EDIT EXPENSE
+// =====================================================
+
 const editExpense = (expense) => {
   isEditing.value = true
+
   editingId.value = expense.id
 
   form.value = {
     expense_type: expense.expense_type || '',
+
     employee_name: expense.employee_name || '',
+
     salary_amount: expense.salary_amount || '',
+
     paid_amount: expense.paid_amount || '',
+
     due_amount: expense.due_amount || 0,
+
     payment_month: expense.payment_month || '',
+
     payment_method: expense.payment_method || '',
+
+    // Manager can see selected branch.
+    // Branch roles do not need to change it.
+    branch_id: isManager.value ? expense.branch_id || '' : '',
   }
 }
 
-// Delete Expense
+// =====================================================
+// DELETE EXPENSE
+// =====================================================
+
 const deleteExpense = async (id) => {
   if (!confirm('Are you sure you want to delete this expense?')) {
     return
@@ -776,22 +1069,41 @@ const deleteExpense = async (id) => {
     await getExpenses()
   } catch (error) {
     console.error('Error deleting expense:', error)
+
+    if (error.response?.data?.message) {
+      alert(error.response.data.message)
+    }
   }
 }
 
-// Lifecycle
+// =====================================================
+// LIFECYCLE
+// =====================================================
+
 onMounted(() => {
+  // Load logged-in user's role FIRST.
+  loadCurrentUser()
+
   // Browser / Mobile Back button
   window.addEventListener('popstate', handleBrowserBack)
+
   window.addEventListener('pageshow', handleBrowserBack)
 
   getExpenses()
+
   fetchTeachers()
+
   fetchStaffs()
+
+  // Branch list is only actually needed
+  // for Manager, but keeping the fetch
+  // does not affect other roles.
+  fetchBranches()
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('popstate', handleBrowserBack)
+
   window.removeEventListener('pageshow', handleBrowserBack)
 
   cleanupModals()

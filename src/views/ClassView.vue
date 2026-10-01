@@ -5,9 +5,11 @@
     <!-- =====================================================
          PAGE HEADER
     ====================================================== -->
+
     <div class="row mb-4 align-items-center">
       <div class="col">
         <h2 class="fw-bold text-dark mb-1">Class Management</h2>
+
         <p class="text-muted mb-0">Manage all Student Classes from here easily.</p>
       </div>
 
@@ -26,6 +28,7 @@
     <!-- =====================================================
          ALERT MESSAGE
     ====================================================== -->
+
     <div
       v-if="message"
       class="alert alert-dismissible fade show shadow-sm"
@@ -40,6 +43,7 @@
     <!-- =====================================================
          CLASSES TABLE
     ====================================================== -->
+
     <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
       <div class="card-body p-0">
         <div class="table-responsive">
@@ -47,31 +51,39 @@
             <thead class="table-light text-uppercase fs-7 text-secondary">
               <tr>
                 <th class="py-3 ps-4">#ID</th>
+
                 <th class="py-3">Class Name</th>
+
                 <th class="py-3">Subjects</th>
+
                 <th class="py-3 text-end pe-4">Actions</th>
               </tr>
             </thead>
 
             <tbody>
               <!-- EMPTY -->
+
               <tr v-if="classes.length === 0">
                 <td colspan="4" class="text-center py-5 text-muted">No classes found.</td>
               </tr>
 
               <!-- CLASS ROW -->
+
               <tr v-for="(cls, index) in classes" :key="cls.id">
                 <!-- ID -->
+
                 <td class="ps-4 fw-semibold text-secondary">
                   {{ cls.id || index + 1 }}
                 </td>
 
                 <!-- CLASS NAME -->
+
                 <td class="fw-bold text-dark">
                   {{ cls.class_name || cls.name || 'N/A' }}
                 </td>
 
                 <!-- SUBJECTS -->
+
                 <td>
                   <div v-if="cls.subjects && cls.subjects.length" class="d-flex flex-wrap gap-1">
                     <span
@@ -87,6 +99,7 @@
                 </td>
 
                 <!-- ACTIONS -->
+
                 <td class="text-end pe-4">
                   <button
                     type="button"
@@ -116,6 +129,7 @@
     <!-- =====================================================
          ADD / EDIT CLASS MODAL
     ====================================================== -->
+
     <div
       v-if="showModal"
       class="modal fade show d-block"
@@ -128,6 +142,7 @@
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-lg rounded-4">
           <!-- MODAL HEADER -->
+
           <div class="modal-header border-0 pb-0">
             <div>
               <h5 class="modal-title fw-bold text-dark">
@@ -147,14 +162,44 @@
           </div>
 
           <!-- FORM -->
+
           <form @submit.prevent="saveClass">
             <div class="modal-body py-4">
               <!-- =================================================
+                   BRANCH
+              ================================================== -->
+
+              <div v-if="role === 'Manager'" class="mb-4">
+                <label class="form-label fw-semibold text-secondary">
+                  Select Branch
+
+                  <span class="text-danger">*</span>
+                </label>
+
+                <select
+                  v-model="form.branch_id"
+                  class="form-select form-select-lg fs-6"
+                  required
+                  :disabled="branchesLoading"
+                >
+                  <option value="" disabled>
+                    {{ branchesLoading ? 'Loading branches...' : 'Select Branch' }}
+                  </option>
+
+                  <option v-for="branch in branches" :key="branch.id" :value="branch.id">
+                    {{ branch.name }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- =================================================
                    CLASS NAME
               ================================================== -->
+
               <div class="mb-4">
                 <label class="form-label fw-semibold text-secondary">
                   Class Name
+
                   <span class="text-danger">*</span>
                 </label>
 
@@ -170,6 +215,7 @@
               <!-- =================================================
                    SUBJECT SECTION
               ================================================== -->
+
               <div>
                 <div class="d-flex justify-content-between align-items-center mb-2">
                   <label class="form-label fw-semibold text-secondary mb-0">
@@ -183,25 +229,44 @@
 
                 <div class="border rounded-3 p-3 subject-selection-box">
                   <!-- LOADING -->
+
                   <div v-if="subjectsLoading" class="text-center py-4 text-muted">
                     <div class="spinner-border spinner-border-sm me-2" role="status"></div>
 
                     Loading subjects...
                   </div>
 
+                  <!-- MANAGER: NO BRANCH SELECTED -->
+
+                  <div
+                    v-else-if="role === 'Manager' && !form.branch_id"
+                    class="text-center py-4 text-muted"
+                  >
+                    <i class="bi bi-diagram-3 fs-3 d-block mb-2"></i>
+
+                    Please select a branch first.
+
+                    <div class="small mt-1">Subjects will appear after selecting a branch.</div>
+                  </div>
+
                   <!-- NO SUBJECT -->
-                  <div v-else-if="subjects.length === 0" class="text-center py-4 text-muted">
+
+                  <div
+                    v-else-if="availableSubjects.length === 0"
+                    class="text-center py-4 text-muted"
+                  >
                     <i class="bi bi-book fs-3 d-block mb-2"></i>
 
                     No subjects found.
 
-                    <div class="small mt-1">Please create subjects first.</div>
+                    <div class="small mt-1">Please create subjects for this branch first.</div>
                   </div>
 
                   <!-- SUBJECT CHECKBOXES -->
+
                   <div v-else class="row g-2">
                     <div
-                      v-for="subject in subjects"
+                      v-for="subject in availableSubjects"
                       :key="subject.id"
                       class="col-12 col-sm-6 col-md-4"
                     >
@@ -246,6 +311,7 @@
             <!-- =================================================
                  MODAL FOOTER
             ================================================== -->
+
             <div class="modal-footer border-0 pt-0">
               <button
                 type="button"
@@ -272,9 +338,23 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import api from '../services/api'
 import dashPageView from './dashPageView.vue'
+
+/* =========================================================
+   ROLE
+========================================================= */
+
+const role = localStorage.getItem('role')
+
+/* =========================================================
+   ACADEMIC ACCESS
+========================================================= */
+
+const hasAcademicAccess = computed(() => {
+  return !['Branch Accountant', 'Accountant'].includes(role)
+})
 
 /* =========================================================
    CLASSES
@@ -288,6 +368,13 @@ const classes = ref([])
 
 const subjects = ref([])
 const subjectsLoading = ref(false)
+
+/* =========================================================
+   BRANCHES
+========================================================= */
+
+const branches = ref([])
+const branchesLoading = ref(false)
 
 /* =========================================================
    MODAL
@@ -304,6 +391,7 @@ const saving = ref(false)
 
 const form = ref({
   class_name: '',
+  branch_id: '',
   subject_ids: [],
 })
 
@@ -315,6 +403,62 @@ const message = ref('')
 const isError = ref(false)
 
 /* =========================================================
+   AVAILABLE SUBJECTS
+=========================================================
+   Manager:
+   - Branch select করার পর selected branch-এর subjects দেখাবে।
+
+   Admin / Branch Manager:
+   - Backend /subjects endpoint থেকেই own branch-এর
+     subjects আসবে।
+   - তাই এখানে subjects.value সরাসরি দেখানো হবে।
+========================================================= */
+
+const availableSubjects = computed(() => {
+  if (role === 'Manager') {
+    if (!form.value.branch_id) {
+      return []
+    }
+
+    return subjects.value.filter(
+      (subject) => Number(subject.branch_id) === Number(form.value.branch_id),
+    )
+  }
+
+  return subjects.value
+})
+
+/* =========================================================
+   FETCH BRANCHES
+========================================================= */
+
+const fetchBranches = async () => {
+  branchesLoading.value = true
+
+  try {
+    const response = await api.get('/branches')
+
+    if (Array.isArray(response.data)) {
+      branches.value = response.data
+    } else if (response.data && Array.isArray(response.data.data)) {
+      branches.value = response.data.data
+    } else if (response.data && Array.isArray(response.data.branches)) {
+      branches.value = response.data.branches
+    } else {
+      branches.value = []
+    }
+  } catch (error) {
+    console.error('Failed to fetch branches:', error)
+
+    branches.value = []
+
+    showAlert(error.response?.data?.message || 'Failed to fetch branches.', true)
+  } finally {
+    branchesLoading.value = false
+  }
+}
+
+/* =========================================================
    OPEN ADD MODAL
 ========================================================= */
 
@@ -324,15 +468,33 @@ const openAddModal = async () => {
 
   form.value = {
     class_name: '',
+    branch_id: '',
     subject_ids: [],
   }
+
+  subjects.value = []
 
   message.value = ''
   isError.value = false
 
   showModal.value = true
 
-  await fetchSubjects()
+  /*
+   * Manager:
+   * প্রথমে শুধু Branch load হবে।
+   * Branch select না করা পর্যন্ত subjects load হবে না।
+   */
+
+  if (role === 'Manager') {
+    await fetchBranches()
+  } else {
+    /*
+     * Admin / Branch Manager:
+     * Backend নিজের branch-এর subjects return করবে।
+     */
+
+    await fetchSubjects()
+  }
 }
 
 /* =========================================================
@@ -347,18 +509,86 @@ const openEditModal = async (classItem) => {
 
   form.value = {
     class_name: classItem.class_name || classItem.name || '',
+
+    branch_id: classItem.branch_id ? Number(classItem.branch_id) : '',
+
     subject_ids: Array.isArray(classItem.subjects)
       ? classItem.subjects.map((subject) => Number(subject.id))
       : [],
   }
+
+  subjects.value = []
 
   message.value = ''
   isError.value = false
 
   showModal.value = true
 
-  await fetchSubjects()
+  /*
+   * Manager-এর existing class-এর branch_id already আছে।
+   * তাই সেই branch-এর subjects load হবে।
+   */
+
+  if (role === 'Manager') {
+    await fetchBranches()
+    await fetchSubjects()
+  } else {
+    /*
+     * Admin / Branch Manager:
+     * নিজের branch-এর subjects load হবে।
+     */
+
+    await fetchSubjects()
+  }
 }
+
+/* =========================================================
+   WATCH BRANCH CHANGE
+=========================================================
+   Manager branch change করলে নতুন branch-এর subjects
+   আবার API থেকে load হবে।
+========================================================= */
+
+watch(
+  () => form.value.branch_id,
+  async (newBranchId, oldBranchId) => {
+    /*
+     * শুধু Manager-এর ক্ষেত্রে branch change-এর
+     * উপর subject reload হবে।
+     */
+
+    if (role !== 'Manager') {
+      return
+    }
+
+    if (!newBranchId) {
+      subjects.value = []
+
+      form.value.subject_ids = []
+
+      return
+    }
+
+    /*
+     * Branch change হলে নতুন branch-এর subjects load।
+     */
+
+    await fetchSubjects()
+
+    const branchId = Number(newBranchId)
+
+    /*
+     * নতুন branch-এর বাইরে কোনো previously selected
+     * subject থাকলে remove করা হবে।
+     */
+
+    form.value.subject_ids = form.value.subject_ids.filter((subjectId) => {
+      const subject = subjects.value.find((item) => Number(item.id) === Number(subjectId))
+
+      return subject && Number(subject.branch_id) === branchId
+    })
+  },
+)
 
 /* =========================================================
    TOGGLE SUBJECT
@@ -402,18 +632,53 @@ const fetchClasses = async () => {
 
 /* =========================================================
    FETCH SUBJECTS
+=========================================================
+   Manager:
+   /subjects?branch_id=selectedBranch
+
+   Admin / Branch Manager:
+   /subjects
+   Backend নিজের branch-এর subjects দেবে।
 ========================================================= */
 
 const fetchSubjects = async () => {
   subjectsLoading.value = true
 
   try {
-    const response = await api.get('/subjects')
+    let response
+
+    if (role === 'Manager') {
+      /*
+       * Manager-এর branch select করা না থাকলে
+       * কোনো subject request করা হবে না।
+       */
+
+      if (!form.value.branch_id) {
+        subjects.value = []
+
+        return
+      }
+
+      response = await api.get('/subjects', {
+        params: {
+          branch_id: Number(form.value.branch_id),
+        },
+      })
+    } else {
+      /*
+       * Admin / Branch Manager:
+       * Backend নিজে own branch scope করবে।
+       */
+
+      response = await api.get('/subjects')
+    }
 
     if (Array.isArray(response.data)) {
       subjects.value = response.data
     } else if (response.data && Array.isArray(response.data.data)) {
       subjects.value = response.data.data
+    } else if (response.data && Array.isArray(response.data.subjects)) {
+      subjects.value = response.data.subjects
     } else {
       subjects.value = []
     }
@@ -437,8 +702,18 @@ const saveClass = async () => {
     return
   }
 
+  /* Class Name validation */
+
   if (!form.value.class_name.trim()) {
     showAlert('Class name is required.', true)
+
+    return
+  }
+
+  /* Manager branch validation */
+
+  if (role === 'Manager' && !form.value.branch_id) {
+    showAlert('Please select a branch.', true)
 
     return
   }
@@ -446,10 +721,22 @@ const saveClass = async () => {
   saving.value = true
 
   try {
+    /* =====================================================
+       PAYLOAD
+    ====================================================== */
+
     const payload = {
       class_name: form.value.class_name.trim(),
 
       subject_ids: form.value.subject_ids.map((id) => Number(id)),
+    }
+
+    /* =====================================================
+       MANAGER BRANCH
+    ====================================================== */
+
+    if (role === 'Manager') {
+      payload.branch_id = Number(form.value.branch_id)
     }
 
     /* =====================================================
@@ -469,9 +756,11 @@ const saveClass = async () => {
         await fetchClasses()
       }
     } else {
-      /* =====================================================
+      /* =================================================
          CREATE
-      ====================================================== */
+      ================================================== */
+
+      console.log('CREATING CLASS:', payload)
 
       const response = await api.post('/classes', payload)
 
@@ -520,8 +809,11 @@ const closeModal = () => {
 
   currentClassID.value = null
 
+  subjects.value = []
+
   form.value = {
     class_name: '',
+    branch_id: '',
     subject_ids: [],
   }
 }
@@ -551,11 +843,6 @@ const deleteClass = async (id) => {
     if (response.status === 200 || response.data?.status) {
       showAlert(response.data?.message || 'Class deleted successfully!')
 
-      /*
-       * Backend থেকে fresh data আনা হচ্ছে।
-       * এতে frontend list এবং database-এর data
-       * সবসময় synchronized থাকবে।
-       */
       await fetchClasses()
     }
   } catch (error) {
@@ -573,6 +860,7 @@ const deleteClass = async (id) => {
 
 const showAlert = (msg, error = false) => {
   message.value = msg
+
   isError.value = error
 
   setTimeout(() => {
@@ -585,6 +873,10 @@ const showAlert = (msg, error = false) => {
 ========================================================= */
 
 onMounted(() => {
+  if (!hasAcademicAccess.value) {
+    return
+  }
+
   fetchClasses()
 })
 </script>
@@ -596,6 +888,7 @@ onMounted(() => {
 
 .body {
   width: 86%;
+
   margin-left: 259px;
 }
 
@@ -605,7 +898,9 @@ onMounted(() => {
 
 .subject-selection-box {
   background-color: #f8f9fa;
+
   max-height: 320px;
+
   overflow-y: auto;
 }
 
@@ -615,10 +910,15 @@ onMounted(() => {
 
 .subject-check-card {
   background-color: #ffffff;
+
   cursor: pointer;
+
   transition: all 0.2s ease;
+
   min-height: 70px;
+
   display: flex;
+
   align-items: flex-start;
 }
 
@@ -626,6 +926,7 @@ onMounted(() => {
 
 .subject-check-card:hover {
   border-color: #86b7fe !important;
+
   background-color: #f8fbff;
 }
 
@@ -633,6 +934,7 @@ onMounted(() => {
 
 .subject-check-card.selected-subject {
   border-color: #0d6efd !important;
+
   background-color: rgba(13, 110, 253, 0.06);
 }
 
@@ -640,6 +942,7 @@ onMounted(() => {
 
 .subject-check-card .form-check-input {
   margin-top: 3px;
+
   cursor: pointer;
 }
 
@@ -647,6 +950,7 @@ onMounted(() => {
 
 .subject-check-card .form-check-label {
   cursor: pointer;
+
   flex: 1;
 }
 
@@ -656,6 +960,7 @@ onMounted(() => {
 
 .table th {
   font-size: 0.8rem;
+
   letter-spacing: 0.03em;
 }
 
@@ -678,7 +983,9 @@ onMounted(() => {
 @media (max-width: 768px) {
   .body {
     width: 100%;
+
     margin-left: 0;
+
     padding: 15px;
   }
 }

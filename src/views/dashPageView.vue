@@ -46,6 +46,10 @@
       <i class="fa-solid fa-gauge-high"></i>
       <span>Dashboard</span>
     </router-link>
+    <router-link to="/branch" active-class="active-menu" @click="closeSidebar">
+      <i class="fa-solid fa-gauge-high"></i>
+      <span>Branches</span>
+    </router-link>
 
     <!-- ================= INSTITUTE ================= -->
     <router-link to="/Institure-Info" active-class="active-menu" @click="closeSidebar">
@@ -159,7 +163,7 @@
       </button>
 
       <ul class="dropdown-menu">
-        <li v-if="role === 'Manager' || role === 'Admin'">
+        <li v-if="role === 'Manager' || role === 'Branch Manager' || role === 'Admin'">
           <router-link
             class="dropdown-item"
             to="/staff"
@@ -270,7 +274,7 @@
 
     <!-- ================= ACCOUNT DASHBOARD ================= -->
     <router-link
-      v-if="role === 'Manager'"
+      v-if="role === 'Manager' || role === 'Branch Manager'"
       to="/account/dashboard"
       active-class="active-menu"
       @click="closeSidebar"

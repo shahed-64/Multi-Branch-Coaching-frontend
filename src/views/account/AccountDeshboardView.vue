@@ -14,7 +14,6 @@
         <!-- Left Side -->
         <div>
           <h3 class="fw-bold mb-1 text-dark">Dashboard</h3>
-
           <p class="text-muted mb-0 small">Welcome back! Here's today's coaching overview.</p>
         </div>
 
@@ -140,7 +139,7 @@
               <div>
                 <h4>৳ {{ Number(thisMonthCollection).toLocaleString() }}</h4>
 
-                <small> This Month Collection </small>
+                <small>This Month Collection</small>
               </div>
             </div>
 
@@ -151,7 +150,7 @@
               <div>
                 <h4>৳ {{ Number(totalOtherPayment).toLocaleString() }}</h4>
 
-                <small> Other Collection </small>
+                <small>Other Collection</small>
               </div>
             </div>
 
@@ -162,7 +161,7 @@
               <div>
                 <h4>৳ {{ Number(thisMonthDue).toLocaleString() }}</h4>
 
-                <small> This Month Due </small>
+                <small>This Month Due</small>
               </div>
             </div>
 
@@ -175,7 +174,7 @@
                   {{ totalStudents }}
                 </h4>
 
-                <small> Total Students </small>
+                <small>Total Students</small>
               </div>
             </div>
 
@@ -188,7 +187,7 @@
                   {{ runningMonthUnpaidStudents }}
                 </h4>
 
-                <small> Unpaid Students </small>
+                <small>Unpaid Students</small>
               </div>
             </div>
           </div>
@@ -421,11 +420,8 @@ const getDashboardData = async () => {
     ===================================================== */
 
     totalPaidAmount.value = Number(data.total_paid_amount || 0)
-
     totalDueAmount.value = Number(data.total_due_amount || 0)
-
     totalStudents.value = Number(data.total_students || 0)
-
     dueStudents.value = Number(data.due_students || 0)
 
     /* =====================================================
@@ -467,17 +463,12 @@ const getDashboardData = async () => {
     /* =====================================================
        THIS MONTH STUDENT COLLECTION
 
-       IMPORTANT:
-       We calculate ONLY the student payment part here.
-
-       Other Payment will NOT be directly added here.
-       It will be combined later after both API calls finish.
+       ONLY student payment part here.
+       Other Payment is combined later.
     ===================================================== */
 
     const currentDate = new Date()
-
     const currentYear = currentDate.getFullYear()
-
     const currentMonth = currentDate.getMonth()
 
     const thisMonthStudentCollection = payments.value.reduce((total, payment) => {
@@ -510,7 +501,6 @@ const getDashboardData = async () => {
     ===================================================== */
 
     recentPayments.value = data.recent_payments || []
-
     monthlyPayments.value = data.monthly_payments || []
 
     runningMonthUnpaidStudents.value = Number(data.running_month_unpaid_students || 0)
@@ -547,6 +537,18 @@ const getDashboardData = async () => {
 
 /* =========================================================
    TOTAL EXPENSE + TODAY'S EXPENSE
+
+   IMPORTANT BRANCH LOGIC:
+
+   Manager
+   -> /expenses returns ALL branches' expenses.
+
+   Branch Manager / Branch Accountant
+   -> /expenses returns ONLY their own branch's expenses.
+
+   Therefore no branch_id is sent from frontend.
+   Backend controls the branch isolation.
+
 ========================================================= */
 
 const getTotalExpense = async () => {
@@ -557,6 +559,12 @@ const getTotalExpense = async () => {
 
     /* =====================================================
        TOTAL EXPENSE
+
+       Manager:
+       -> All branch expenses
+
+       Branch Manager / Branch Accountant:
+       -> Own branch expenses only
     ===================================================== */
 
     totalExpense.value = expenses.reduce((total, expense) => {
@@ -565,6 +573,8 @@ const getTotalExpense = async () => {
 
     /* =====================================================
        TODAY'S EXPENSE
+
+       Same branch filtering comes from backend.
     ===================================================== */
 
     const today = new Date().toISOString().slice(0, 10)
@@ -577,7 +587,10 @@ const getTotalExpense = async () => {
       return total
     }, 0)
   } catch (error) {
-    console.error('Expense Error:', error)
+    console.error('Expense Error:', error.response?.data || error.message)
+
+    totalExpense.value = 0
+    todayExpense.value = 0
   }
 }
 
@@ -643,13 +656,10 @@ const getDashboardimages = async () => {
 /* =========================================================
    OTHER PAYMENTS
 
-   IMPORTANT:
-   This function now ONLY loads and calculates
+   This function ONLY loads and calculates
    Other Payment data.
 
    It does NOT directly modify thisMonthCollection.
-
-   This prevents the race-condition problem.
 ========================================================= */
 
 const getTotalOtherPayment = async () => {
@@ -660,10 +670,6 @@ const getTotalOtherPayment = async () => {
 
     /* =====================================================
        TOTAL OTHER PAYMENT
-
-       Used by "Other Collection".
-
-       This remains total of ALL Other Payments.
     ===================================================== */
 
     totalOtherPayment.value = rawOtherPayments.value.reduce((total, payment) => {
@@ -675,9 +681,7 @@ const getTotalOtherPayment = async () => {
     ===================================================== */
 
     const currentDate = new Date()
-
     const currentYear = currentDate.getFullYear()
-
     const currentMonth = currentDate.getMonth()
 
     const thisMonthOtherPayment = rawOtherPayments.value.reduce((total, payment) => {
@@ -696,14 +700,6 @@ const getTotalOtherPayment = async () => {
       return total
     }, 0)
 
-    /* =====================================================
-       IMPORTANT:
-       DO NOT ADD THIS DIRECTLY TO thisMonthCollection HERE.
-
-       The final This Month Collection is calculated
-       AFTER both API calls finish in onMounted().
-    ===================================================== */
-
     return thisMonthOtherPayment
   } catch (error) {
     console.error('Other Payment Error:', error)
@@ -717,42 +713,38 @@ const getTotalOtherPayment = async () => {
 ========================================================= */
 
 onMounted(async () => {
-  /*
-   * IMPORTANT FIX
-   *
-   * First load Payments + Other Payments together.
-   * Then calculate This Month Collection only after
-   * both API requests are finished.
-   *
-   * Therefore API response order can no longer
-   * overwrite/remove Other Payment from the total.
-   */
+  /* =====================================================
+     First load Payments + Other Payments together.
+  ===================================================== */
 
   const [dashboardResult, otherPaymentResult] = await Promise.all([
     getDashboardData(),
     getTotalOtherPayment(),
   ])
 
-  /*
-   * Other Payment function returns the current month's
-   * Other Payment amount.
-   *
-   * Dashboard data calculates the current month's
-   * student payment amount.
-   *
-   * Now combine them once.
-   */
+  /* =====================================================
+     Combine This Month Collection
+  ===================================================== */
 
   thisMonthCollection.value =
     Number(thisMonthCollection.value || 0) + Number(otherPaymentResult || 0)
 
-  /*
-   * These are independent APIs, so they can continue
-   * loading normally without affecting the calculation above.
-   */
+  /* =====================================================
+     Independent Dashboard APIs
+  ===================================================== */
 
   getDashboardimages()
 
+  /*
+   * IMPORTANT:
+   *
+   * Expense branch isolation is handled by
+   * ExpenseController.
+   *
+   * Manager -> all branches
+   * Branch Manager -> own branch
+   * Branch Accountant -> own branch
+   */
   getTotalExpense()
 })
 </script>

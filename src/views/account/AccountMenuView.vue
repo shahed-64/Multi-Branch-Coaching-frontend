@@ -116,8 +116,9 @@
 
         <!-- ================= MAIN DASHBOARD ================= -->
 
+        <!-- ================= MAIN DASHBOARD ================= -->
         <router-link
-          v-if="role === 'Manager'"
+          v-if="role === 'Manager' || role === 'Branch Manager'"
           to="/dashboard"
           class="menu-item"
           active-class="active-menu"
