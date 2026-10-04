@@ -5,7 +5,6 @@
         <!-- ===================================================== -->
         <!-- LOGO WATERMARK -->
         <!-- ===================================================== -->
-
         <div v-if="institute?.logo" class="logo-watermark">
           <img
             :src="getLogoUrl(institute.logo)"
@@ -16,7 +15,6 @@
         <!-- ===================================================== -->
         <!-- TOP HEADER -->
         <!-- ===================================================== -->
-
         <div class="text-center mb-4 position-relative z-1">
           <h3 class="header-title mb-1">
             {{ institute?.institute_name || 'Institute Name' }}
@@ -27,8 +25,8 @@
           </p>
 
           <h4 class="fw-bold text-dark border-bottom pb-2 d-inline-block px-4">
-            {{ resultData.type }} EXAMINATION -
-            {{ resultData.year }}
+            {{ examType }} EXAMINATION -
+            {{ examYear }}
           </h4>
 
           <h5 class="text-secondary mt-1">ACADEMIC TRANSCRIPT</h5>
@@ -37,7 +35,6 @@
         <!-- ===================================================== -->
         <!-- STUDENT INFORMATION -->
         <!-- ===================================================== -->
-
         <table class="info-table mb-4 position-relative z-1">
           <tr>
             <!-- LEFT SIDE -->
@@ -45,33 +42,28 @@
               <table class="table table-sm table-borderless mb-0">
                 <tr>
                   <td class="fw-bold" style="width: 140px">Student's Name</td>
-
-                  <td>: {{ resultData.student_name }}</td>
+                  <td>: {{ studentName }}</td>
                 </tr>
 
                 <tr>
                   <td class="fw-bold">Father's Name</td>
-
-                  <td>: {{ resultData.father_name }}</td>
+                  <td>: {{ fatherName }}</td>
                 </tr>
 
                 <tr>
                   <td class="fw-bold">Mother's Name</td>
-
-                  <td>: {{ resultData.mother_name }}</td>
+                  <td>: {{ motherName }}</td>
                 </tr>
 
                 <tr>
                   <td class="fw-bold">Class / Batch</td>
-
-                  <td>: {{ resultData.class_name || 'N/A' }}</td>
+                  <td>: {{ className }}</td>
                 </tr>
 
                 <!-- VERSION -->
                 <tr>
                   <td class="fw-bold">Version</td>
-
-                  <td>: {{ resultData.version || 'N/A' }}</td>
+                  <td>: {{ versionName }}</td>
                 </tr>
               </table>
             </td>
@@ -81,30 +73,25 @@
               <table class="table table-sm table-borderless mb-0">
                 <tr>
                   <td class="fw-bold" style="width: 110px">Student ID.</td>
-
-                  <td>: {{ resultData.roll }}</td>
+                  <td>: {{ studentId }}</td>
                 </tr>
 
                 <!-- GROUP / SECTION -->
                 <tr>
                   <td class="fw-bold">
-                    {{ isJuniorClass(resultData.class_name) ? 'Section' : 'Group' }}
+                    {{ isJuniorClass(className) ? 'Section' : 'Group' }}
                   </td>
 
                   <td>
                     :
-                    {{
-                      isJuniorClass(resultData.class_name)
-                        ? resultData.course_name || 'N/A'
-                        : resultData.group_name || 'N/A'
-                    }}
+                    {{ isJuniorClass(className) ? sectionName : groupName }}
                   </td>
                 </tr>
 
                 <tr>
                   <td class="fw-bold">Type</td>
 
-                  <td>: {{ resultData.type }}</td>
+                  <td>: {{ examType }}</td>
                 </tr>
 
                 <tr>
@@ -125,7 +112,6 @@
         <!-- ===================================================== -->
         <!-- MARKS / GRADES TABLE -->
         <!-- ===================================================== -->
-
         <div class="table-responsive position-relative z-1 mb-4">
           <table class="table table-bordered text-center align-middle">
             <thead class="table-success text-dark">
@@ -148,7 +134,6 @@
               <!-- ================================================= -->
               <!-- MAIN SUBJECTS -->
               <!-- ================================================= -->
-
               <tr v-for="(subject, index) in mainSubjects" :key="subject.id || index">
                 <td>{{ index + 1 }}.</td>
 
@@ -177,14 +162,13 @@
                   :rowspan="mainSubjects.length"
                   class="fw-bold bg-light align-middle"
                 >
-                  {{ resultData.gpa_without_additional || '-' }}
+                  {{ gpaWithoutAdditional }}
                 </td>
               </tr>
 
               <!-- ================================================= -->
               <!-- ADDITIONAL SUBJECTS -->
               <!-- ================================================= -->
-
               <template
                 v-for="(subject, index) in additionalSubjects"
                 :key="'additional-' + (subject.id || index)"
@@ -221,7 +205,6 @@
               <!-- ================================================= -->
               <!-- NO SUBJECT -->
               <!-- ================================================= -->
-
               <tr v-if="mainSubjects.length === 0 && additionalSubjects.length === 0">
                 <td colspan="6" class="text-center text-muted py-4">No subject result found.</td>
               </tr>
@@ -232,7 +215,6 @@
         <!-- ===================================================== -->
         <!-- GRADING SYSTEM -->
         <!-- ===================================================== -->
-
         <div class="row position-relative z-1 mb-5">
           <!-- Grading Table -->
           <div class="col-7">
@@ -273,7 +255,7 @@
               <p class="mb-1 text-muted small">Date of Publication of Results</p>
 
               <p class="fw-bold mb-0">
-                {{ resultData.publication_date }}
+                {{ resultData.publication_date || 'N/A' }}
               </p>
             </div>
           </div>
@@ -282,7 +264,6 @@
         <!-- ===================================================== -->
         <!-- ADDITIONAL SUBJECT INFORMATION -->
         <!-- ===================================================== -->
-
         <div v-if="additionalSubjects.length" class="alert alert-info position-relative z-1 mb-4">
           <strong> Additional Subject: </strong>
 
@@ -303,7 +284,6 @@
         <!-- ===================================================== -->
         <!-- SIGNATURES -->
         <!-- ===================================================== -->
-
         <div class="row text-center mt-5 position-relative z-1 pt-4">
           <div class="col-4">
             <div class="border-top border-dark pt-2 mx-auto" style="width: 80%">Prepared by</div>
@@ -324,7 +304,6 @@
       <!-- ===================================================== -->
       <!-- BUTTONS -->
       <!-- ===================================================== -->
-
       <div class="text-center mb-5 no-print mt-4">
         <button @click="printMarksheet" class="btn btn-success px-4 py-2 fw-bold shadow-sm">
           🖨️ Print / Save A4 Marksheet
@@ -340,7 +319,6 @@
   <!-- ========================================================= -->
   <!-- LOADING -->
   <!-- ========================================================= -->
-
   <div v-else class="text-center py-5">
     <p class="fs-5 text-muted">Loading Result...</p>
   </div>
@@ -354,36 +332,31 @@ import api from '@/services/api'
 // ============================================================
 // ROUTE
 // ============================================================
-
 const route = useRoute()
 
 // ============================================================
 // RESULT DATA
 // ============================================================
-
 const resultData = ref(null)
 
 // ============================================================
 // INSTITUTE DATA
 // ============================================================
-
 const institute = ref(null)
 
 // ============================================================
 // GRADING SYSTEM DATA
 // ============================================================
-
 const gradingSystems = ref([])
 
 // ============================================================
 // FETCH INSTITUTE INFORMATION
 // ============================================================
-
 const fetchInstitute = async () => {
   try {
     const response = await api.get('/institute-info')
 
-    institute.value = response.data.data
+    institute.value = response.data?.data || null
   } catch (error) {
     console.error('Failed to fetch institute information:', error)
   }
@@ -392,12 +365,11 @@ const fetchInstitute = async () => {
 // ============================================================
 // FETCH GRADING SYSTEM
 // ============================================================
-
 const fetchGradingSystems = async () => {
   try {
     const response = await api.get('/grading-systems')
 
-    gradingSystems.value = Array.isArray(response.data.data) ? response.data.data : []
+    gradingSystems.value = Array.isArray(response.data?.data) ? response.data.data : []
   } catch (error) {
     console.error('Failed to fetch grading systems:', error)
 
@@ -408,7 +380,6 @@ const fetchGradingSystems = async () => {
 // ============================================================
 // SORTED GRADING SYSTEM
 // ============================================================
-
 const sortedGradingSystems = computed(() => {
   return [...gradingSystems.value].sort(
     (a, b) => Number(b.min_percentage) - Number(a.min_percentage),
@@ -418,7 +389,6 @@ const sortedGradingSystems = computed(() => {
 // ============================================================
 // GRADE RANGE
 // ============================================================
-
 const getGradeRange = (grading) => {
   const sorted = sortedGradingSystems.value
 
@@ -445,7 +415,6 @@ const getGradeRange = (grading) => {
 // ============================================================
 // LOGO URL
 // ============================================================
-
 const getLogoUrl = (logo) => {
   if (!logo) {
     return ''
@@ -463,7 +432,6 @@ const getLogoUrl = (logo) => {
 // ============================================================
 // FETCH SINGLE RESULT
 // ============================================================
-
 const fetchSingleResult = async () => {
   const resultId = route.query.id
 
@@ -477,16 +445,164 @@ const fetchSingleResult = async () => {
 
     console.log('RESULT SHOW RESPONSE:', response.data)
 
-    resultData.value = response.data.data
+    // ========================================================
+    // SUPPORT BOTH:
+    // response.data.data
+    // response.data.result
+    // response.data
+    // ========================================================
+    const data = response.data?.data || response.data?.result || response.data
+
+    resultData.value = data
+
+    console.log('FINAL RESULT DATA:', resultData.value)
   } catch (error) {
     console.error('Error fetching result details:', error)
+
+    resultData.value = null
   }
 }
 
 // ============================================================
+// STUDENT NAME
+// ============================================================
+const studentName = computed(() => {
+  return (
+    resultData.value?.student_name ||
+    resultData.value?.student?.full_name ||
+    resultData.value?.student?.name ||
+    'N/A'
+  )
+})
+
+// ============================================================
+// FATHER NAME
+// ============================================================
+const fatherName = computed(() => {
+  return (
+    resultData.value?.father_name ||
+    resultData.value?.fatherName ||
+    resultData.value?.student?.fathers_name ||
+    resultData.value?.student?.father_name ||
+    resultData.value?.student?.father ||
+    'N/A'
+  )
+})
+
+// ============================================================
+// MOTHER NAME
+// ============================================================
+const motherName = computed(() => {
+  return (
+    resultData.value?.mother_name ||
+    resultData.value?.motherName ||
+    resultData.value?.student?.mothers_name ||
+    resultData.value?.student?.mother_name ||
+    resultData.value?.student?.mother ||
+    'N/A'
+  )
+})
+
+// ============================================================
+// STUDENT ID
+// ============================================================
+const studentId = computed(() => {
+  return (
+    resultData.value?.student_id ||
+    resultData.value?.roll ||
+    resultData.value?.student?.student_id ||
+    resultData.value?.student?.roll ||
+    'N/A'
+  )
+})
+
+// ============================================================
+// CLASS NAME
+// ============================================================
+const className = computed(() => {
+  return (
+    resultData.value?.class_name ||
+    resultData.value?.className ||
+    resultData.value?.student?.class_info?.class_name ||
+    resultData.value?.student?.class_info?.name ||
+    resultData.value?.student?.classInfo?.class_name ||
+    resultData.value?.student?.classInfo?.name ||
+    resultData.value?.student?.class?.class_name ||
+    resultData.value?.student?.class?.name ||
+    'N/A'
+  )
+})
+
+// ============================================================
+// VERSION
+// ============================================================
+const versionName = computed(() => {
+  return (
+    resultData.value?.version ||
+    resultData.value?.version_name ||
+    resultData.value?.student?.version ||
+    resultData.value?.student?.version_name ||
+    'N/A'
+  )
+})
+
+// ============================================================
+// GROUP NAME
+// ============================================================
+const groupName = computed(() => {
+  return (
+    resultData.value?.group_name ||
+    resultData.value?.student?.class_group?.group_name ||
+    resultData.value?.student?.class_group?.name ||
+    resultData.value?.student?.classGroup?.group_name ||
+    resultData.value?.student?.classGroup?.name ||
+    resultData.value?.student?.group?.group_name ||
+    resultData.value?.student?.group?.name ||
+    'N/A'
+  )
+})
+
+// ============================================================
+// SECTION NAME
+// ============================================================
+const sectionName = computed(() => {
+  return (
+    resultData.value?.section_name ||
+    resultData.value?.student?.section?.section_name ||
+    resultData.value?.student?.section?.name ||
+    'N/A'
+  )
+})
+
+// ============================================================
+// EXAM TYPE
+// ============================================================
+const examType = computed(() => {
+  return (
+    resultData.value?.type ||
+    resultData.value?.exam_type ||
+    resultData.value?.exam?.examination_type ||
+    resultData.value?.examination?.examination_type ||
+    'N/A'
+  )
+})
+
+// ============================================================
+// EXAM YEAR
+// ============================================================
+const examYear = computed(() => {
+  return (
+    resultData.value?.year ||
+    resultData.value?.exam_year ||
+    resultData.value?.exam?.examination_year ||
+    resultData.value?.examination?.examination_year ||
+    'N/A'
+  )
+})
+
+// ============================================================
 // MAIN SUBJECTS
 // ============================================================
-
 const mainSubjects = computed(() => {
   if (!resultData.value || !Array.isArray(resultData.value.subjects)) {
     return []
@@ -498,7 +614,6 @@ const mainSubjects = computed(() => {
 // ============================================================
 // ADDITIONAL SUBJECTS
 // ============================================================
-
 const additionalSubjects = computed(() => {
   if (!resultData.value) {
     return []
@@ -520,7 +635,6 @@ const additionalSubjects = computed(() => {
 // ============================================================
 // NORMAL GRADE CALCULATOR
 // ============================================================
-
 const calculateGrade = (marks, fullMark = 100) => {
   if (marks === null || marks === undefined || marks === '') {
     return {
@@ -563,15 +677,44 @@ const calculateGrade = (marks, fullMark = 100) => {
 // ============================================================
 // ADDITIONAL SUBJECT GRADE
 // ============================================================
-
 const calculateAdditionalGrade = (marks, fullMark = 100) => {
   return calculateGrade(marks, fullMark)
 }
 
 // ============================================================
+// GPA WITHOUT ADDITIONAL SUBJECT
+// ============================================================
+const gpaWithoutAdditional = computed(() => {
+  const main = mainSubjects.value
+
+  if (!main.length) {
+    return '-'
+  }
+
+  let totalPoint = 0
+  let validSubjects = 0
+
+  main.forEach((subject) => {
+    const grade = calculateGrade(subject.marks, subject.full_mark)
+
+    if (grade.point !== '-') {
+      totalPoint += Number(grade.point)
+      validSubjects++
+    }
+  })
+
+  if (validSubjects === 0) {
+    return '-'
+  }
+
+  const gpa = totalPoint / validSubjects
+
+  return Math.min(gpa, 5).toFixed(2)
+})
+
+// ============================================================
 // GPA WITH ADDITIONAL SUBJECT
 // ============================================================
-
 const gpaWithAdditional = computed(() => {
   if (!resultData.value) {
     return '-'
@@ -593,7 +736,6 @@ const gpaWithAdditional = computed(() => {
 
     if (grade.point !== '-') {
       mainPointTotal += Number(grade.point)
-
       validMainSubjects++
     }
   })
@@ -628,13 +770,12 @@ const gpaWithAdditional = computed(() => {
 // ============================================================
 // JUNIOR CLASS CHECK
 // ============================================================
-
-const isJuniorClass = (className) => {
-  if (!className) {
+const isJuniorClass = (classNameValue) => {
+  if (!classNameValue) {
     return false
   }
 
-  const numericClass = parseInt(className.toString().replace(/\D/g, ''), 10)
+  const numericClass = parseInt(classNameValue.toString().replace(/\D/g, ''), 10)
 
   if (!isNaN(numericClass)) {
     return numericClass >= 1 && numericClass <= 8
@@ -659,13 +800,12 @@ const isJuniorClass = (className) => {
     'class 8',
   ]
 
-  return juniorClasses.some((c) => className.toString().toLowerCase().includes(c))
+  return juniorClasses.some((c) => classNameValue.toString().toLowerCase().includes(c))
 }
 
 // ============================================================
 // PRINT
 // ============================================================
-
 const printMarksheet = () => {
   window.print()
 }
@@ -673,7 +813,6 @@ const printMarksheet = () => {
 // ============================================================
 // MOUNT
 // ============================================================
-
 onMounted(() => {
   fetchInstitute()
   fetchGradingSystems()
@@ -685,7 +824,6 @@ onMounted(() => {
 /* =========================================================
    MARKSHEET WRAPPER
 ========================================================= */
-
 .marksheet-wrapper {
   background-color: #f2f4f7;
   font-family: 'Arial', sans-serif;
@@ -695,7 +833,6 @@ onMounted(() => {
 /* =========================================================
    MARKSHEET CONTAINER
 ========================================================= */
-
 .marksheet-container {
   max-width: 850px;
   border: 5px solid #198754;
@@ -707,7 +844,6 @@ onMounted(() => {
 /* =========================================================
    LOGO WATERMARK
 ========================================================= */
-
 .logo-watermark {
   position: absolute;
   top: 50%;
@@ -726,7 +862,6 @@ onMounted(() => {
 /* =========================================================
    WATERMARK IMAGE
 ========================================================= */
-
 .logo-watermark img {
   width: 100%;
   height: 100%;
@@ -738,7 +873,6 @@ onMounted(() => {
 /* =========================================================
    HEADER
 ========================================================= */
-
 .header-title {
   color: #198754;
   font-weight: bold;
@@ -747,7 +881,6 @@ onMounted(() => {
 /* =========================================================
    INFORMATION TABLE
 ========================================================= */
-
 .info-table {
   width: 100%;
   border-collapse: collapse;
@@ -756,7 +889,6 @@ onMounted(() => {
 /* =========================================================
    TABLE
 ========================================================= */
-
 .table-bordered th,
 .table-bordered td {
   border-color: #dee2e6 !important;
@@ -766,7 +898,6 @@ onMounted(() => {
 /* =========================================================
    GRADING TABLE
 ========================================================= */
-
 .grade-table th,
 .grade-table td {
   font-size: 0.85rem;
@@ -776,7 +907,6 @@ onMounted(() => {
 /* =========================================================
    ADDITIONAL SUBJECT
 ========================================================= */
-
 .additional-row {
   border-top: 2px solid #ffc107 !important;
 }
@@ -784,7 +914,6 @@ onMounted(() => {
 /* =========================================================
    PRINT
 ========================================================= */
-
 @media print {
   @page {
     size: A4 portrait;
@@ -831,7 +960,6 @@ onMounted(() => {
 /* =========================================================
    MOBILE
 ========================================================= */
-
 @media (max-width: 576px) {
   .marksheet-container {
     border-width: 3px;

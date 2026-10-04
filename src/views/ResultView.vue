@@ -16,6 +16,7 @@
             <div class="d-flex justify-content-between align-items-center">
               <div>
                 <p class="text-muted mb-1 small fw-bold">Exam Participants</p>
+
                 <h4 class="fw-bold text-dark mb-0">
                   {{ totalStudents }}
                 </h4>
@@ -32,6 +33,7 @@
             <div class="d-flex justify-content-between align-items-center">
               <div>
                 <p class="text-muted mb-1 small fw-bold">Published Results</p>
+
                 <h4 class="fw-bold text-dark mb-0">
                   {{ publishedResults }}
                 </h4>
@@ -48,6 +50,7 @@
             <div class="d-flex justify-content-between align-items-center">
               <div>
                 <p class="text-muted mb-1 small fw-bold">Pass Rate</p>
+
                 <h4 class="fw-bold text-dark mb-0">{{ passRate }}%</h4>
               </div>
 
@@ -62,6 +65,7 @@
             <div class="d-flex justify-content-between align-items-center">
               <div>
                 <p class="text-muted mb-1 small fw-bold">Total GPA 5.00</p>
+
                 <h4 class="fw-bold text-dark mb-0">
                   {{ totalGpaFive }}
                 </h4>
@@ -119,10 +123,15 @@
             <thead class="table-light text-uppercase fs-7 text-muted">
               <tr>
                 <th class="py-3 ps-3" style="width: 8%">#</th>
+
                 <th class="py-3">Student ID</th>
+
                 <th class="py-3">Student Name</th>
+
                 <th class="py-3">Exam Info</th>
+
                 <th class="py-3">Exam Year</th>
+
                 <th class="py-3 text-center" style="width: 20%">Action / Receipt</th>
               </tr>
             </thead>
@@ -180,20 +189,29 @@
           class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 mt-4 pt-3 border-top"
         >
           <!-- Showing -->
+
           <p class="text-muted small mb-0">
             Showing
+
             <b>{{ showingFrom }}</b>
+
             to
+
             <b>{{ showingTo }}</b>
+
             of
+
             <b>{{ filteredTotal }}</b>
+
             result(s)
           </p>
 
           <!-- Pagination -->
+
           <nav v-if="totalPages > 1">
             <ul class="pagination pagination-sm mb-0">
               <!-- Previous -->
+
               <li class="page-item" :class="{ disabled: currentPage === 1 }">
                 <button
                   type="button"
@@ -206,6 +224,7 @@
               </li>
 
               <!-- Page Numbers -->
+
               <li
                 v-for="(page, index) in pageNumbers"
                 :key="`${page}-${index}`"
@@ -228,6 +247,7 @@
               </li>
 
               <!-- Next -->
+
               <li class="page-item" :class="{ disabled: currentPage === totalPages }">
                 <button
                   type="button"
@@ -261,6 +281,7 @@
       <div class="result-modal-dialog" @click.stop>
         <div class="result-modal-content">
           <!-- Modal Header -->
+
           <div class="result-modal-header">
             <h5 class="fw-bold text-dark mb-0">Insert Student Result & Marks</h5>
 
@@ -272,6 +293,7 @@
           </div>
 
           <!-- Modal Body -->
+
           <div class="result-modal-body">
             <form @submit.prevent="saveNewResult">
               <!-- =================================================
@@ -280,6 +302,7 @@
 
               <div class="row">
                 <!-- Student -->
+
                 <div class="col-md-4 mb-3 position-relative">
                   <label class="form-label small fw-bold text-muted"> Student ID / Name </label>
 
@@ -304,6 +327,7 @@
                   </div>
 
                   <!-- Student Dropdown -->
+
                   <div
                     v-if="isStudentDropdownOpen"
                     class="dropdown-menu show shadow-lg border rounded-3 bg-white position-absolute w-100 mt-1"
@@ -321,10 +345,12 @@
                       </span>
 
                       -
+
                       {{ student.full_name }}
 
                       <small class="text-muted d-block">
                         Class:
+
                         {{
                           student.class_info?.class_name ||
                           student.class_name ||
@@ -349,6 +375,7 @@
                 </div>
 
                 <!-- Exam Year -->
+
                 <div class="col-md-4 mb-3 position-relative">
                   <label class="form-label small fw-bold text-muted"> Exam Year </label>
 
@@ -373,6 +400,7 @@
                   </div>
 
                   <!-- Year Dropdown -->
+
                   <div
                     v-if="isYearDropdownOpen"
                     class="dropdown-menu show shadow-lg border rounded-3 bg-white position-absolute w-100 mt-1"
@@ -400,6 +428,7 @@
                 </div>
 
                 <!-- Exam Type -->
+
                 <div class="col-md-4 mb-3 position-relative">
                   <label class="form-label small fw-bold text-muted"> Exam Type </label>
 
@@ -424,6 +453,7 @@
                   </div>
 
                   <!-- Exam Dropdown -->
+
                   <div
                     v-if="isExamDropdownOpen"
                     class="dropdown-menu show shadow-lg border rounded-3 bg-white position-absolute w-100 mt-1"
@@ -462,6 +492,7 @@
                   <div class="card-body py-3">
                     <div class="row align-items-center">
                       <!-- CLASS -->
+
                       <div class="col-md-6 mb-2 mb-md-0">
                         <div class="d-flex align-items-center gap-2">
                           <i class="bi bi-mortarboard-fill text-primary fs-5"></i>
@@ -482,6 +513,7 @@
                       </div>
 
                       <!-- GROUP -->
+
                       <div class="col-md-6">
                         <div class="d-flex align-items-center gap-2">
                           <i class="bi bi-people-fill text-success fs-5"></i>
@@ -507,24 +539,31 @@
               <h6 class="fw-bold text-dark mb-3">Subject Marks</h6>
 
               <!-- NO STUDENT -->
+
               <div v-if="!form.student_id" class="alert alert-info">
                 <i class="bi bi-info-circle me-2"></i>
+
                 Please select a student first.
               </div>
 
               <!-- NO SUBJECT -->
+
               <div v-else-if="currentSubjects.length === 0" class="alert alert-warning">
                 <i class="bi bi-exclamation-triangle me-2"></i>
+
                 No subjects are assigned to this student's class/group.
               </div>
 
               <!-- SUBJECTS -->
+
               <div v-else>
                 <!-- MAIN SUBJECTS -->
+
                 <div v-if="mainSubjects.length" class="mb-4">
                   <div class="d-flex justify-content-between align-items-center mb-3">
                     <h6 class="fw-bold text-primary mb-0">
                       <i class="bi bi-book me-2"></i>
+
                       Main Subjects
                     </h6>
 
@@ -564,10 +603,12 @@
                 </div>
 
                 <!-- ADDITIONAL SUBJECT -->
+
                 <div v-if="additionalSubjects.length" class="mt-4">
                   <div class="d-flex justify-content-between align-items-center mb-3">
                     <h6 class="fw-bold text-success mb-0">
                       <i class="bi bi-plus-circle me-2"></i>
+
                       Additional Subject
                     </h6>
 
@@ -657,6 +698,7 @@ const examinationsList = ref([])
 const currentSubjects = ref([])
 
 const search = ref('')
+
 const isAddModalOpen = ref(false)
 const isSaving = ref(false)
 
@@ -668,8 +710,10 @@ const isSaving = ref(false)
 
 const currentPage = ref(1)
 const perPage = ref(10)
+
 const filteredTotal = ref(0)
 const totalPages = ref(1)
+
 const showingFrom = ref(0)
 const showingTo = ref(0)
 
@@ -771,22 +815,41 @@ const fetchData = async (page = 1) => {
     })
 
     /**
-     * Result list
+     * ==========================================================
+     * IMPORTANT FIX
+     *
+     * Laravel paginate() returns:
+     *
+     * response.data.results.data
+     *
+     * NOT:
+     *
+     * response.data.results
+     * ==========================================================
      */
-    resultsList.value = Array.isArray(response.data.results)
-      ? response.data.results.filter((result) => result !== null && typeof result === 'object')
+
+    const resultData = response.data.results?.data ?? []
+
+    resultsList.value = Array.isArray(resultData)
+      ? resultData.filter((result) => result !== null && typeof result === 'object')
       : []
 
     /**
-     * Student list
+     * |--------------------------------------------------------------------------
+     * | Student list
+     * |--------------------------------------------------------------------------
      */
+
     studentsList.value = Array.isArray(response.data.students)
       ? response.data.students.filter((student) => student !== null && typeof student === 'object')
       : []
 
     /**
-     * Result pagination
+     * |--------------------------------------------------------------------------
+     * | Result pagination
+     * |--------------------------------------------------------------------------
      */
+
     const resultPagination = response.data.results_pagination || {}
 
     currentPage.value = resultPagination.current_page || 1
@@ -800,10 +863,16 @@ const fetchData = async (page = 1) => {
     showingTo.value = resultPagination.to || 0
 
     console.log('Students:', studentsList.value)
+
     console.log('Results:', resultsList.value)
+
     console.log('Result Pagination:', resultPagination)
   } catch (error) {
     console.error('Error fetching result data:', error)
+
+    resultsList.value = []
+
+    studentsList.value = []
   }
 }
 
@@ -872,6 +941,7 @@ const pageNumbers = computed(() => {
   }
 
   const start = Math.max(2, current - 1)
+
   const end = Math.min(total - 1, current + 1)
 
   for (let i = start; i <= end; i++) {
@@ -955,6 +1025,7 @@ const searchableExaminations = computed(() => {
   /**
    * Selected student's branch অনুযায়ী
    */
+
   if (selectedStudent.value?.branch_id) {
     examinations = examinations.filter(
       (exam) => Number(exam.branch_id) === Number(selectedStudent.value.branch_id),
@@ -988,6 +1059,7 @@ const searchableYears = computed(() => {
   /**
    * Selected student's branch অনুযায়ী
    */
+
   if (selectedStudent.value?.branch_id) {
     examinations = examinations.filter(
       (exam) => Number(exam.branch_id) === Number(selectedStudent.value.branch_id),
@@ -1035,6 +1107,7 @@ const selectStudent = (student) => {
   /**
    * Student change হলে পুরোনো exam/year selection clear
    */
+
   form.exam_year = ''
   form.exam_type = ''
 
@@ -1084,13 +1157,21 @@ const loadStudentSubjects = () => {
   }
 
   console.log('====================================')
+
   console.log('SELECTED STUDENT:', student)
+
   console.log('STUDENT BRANCH:', student.branch_id)
+
   console.log('CLASS INFO:', student.class_info)
+
   console.log('GROUP:', student.group)
+
   console.log('GROUP NAME:', getStudentGroupName(student))
+
   console.log('GROUP SUBJECTS:', student.group_subjects)
+
   console.log('MAPPED GROUP SUBJECTS:', student.mapped_group_subjects)
+
   console.log('====================================')
 
   /**
@@ -1141,8 +1222,11 @@ const loadStudentSubjects = () => {
 
   const mappedSubjectIds = new Set(
     mappedGroupSubjects
+
       .filter((subject) => subject !== null && typeof subject === 'object')
+
       .map((subject) => Number(subject.id))
+
       .filter((id) => !Number.isNaN(id)),
   )
 
@@ -1154,8 +1238,11 @@ const loadStudentSubjects = () => {
 
   const additionalSubjectIds = new Set(
     groupSubjects
+
       .filter((subject) => subject !== null && typeof subject === 'object')
+
       .map((subject) => Number(subject.id))
+
       .filter((id) => !Number.isNaN(id)),
   )
 
@@ -1166,7 +1253,9 @@ const loadStudentSubjects = () => {
    */
 
   const normalizedClassSubjects = classSubjects
+
     .filter((subject) => subject !== null && typeof subject === 'object')
+
     .filter((subject) => {
       const subjectId = Number(subject.id)
 
@@ -1176,21 +1265,20 @@ const loadStudentSubjects = () => {
 
       return true
     })
-    .map((subject) => {
-      return {
-        unique_key: `main_${subject.id}`,
 
-        id: subject.id,
+    .map((subject) => ({
+      unique_key: `main_${subject.id}`,
 
-        name: subject.name || subject.subject_name || subject.subject?.name || 'Unknown Subject',
+      id: subject.id,
 
-        code: subject.code || subject.subject_code || subject.subject?.code || null,
+      name: subject.name || subject.subject_name || subject.subject?.name || 'Unknown Subject',
 
-        is_additional: false,
+      code: subject.code || subject.subject_code || subject.subject?.code || null,
 
-        marks: '',
-      }
-    })
+      is_additional: false,
+
+      marks: '',
+    }))
 
   /**
    * ==========================================================
@@ -1199,27 +1287,28 @@ const loadStudentSubjects = () => {
    */
 
   const normalizedMappedGroupSubjects = mappedGroupSubjects
+
     .filter((subject) => subject !== null && typeof subject === 'object')
+
     .filter((subject) => {
       const subjectId = Number(subject.id)
 
       return !Number.isNaN(subjectId) && !additionalSubjectIds.has(subjectId)
     })
-    .map((subject) => {
-      return {
-        unique_key: `mapped_group_${subject.id}`,
 
-        id: subject.id,
+    .map((subject) => ({
+      unique_key: `mapped_group_${subject.id}`,
 
-        name: subject.name || subject.subject_name || subject.subject?.name || 'Unknown Subject',
+      id: subject.id,
 
-        code: subject.code || subject.subject_code || subject.subject?.code || null,
+      name: subject.name || subject.subject_name || subject.subject?.name || 'Unknown Subject',
 
-        is_additional: false,
+      code: subject.code || subject.subject_code || subject.subject?.code || null,
 
-        marks: '',
-      }
-    })
+      is_additional: false,
+
+      marks: '',
+    }))
 
   /**
    * ==========================================================
@@ -1228,25 +1317,25 @@ const loadStudentSubjects = () => {
    */
 
   const normalizedGroupSubjects = groupSubjects
+
     .filter((subject) => subject !== null && typeof subject === 'object')
-    .map((subject) => {
-      return {
-        unique_key: `group_${subject.id}`,
 
-        id: subject.id,
+    .map((subject) => ({
+      unique_key: `group_${subject.id}`,
 
-        name: subject.name || subject.subject_name || subject.subject?.name || 'Unknown Subject',
+      id: subject.id,
 
-        code: subject.code || subject.subject_code || subject.subject?.code || null,
+      name: subject.name || subject.subject_name || subject.subject?.name || 'Unknown Subject',
 
-        is_additional:
-          subject.is_additional === true ||
-          subject.is_additional === 1 ||
-          subject.is_additional === '1',
+      code: subject.code || subject.subject_code || subject.subject?.code || null,
 
-        marks: '',
-      }
-    })
+      is_additional:
+        subject.is_additional === true ||
+        subject.is_additional === 1 ||
+        subject.is_additional === '1',
+
+      marks: '',
+    }))
 
   /**
    * ==========================================================
@@ -1256,7 +1345,9 @@ const loadStudentSubjects = () => {
 
   const mergedSubjects = [
     ...normalizedClassSubjects,
+
     ...normalizedMappedGroupSubjects,
+
     ...normalizedGroupSubjects,
   ]
 
@@ -1337,7 +1428,9 @@ const updateSubjectMarks = (subjectKey, marks) => {
 
 const syncFormSubjects = () => {
   form.subjects = currentSubjects.value
+
     .filter((subject) => subject !== null && typeof subject === 'object')
+
     .map((subject) => ({
       subject_id: subject.id,
 
@@ -1421,7 +1514,9 @@ const closeAddModal = () => {
   isAddModalOpen.value = false
 
   isStudentDropdownOpen.value = false
+
   isYearDropdownOpen.value = false
+
   isExamDropdownOpen.value = false
 }
 
@@ -1446,58 +1541,14 @@ const openAddModal = () => {
   currentSubjects.value = []
 
   isStudentDropdownOpen.value = false
+
   isYearDropdownOpen.value = false
+
   isExamDropdownOpen.value = false
 
   isAddModalOpen.value = true
 
   console.log('isAddModalOpen:', isAddModalOpen.value)
-}
-
-/**
- * |--------------------------------------------------------------------------
- * | EXTRACT CREATED RESULT
- * |--------------------------------------------------------------------------
- *
- * Backend response-এর structure যেভাবেই আসুক,
- * নতুন result object খুঁজে বের করার চেষ্টা করবে।
- */
-
-const extractCreatedResult = (data) => {
-  if (!data || typeof data !== 'object') {
-    return null
-  }
-
-  const candidates = [data.data, data.result, data.result_data, data.resultData]
-
-  for (const candidate of candidates) {
-    /**
-     * Direct object
-     */
-    if (candidate && typeof candidate === 'object' && !Array.isArray(candidate) && candidate.id) {
-      return candidate
-    }
-
-    /**
-     * Array-এর মধ্যে result
-     */
-    if (Array.isArray(candidate)) {
-      const found = candidate.find((item) => item && typeof item === 'object' && item.id)
-
-      if (found) {
-        return found
-      }
-    }
-  }
-
-  /**
-   * যদি response নিজেই result object হয়
-   */
-  if (data.id) {
-    return data
-  }
-
-  return null
 }
 
 /**
@@ -1513,21 +1564,25 @@ const saveNewResult = async () => {
 
   if (!form.student_id) {
     alert('Please select a student.')
+
     return
   }
 
   if (!form.exam_year) {
     alert('Please select exam year.')
+
     return
   }
 
   if (!form.exam_type) {
     alert('Please select examination.')
+
     return
   }
 
   if (!form.subjects || form.subjects.length === 0) {
     alert('Please enter marks for at least one subject.')
+
     return
   }
 
@@ -1560,88 +1615,52 @@ const saveNewResult = async () => {
 
     console.log('RESULT SAVE RESPONSE:', response.data)
 
-    if (response.data.status) {
-      /**
-       * ========================================================
-       * নতুন Result response থেকে বের করি
-       * ========================================================
-       */
-
-      const createdResult = extractCreatedResult(response.data)
-
-      console.log('CREATED RESULT FROM RESPONSE:', createdResult)
-
-      /**
-       * Search clear
-       */
-      search.value = ''
-
-      /**
-       * ========================================================
-       * প্রথমে backend থেকে fresh data আনি
-       * ========================================================
-       */
-
-      await fetchData(1)
-
-      /**
-       * ========================================================
-       * IMPORTANT FIX
-       *
-       * Backend-এর pagination/order-এর কারণে newly created
-       * result page-1 এ না থাকলে manually list-এর শুরুতে
-       * বসিয়ে দিচ্ছি।
-       * ========================================================
-       */
-
-      if (createdResult && createdResult.id) {
-        const alreadyExists = resultsList.value.some(
-          (result) => result && result.id == createdResult.id,
-        )
-
-        if (!alreadyExists) {
-          /**
-           * Student relation response-এ না থাকলে
-           * selectedStudent থেকে সেট করার চেষ্টা।
-           */
-          const resultToInsert = {
-            ...createdResult,
-
-            student: createdResult.student || selectedStudent.value || null,
-          }
-
-          resultsList.value = [resultToInsert, ...resultsList.value]
-
-          /**
-           * Pagination total update
-           */
-          filteredTotal.value = Number(filteredTotal.value || 0) + 1
-
-          /**
-           * New result এখন page-1-এর প্রথম item
-           */
-          currentPage.value = 1
-
-          showingFrom.value = 1
-
-          showingTo.value = Math.min(resultsList.value.length, perPage.value)
-
-          /**
-           * Total pages
-           */
-          totalPages.value = Math.max(1, Math.ceil(filteredTotal.value / perPage.value))
-        }
-      }
-
-      /**
-       * Modal close
-       */
-      closeAddModal()
-
-      alert(response.data.message || 'Result saved successfully.')
-    } else {
+    if (!response.data.status) {
       alert(response.data.message || 'Failed to save result.')
+
+      return
     }
+
+    /**
+     * ==========================================================
+     * IMPORTANT FIX
+     *
+     * Backend database থেকে fresh result list
+     * আবার load করা হবে।
+     *
+     * এখানে আর manually resultList-এর মধ্যে
+     * নতুন result push করা হচ্ছে না।
+     * ==========================================================
+     */
+
+    await fetchData(1)
+
+    /**
+     * ==========================================================
+     * CLOSE MODAL
+     * ==========================================================
+     */
+
+    closeAddModal()
+
+    /**
+     * ==========================================================
+     * FORM RESET
+     * ==========================================================
+     */
+
+    form.student_id = ''
+    form.exam_year = ''
+    form.exam_type = ''
+    form.subjects = []
+
+    studentSearchText.value = ''
+    yearSearchText.value = ''
+    examSearchText.value = ''
+
+    currentSubjects.value = []
+
+    alert(response.data.message || 'Result saved successfully.')
   } catch (error) {
     console.error('Error saving result:', error)
 
@@ -1732,7 +1751,9 @@ const calculateResultDetails = (result) => {
   let hasFailed = false
 
   subjects
+
     .filter((resultSubject) => resultSubject !== null && typeof resultSubject === 'object')
+
     .forEach((resultSubject) => {
       const marks = resultSubject.marks
 
@@ -1766,6 +1787,7 @@ const calculateResultDetails = (result) => {
 
   return {
     gpa: Number(gpa.toFixed(2)),
+
     status: 'Pass',
   }
 }
@@ -1828,7 +1850,9 @@ const totalGpaFive = computed(() => {
 
 const closeDropdowns = () => {
   isStudentDropdownOpen.value = false
+
   isYearDropdownOpen.value = false
+
   isExamDropdownOpen.value = false
 }
 

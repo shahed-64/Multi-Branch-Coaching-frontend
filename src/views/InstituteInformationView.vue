@@ -36,7 +36,7 @@
       <!-- Loading -->
       <div v-if="isLoading" class="loading-card">
         <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden"> Loading... </span>
+          <span class="visually-hidden">Loading...</span>
         </div>
 
         <p class="text-muted mt-3 mb-0">Loading institute information...</p>
@@ -81,7 +81,12 @@
             <div class="col-12 col-md-4 col-lg-3">
               <div class="logo-section">
                 <div v-if="institute.logo" class="logo-wrapper">
-                  <img :src="institute.logo" alt="Institute Logo" class="institute-logo" />
+                  <img
+                    :src="getLogoUrl(institute.logo)"
+                    alt="Institute Logo"
+                    class="institute-logo"
+                    @error="handleImageError"
+                  />
                 </div>
 
                 <div v-else class="logo-wrapper logo-placeholder">
@@ -105,7 +110,7 @@
                     </div>
 
                     <div class="info-content">
-                      <small> Institute Name </small>
+                      <small>Institute Name</small>
 
                       <div>
                         {{ institute.institute_name || 'N/A' }}
@@ -122,7 +127,7 @@
                     </div>
 
                     <div class="info-content">
-                      <small> Established Year </small>
+                      <small>Established Year</small>
 
                       <div>
                         {{ institute.established_year || 'N/A' }}
@@ -139,7 +144,7 @@
                     </div>
 
                     <div class="info-content">
-                      <small> Location </small>
+                      <small>Location</small>
 
                       <div>
                         {{ institute.location || 'N/A' }}
@@ -156,7 +161,7 @@
                     </div>
 
                     <div class="info-content">
-                      <small> Contact </small>
+                      <small>Contact</small>
 
                       <div>
                         {{ institute.contact || 'N/A' }}
@@ -216,11 +221,39 @@
           <!-- Modal Body -->
           <div class="modal-body-custom">
             <div class="row g-3">
+              <!-- Branch -->
+              <div v-if="isManager" class="col-12">
+                <label class="form-label-custom">
+                  Branch
+                  <span class="text-danger">*</span>
+                </label>
+
+                <div class="input-group-custom">
+                  <i class="bi bi-diagram-3"></i>
+
+                  <select
+                    v-model="form.branch_id"
+                    class="form-control"
+                    :disabled="isEditing"
+                    required
+                  >
+                    <option value="" disabled>Select Branch</option>
+
+                    <option v-for="branch in branches" :key="branch.id" :value="branch.id">
+                      {{ branch.name }}
+                    </option>
+                  </select>
+                </div>
+
+                <small v-if="isEditing" class="text-muted">
+                  Branch cannot be changed while editing institute information.
+                </small>
+              </div>
+
               <!-- Institute Name -->
               <div class="col-12">
                 <label class="form-label-custom">
                   Institute Name
-
                   <span class="text-danger">*</span>
                 </label>
 
@@ -308,7 +341,12 @@
                 <div class="logo-preview-box">
                   <small class="text-muted d-block mb-2"> Logo Preview </small>
 
-                  <img :src="logoPreview" alt="Logo Preview" class="logo-preview" />
+                  <img
+                    :src="getLogoUrl(logoPreview)"
+                    alt="Logo Preview"
+                    class="logo-preview"
+                    @error="handleImageError"
+                  />
                 </div>
               </div>
             </div>
@@ -340,31 +378,46 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
+import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
+
 import dashPageView from './dashPageView.vue'
 import api from '@/services/api'
 
-/**
- * |--------------------------------------------------------------------------
- * | State
- * |--------------------------------------------------------------------------
- */
+/* =========================================================
+   State
+   ========================================================= */
 
 const institute = ref(null)
 const isLoading = ref(false)
 const isSaving = ref(false)
 const showModal = ref(false)
 const isEditing = ref(false)
+
 const selectedLogo = ref(null)
 const logoPreview = ref('')
 
-/**
- * |--------------------------------------------------------------------------
- * | Form
- * |--------------------------------------------------------------------------
- */
+/* =========================================================
+   Branch State
+   ========================================================= */
+
+const branches = ref([])
+
+/* =========================================================
+   Manager Role
+   ========================================================= */
+
+const userRole = ref(localStorage.getItem('role') || '')
+
+const isManager = computed(() => {
+  return userRole.value === 'Manager'
+})
+
+/* =========================================================
+   Form
+   ========================================================= */
 
 const form = reactive({
+  branch_id: '',
   institute_name: '',
   established_year: '',
   location: '',
@@ -372,13 +425,53 @@ const form = reactive({
   logo: null,
 })
 
-/**
- * |--------------------------------------------------------------------------
- * | Reset Form
- * |--------------------------------------------------------------------------
- */
+/* =========================================================
+   Logo URL
+   ========================================================= */
+
+const getLogoUrl = (logo) => {
+  if (!logo) {
+    return ''
+  }
+
+  // Blob URL হলে সরাসরি return
+  if (logo.startsWith('blob:')) {
+    return logo
+  }
+
+  // Full URL হলে 그대로 return
+  if (logo.startsWith('http://') || logo.startsWith('https://')) {
+    return logo
+  }
+
+  // /storage/... হলে backend origin-এর সাথে যোগ হবে
+  if (logo.startsWith('/storage/')) {
+    return `http://127.0.0.1:8000${logo}`
+  }
+
+  // storage/... হলে
+  if (logo.startsWith('storage/')) {
+    return `http://127.0.0.1:8000/${logo}`
+  }
+
+  // অন্য relative path হলে
+  return `http://127.0.0.1:8000/storage/${logo}`
+}
+
+/* =========================================================
+   Image Error
+   ========================================================= */
+
+const handleImageError = (event) => {
+  console.error('Institute logo failed to load:', event.target.src)
+}
+
+/* =========================================================
+   Reset Form
+   ========================================================= */
 
 const resetForm = () => {
+  form.branch_id = ''
   form.institute_name = ''
   form.established_year = ''
   form.location = ''
@@ -387,7 +480,6 @@ const resetForm = () => {
 
   selectedLogo.value = null
 
-  // Remove previous preview URL
   if (logoPreview.value && logoPreview.value.startsWith('blob:')) {
     URL.revokeObjectURL(logoPreview.value)
   }
@@ -395,11 +487,29 @@ const resetForm = () => {
   logoPreview.value = ''
 }
 
-/**
- * |--------------------------------------------------------------------------
- * | Fetch Institute
- * |--------------------------------------------------------------------------
- */
+/* =========================================================
+   Fetch Branches
+   ========================================================= */
+
+const fetchBranches = async () => {
+  if (!isManager.value) {
+    return
+  }
+
+  try {
+    const response = await api.get('/branches')
+
+    branches.value = response.data.branches || []
+  } catch (error) {
+    console.error('Failed to fetch branches:', error)
+
+    branches.value = []
+  }
+}
+
+/* =========================================================
+   Fetch Institute
+   ========================================================= */
 
 const fetchInstitute = async () => {
   isLoading.value = true
@@ -417,11 +527,9 @@ const fetchInstitute = async () => {
   }
 }
 
-/**
- * |--------------------------------------------------------------------------
- * | Open Create Modal
- * |--------------------------------------------------------------------------
- */
+/* =========================================================
+   Open Create Modal
+   ========================================================= */
 
 const openCreateModal = () => {
   resetForm()
@@ -430,26 +538,27 @@ const openCreateModal = () => {
   showModal.value = true
 }
 
-/**
- * |--------------------------------------------------------------------------
- * | Open Edit Modal
- * |--------------------------------------------------------------------------
- */
+/* =========================================================
+   Open Edit Modal
+   ========================================================= */
 
 const openEditModal = () => {
   if (!institute.value) {
     return
   }
 
+  form.branch_id = institute.value.branch_id || ''
+
   form.institute_name = institute.value.institute_name || ''
+
   form.established_year = institute.value.established_year || ''
+
   form.location = institute.value.location || ''
+
   form.contact = institute.value.contact || ''
 
-  // Existing logo থাকবে,
-  // কিন্তু নতুন logo select না করা পর্যন্ত
-  // backend-এ কোনো logo পাঠানো হবে না.
   form.logo = null
+
   selectedLogo.value = null
 
   logoPreview.value = institute.value.logo || ''
@@ -458,11 +567,9 @@ const openEditModal = () => {
   showModal.value = true
 }
 
-/**
- * |--------------------------------------------------------------------------
- * | Logo Change
- * |--------------------------------------------------------------------------
- */
+/* =========================================================
+   Logo Change
+   ========================================================= */
 
 const handleLogoChange = (event) => {
   const file = event.target.files?.[0]
@@ -471,21 +578,25 @@ const handleLogoChange = (event) => {
     return
   }
 
-  // Image validation
+  /* Image validation */
   if (!file.type.startsWith('image/')) {
     alert('Please select a valid image file.')
+
     event.target.value = ''
+
     return
   }
 
-  // 2MB validation
+  /* 2MB validation */
   if (file.size > 2 * 1024 * 1024) {
     alert('Logo size must be less than 2MB.')
+
     event.target.value = ''
+
     return
   }
 
-  // Remove previous blob URL
+  /* Remove previous blob URL */
   if (logoPreview.value && logoPreview.value.startsWith('blob:')) {
     URL.revokeObjectURL(logoPreview.value)
   }
@@ -493,15 +604,13 @@ const handleLogoChange = (event) => {
   selectedLogo.value = file
   form.logo = file
 
-  // New preview
+  /* New preview */
   logoPreview.value = URL.createObjectURL(file)
 }
 
-/**
- * |--------------------------------------------------------------------------
- * | Close Modal
- * |--------------------------------------------------------------------------
- */
+/* =========================================================
+   Close Modal
+   ========================================================= */
 
 const closeModal = () => {
   if (isSaving.value) {
@@ -511,55 +620,61 @@ const closeModal = () => {
   showModal.value = false
 }
 
-/**
- * |--------------------------------------------------------------------------
- * | Save Institute
- * |--------------------------------------------------------------------------
- */
+/* =========================================================
+   Save Institute
+   ========================================================= */
 
 const saveInstitute = async () => {
   if (isSaving.value) {
     return
   }
 
-  // Validation
+  /* Validation */
   if (!form.institute_name.trim()) {
     alert('Institute name is required.')
+    return
+  }
+
+  /*
+   * Manager CREATE করার সময়
+   * branch অবশ্যই select করতে হবে।
+   */
+  if (!isEditing.value && isManager.value && !form.branch_id) {
+    alert('Please select a branch.')
     return
   }
 
   isSaving.value = true
 
   try {
-    /**
-     * --------------------------------------------------------------------------
-     * | FormData
-     * --------------------------------------------------------------------------
-     */
-
     const formData = new FormData()
 
+    /*
+     * Manager create করার সময় branch_id পাঠাব।
+     *
+     * Non-Manager-এর branch_id backend নিজে
+     * user-এর branch থেকে নেবে।
+     */
+    if (!isEditing.value && isManager.value) {
+      formData.append('branch_id', String(form.branch_id))
+    }
+
     formData.append('institute_name', form.institute_name)
+
     formData.append('established_year', form.established_year || '')
+
     formData.append('location', form.location || '')
+
     formData.append('contact', form.contact || '')
 
-    /**
-     * --------------------------------------------------------------------------
-     * | Logo
-     * --------------------------------------------------------------------------
+    /*
+     * Logo
      */
-
     if (selectedLogo.value) {
       formData.append('logo', selectedLogo.value)
     }
 
-    /**
-     * --------------------------------------------------------------------------
-     * | CREATE
-     * --------------------------------------------------------------------------
-     */
-
+    /* CREATE */
     if (!isEditing.value) {
       const response = await api.post('/institute-info', formData, {
         headers: {
@@ -571,13 +686,10 @@ const saveInstitute = async () => {
 
       alert('Institute created successfully.')
     } else {
-      /**
-       * ------------------------------------------------------------------------
-       * | UPDATE
-       * ------------------------------------------------------------------------
-       *
+      /* UPDATE */
+      /*
        * Laravel PUT + FormData issue avoid করার জন্য
-       * POST + _method ব্যবহার করছি.
+       * POST + _method ব্যবহার করছি।
        */
 
       formData.append('_method', 'PUT')
@@ -593,43 +705,20 @@ const saveInstitute = async () => {
       alert('Institute updated successfully.')
     }
 
-    /**
-     * --------------------------------------------------------------------------
-     * | Close
-     * --------------------------------------------------------------------------
-     */
-
     showModal.value = false
     selectedLogo.value = null
   } catch (error) {
-    console.error('Failed to save institute:', error)
-
-    /**
-     * --------------------------------------------------------------------------
-     * | Validation Errors
-     * --------------------------------------------------------------------------
-     */
+    console.error('Failed to save institute:', error.response?.data || error)
 
     if (error.response?.data?.errors) {
       const errors = error.response.data.errors
+
       const firstError = Object.values(errors)[0]?.[0]
 
       alert(firstError || 'Please check the form.')
     } else if (error.response?.data?.message) {
-      /**
-       * ------------------------------------------------------------------------
-       * | Backend Message
-       * ------------------------------------------------------------------------
-       */
-
       alert(error.response.data.message)
     } else {
-      /**
-       * ------------------------------------------------------------------------
-       * | Other Error
-       * ------------------------------------------------------------------------
-       */
-
       alert('Something went wrong. Please try again.')
     }
   } finally {
@@ -637,11 +726,9 @@ const saveInstitute = async () => {
   }
 }
 
-/**
- * |--------------------------------------------------------------------------
- * | Delete Institute
- * |--------------------------------------------------------------------------
- */
+/* =========================================================
+   Delete Institute
+   ========================================================= */
 
 const deleteInstitute = async () => {
   if (!institute.value) {
@@ -663,7 +750,7 @@ const deleteInstitute = async () => {
 
     alert('Institute deleted successfully.')
   } catch (error) {
-    console.error('Failed to delete institute:', error)
+    console.error('Failed to delete institute:', error.response?.data || error)
 
     if (error.response?.data?.message) {
       alert(error.response.data.message)
@@ -673,21 +760,18 @@ const deleteInstitute = async () => {
   }
 }
 
-/**
- * |--------------------------------------------------------------------------
- * | Lifecycle
- * |--------------------------------------------------------------------------
- */
+/* =========================================================
+   Lifecycle
+   ========================================================= */
 
-onMounted(() => {
-  fetchInstitute()
+onMounted(async () => {
+  await fetchBranches()
+  await fetchInstitute()
 })
 
-/**
- * |--------------------------------------------------------------------------
- * | Cleanup Preview URL
- * |--------------------------------------------------------------------------
- */
+/* =========================================================
+   Cleanup Preview URL
+   ========================================================= */
 
 onBeforeUnmount(() => {
   if (logoPreview.value && logoPreview.value.startsWith('blob:')) {
@@ -695,6 +779,7 @@ onBeforeUnmount(() => {
   }
 })
 </script>
+
 <style scoped>
 /* =========================================================
    Main Page
@@ -946,17 +1031,12 @@ onBeforeUnmount(() => {
   background: rgba(15, 23, 42, 0.65);
   backdrop-filter: blur(4px);
   z-index: 2000;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   padding: 20px;
-
-  /* Important for modal scrolling */
   overflow-y: auto;
   overflow-x: hidden;
-
   -webkit-overflow-scrolling: touch;
 }
 
@@ -967,29 +1047,13 @@ onBeforeUnmount(() => {
 .custom-modal {
   width: 100%;
   max-width: 700px;
-
   background: #fff;
   border-radius: 18px;
-
   box-shadow: 0 25px 70px rgba(0, 0, 0, 0.25);
-
   display: flex;
   flex-direction: column;
-
-  /*
-   * Important:
-   * Do not allow the modal itself to cut off
-   * the content on smaller screens.
-   */
   min-height: 0;
-
-  /* Desktop limit */
   max-height: 92vh;
-
-  /*
-   * Keep header/body/footer inside the modal
-   * without hiding the scrollable content.
-   */
   overflow: hidden;
 }
 
@@ -999,16 +1063,12 @@ onBeforeUnmount(() => {
 
 .modal-header-custom {
   flex-shrink: 0;
-
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 15px;
-
   padding: 20px 24px;
-
   border-bottom: 1px solid #e5e7eb;
-
   background: #fff;
 }
 
@@ -1021,19 +1081,14 @@ onBeforeUnmount(() => {
 .modal-close-btn {
   width: 38px;
   height: 38px;
-
   border: none;
   border-radius: 9px;
-
   background: #f1f5f9;
   color: #475569;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   transition: 0.2s;
-
   flex-shrink: 0;
 }
 
@@ -1048,19 +1103,10 @@ onBeforeUnmount(() => {
 
 .modal-body-custom {
   padding: 24px;
-
-  /*
-   * Desktop modal body scroll.
-   */
   overflow-y: auto;
   overflow-x: hidden;
-
-  /*
-   * Critical for flexbox scrolling.
-   */
   min-height: 0;
   flex: 1 1 auto;
-
   -webkit-overflow-scrolling: touch;
 }
 
@@ -1071,7 +1117,6 @@ onBeforeUnmount(() => {
 .form-label-custom {
   display: block;
   margin-bottom: 7px;
-
   font-size: 13px;
   font-weight: 600;
   color: #334155;
@@ -1079,16 +1124,12 @@ onBeforeUnmount(() => {
 
 .input-group-custom {
   min-height: 48px;
-
   display: flex;
   align-items: center;
-
   border: 1px solid #dbe2ea;
   border-radius: 10px;
-
   overflow: hidden;
   background: #fff;
-
   transition: 0.2s;
 }
 
@@ -1100,9 +1141,7 @@ onBeforeUnmount(() => {
 .input-group-custom > i {
   width: 45px;
   text-align: center;
-
   color: #64748b;
-
   flex-shrink: 0;
 }
 
@@ -1123,26 +1162,19 @@ onBeforeUnmount(() => {
 
 .logo-preview-box {
   padding: 15px;
-
   border-radius: 12px;
   border: 1px dashed #cbd5e1;
-
   background: #f8fafc;
 }
 
 .logo-preview {
   display: block;
-
   width: 130px;
   height: 130px;
-
   object-fit: contain;
-
   border-radius: 12px;
-
   background: #fff;
   border: 1px solid #e5e7eb;
-
   padding: 8px;
 }
 
@@ -1152,17 +1184,12 @@ onBeforeUnmount(() => {
 
 .modal-footer-custom {
   flex-shrink: 0;
-
   display: flex;
   align-items: center;
   justify-content: flex-end;
-
   gap: 10px;
-
   padding: 18px 24px;
-
   border-top: 1px solid #e5e7eb;
-
   background: #f8fafc;
 }
 
@@ -1184,8 +1211,6 @@ onBeforeUnmount(() => {
     min-height: 100vh;
   }
 
-  /* Page Header */
-
   .page-header {
     flex-direction: column;
     align-items: flex-start;
@@ -1194,8 +1219,6 @@ onBeforeUnmount(() => {
   .add-btn {
     width: 100%;
   }
-
-  /* Card */
 
   .card-top {
     padding: 18px;
@@ -1225,90 +1248,42 @@ onBeforeUnmount(() => {
     text-align: center;
   }
 
-  /* =======================================================
-     MOBILE MODAL
-     ======================================================= */
-
   .modal-backdrop-custom {
-    /*
-     * VERY IMPORTANT:
-     * Start modal from top instead of center.
-     *
-     * If content becomes taller than the mobile screen,
-     * the whole modal area can scroll.
-     */
     align-items: flex-start;
     justify-content: center;
-
     padding: 15px;
-
     overflow-y: auto;
     overflow-x: hidden;
-
-    /*
-     * Do not lock the scrolling.
-     */
     height: 100dvh;
     max-height: 100dvh;
-
     -webkit-overflow-scrolling: touch;
   }
 
   .custom-modal {
     width: 100%;
     max-width: 700px;
-
-    /*
-     * Do NOT force 95vh here.
-     * Let the modal take its natural height.
-     */
     max-height: none;
     min-height: 0;
-
     margin: 0 auto;
-
     border-radius: 14px;
-
-    /*
-     * Do not hide the content that is outside
-     * the viewport.
-     */
     overflow: visible;
-
     flex-shrink: 0;
   }
-
-  /* Modal Header */
 
   .modal-header-custom {
     padding: 17px;
-
-    /*
-     * Keep header visible while scrolling.
-     */
     flex-shrink: 0;
   }
 
-  /* Modal Body */
-
   .modal-body-custom {
     padding: 17px;
-
-    /*
-     * On mobile the BACKDROP scrolls,
-     * not the modal body.
-     */
     overflow: visible;
-
     min-height: 0;
     flex: none;
   }
 
-  /* Modal Footer */
-
   .modal-footer-custom {
     padding: 15px 17px;
-
     flex-shrink: 0;
   }
 }
@@ -1325,8 +1300,6 @@ onBeforeUnmount(() => {
   .page-subtitle {
     font-size: 13px;
   }
-
-  /* Card */
 
   .card-top {
     flex-direction: column;
@@ -1345,8 +1318,6 @@ onBeforeUnmount(() => {
     width: 40px;
     height: 40px;
   }
-
-  /* Modal */
 
   .modal-backdrop-custom {
     padding: 10px;

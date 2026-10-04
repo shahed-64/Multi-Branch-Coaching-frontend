@@ -5,6 +5,7 @@
 
   <div class="content">
     <!-- ================= HEADER ================= -->
+
     <div class="staff-header">
       <div>
         <h2>Student Management</h2>
@@ -36,8 +37,10 @@
     </div>
 
     <!-- ================= MAIN CARD ================= -->
+
     <div class="staff-table-card">
       <!-- TOOLBAR -->
+
       <div class="staff-toolbar">
         <div class="search-box">
           <i class="bi bi-search"></i>
@@ -46,6 +49,7 @@
         </div>
 
         <!-- CLASS FILTER -->
+
         <select v-model="selectedClass" class="class-filter">
           <option value="">All Classes</option>
 
@@ -56,6 +60,7 @@
       </div>
 
       <!-- TABLE -->
+
       <div class="table-responsive">
         <table class="table staff-table align-middle">
           <thead>
@@ -73,6 +78,7 @@
 
           <tbody>
             <!-- LOADING -->
+
             <tr v-if="loading">
               <td colspan="8" class="text-center py-5">
                 <div class="spinner-border text-primary" role="status"></div>
@@ -82,6 +88,7 @@
             </tr>
 
             <!-- STUDENTS -->
+
             <tr v-for="(item, index) in students" :key="item.id" v-else>
               <td>
                 {{ (currentPage - 1) * perPage + index + 1 }}
@@ -104,6 +111,7 @@
               </td>
 
               <!-- VERSION -->
+
               <td>
                 <span class="version-badge">
                   {{ item.version || 'N/A' }}
@@ -111,6 +119,7 @@
               </td>
 
               <!-- CLASS -->
+
               <td>
                 <span class="skill-badge">
                   {{ item.class_info ? item.class_info.class_name : 'N/A' }}
@@ -118,6 +127,7 @@
               </td>
 
               <!-- GROUP -->
+
               <td>
                 <span v-if="item.class_group" class="group-badge">
                   {{ item.class_group.group_name }}
@@ -127,13 +137,17 @@
               </td>
 
               <!-- EMAIL -->
+
               <td>
                 {{ item.email || 'N/A' }}
               </td>
 
               <!-- ACTION -->
+
               <td>
                 <div class="action-buttons">
+                  <!-- VIEW -->
+
                   <button
                     class="action-btn view"
                     @click="openView(item)"
@@ -143,6 +157,8 @@
                   >
                     <i class="bi bi-eye"></i>
                   </button>
+
+                  <!-- EDIT -->
 
                   <button
                     class="action-btn edit"
@@ -154,6 +170,20 @@
                     <i class="bi bi-pencil"></i>
                   </button>
 
+                  <!-- QR -->
+
+                  <button
+                    class="action-btn qr"
+                    @click="openQr(item)"
+                    data-bs-toggle="modal"
+                    data-bs-target="#qrModal"
+                    title="Generate QR"
+                  >
+                    <i class="bi bi-qr-code"></i>
+                  </button>
+
+                  <!-- DELETE -->
+
                   <button class="action-btn delete" @click="deleteStudent(item.id)" title="Delete">
                     <i class="bi bi-trash"></i>
                   </button>
@@ -162,6 +192,7 @@
             </tr>
 
             <!-- EMPTY STATE -->
+
             <tr v-if="!loading && students.length === 0">
               <td colspan="8" class="text-center py-5">
                 <div class="empty-state">
@@ -178,13 +209,19 @@
       </div>
 
       <!-- PAGINATION -->
+
       <div v-if="filteredTotal > 0" class="pagination-box">
         <div>
           Showing
+
           <b>{{ showingFrom }}</b>
+
           to
+
           <b>{{ showingTo }}</b>
+
           of
+
           <b>{{ filteredTotal }}</b>
         </div>
 
@@ -224,6 +261,7 @@
 
           <div class="modal-body">
             <!-- IMAGE -->
+
             <div class="text-center mb-4">
               <img
                 :src="addPreview || defaultAvatar"
@@ -241,6 +279,7 @@
             </div>
 
             <!-- FULL NAME -->
+
             <div class="mb-3">
               <label class="form-label">
                 Full Name
@@ -256,9 +295,11 @@
             </div>
 
             <!-- VERSION -->
+
             <div class="mb-3">
               <label class="form-label">
                 Version
+
                 <span class="text-danger">*</span>
               </label>
 
@@ -272,9 +313,11 @@
             </div>
 
             <!-- FATHER -->
+
             <div class="mb-3">
               <label class="form-label">
                 Father's Name
+
                 <span class="text-danger">*</span>
               </label>
 
@@ -287,9 +330,11 @@
             </div>
 
             <!-- MOTHER -->
+
             <div class="mb-3">
               <label class="form-label">
                 Mother's Name
+
                 <span class="text-danger">*</span>
               </label>
 
@@ -302,9 +347,11 @@
             </div>
 
             <!-- PHONE -->
+
             <div class="mb-3">
               <label class="form-label">
                 Phone
+
                 <span class="text-danger">*</span>
               </label>
 
@@ -317,6 +364,7 @@
             </div>
 
             <!-- EMAIL -->
+
             <div class="mb-3">
               <label class="form-label"> Email </label>
 
@@ -335,10 +383,12 @@
 
             <div class="mb-3">
               <!-- MANAGER -->
+
               <template v-if="isManager">
                 <label class="form-label">
                   Branch
-                  <span class="text-danger"> * </span>
+
+                  <span class="text-danger">*</span>
                 </label>
 
                 <select v-model="form.branch_id" class="form-select">
@@ -353,6 +403,7 @@
               </template>
 
               <!-- NON-MANAGER -->
+
               <template v-else-if="form.branch_id">
                 <label class="form-label"> Branch </label>
 
@@ -361,9 +412,11 @@
             </div>
 
             <!-- CLASS GROUP -->
+
             <div class="mb-3">
               <label class="form-label">
                 Class Group
+
                 <span class="text-danger">*</span>
               </label>
 
@@ -385,9 +438,11 @@
             </div>
 
             <!-- CLASS -->
+
             <div class="mb-3">
               <label class="form-label">
                 Class
+
                 <span class="text-danger">*</span>
               </label>
 
@@ -409,6 +464,7 @@
             </div>
 
             <!-- SECTION -->
+
             <div class="mb-3">
               <label class="form-label"> Section </label>
 
@@ -426,6 +482,7 @@
             </div>
 
             <!-- SHIFT -->
+
             <div class="mb-3">
               <label class="form-label"> Assign Shift </label>
 
@@ -444,6 +501,7 @@
             </div>
 
             <!-- MONTHLY FEE -->
+
             <div class="mb-3">
               <label class="form-label"> Monthly Fee </label>
 
@@ -511,73 +569,61 @@
             <div class="text-start px-3">
               <p>
                 <strong>Branch:</strong>
-
                 {{ selectedStudent.branch?.name || selectedStudent.branch?.branch_name || 'N/A' }}
               </p>
 
               <p>
                 <strong>Version:</strong>
-
                 {{ selectedStudent.version || 'N/A' }}
               </p>
 
               <p>
                 <strong>Father's Name:</strong>
-
                 {{ selectedStudent.fathers_name || 'N/A' }}
               </p>
 
               <p>
                 <strong>Mother's Name:</strong>
-
                 {{ selectedStudent.mothers_name || 'N/A' }}
               </p>
 
               <p>
                 <strong>Email:</strong>
-
                 {{ selectedStudent.email || 'N/A' }}
               </p>
 
               <p>
                 <strong>Phone:</strong>
-
                 {{ selectedStudent.phone || 'N/A' }}
               </p>
 
               <p>
                 <strong>Class:</strong>
-
                 {{ selectedStudent.class_info?.class_name || 'N/A' }}
               </p>
 
               <p>
                 <strong>Group:</strong>
-
                 {{ selectedStudent.class_group?.group_name || 'N/A' }}
               </p>
 
               <p>
                 <strong>Section:</strong>
-
                 {{ selectedStudent.section?.section_name || 'N/A' }}
               </p>
 
               <p>
                 <strong>Shift:</strong>
-
                 {{ selectedStudent.shift?.name || 'N/A' }}
               </p>
 
               <p>
                 <strong>Monthly Fee:</strong>
-
                 {{ selectedStudent.monthly_fee ? '৳ ' + selectedStudent.monthly_fee : 'N/A' }}
               </p>
 
               <p>
                 <strong>Admission Date:</strong>
-
                 {{ selectedStudent.admission_date || 'N/A' }}
               </p>
             </div>
@@ -605,6 +651,7 @@
 
           <div class="modal-body">
             <!-- IMAGE -->
+
             <div class="text-center mb-4">
               <img
                 :src="editPreview || getImageUrl(selectedStudent)"
@@ -622,6 +669,7 @@
             </div>
 
             <!-- FULL NAME -->
+
             <div class="mb-3">
               <label class="form-label"> Full Name </label>
 
@@ -629,11 +677,12 @@
             </div>
 
             <!-- VERSION -->
+
             <div class="mb-3">
               <label class="form-label">
                 Version
 
-                <span class="text-danger"> * </span>
+                <span class="text-danger">*</span>
               </label>
 
               <select v-model="selectedStudent.version" class="form-select">
@@ -646,6 +695,7 @@
             </div>
 
             <!-- PHONE -->
+
             <div class="mb-3">
               <label class="form-label"> Phone </label>
 
@@ -653,6 +703,7 @@
             </div>
 
             <!-- EMAIL -->
+
             <div class="mb-3">
               <label class="form-label"> Email </label>
 
@@ -666,11 +717,12 @@
 
             <div class="mb-3">
               <!-- MANAGER -->
+
               <template v-if="isManager">
                 <label class="form-label">
                   Branch
 
-                  <span class="text-danger"> * </span>
+                  <span class="text-danger">*</span>
                 </label>
 
                 <select v-model="selectedStudent.branch_id" class="form-select">
@@ -683,6 +735,7 @@
               </template>
 
               <!-- NON-MANAGER -->
+
               <template v-else-if="selectedStudent.branch_id">
                 <label class="form-label"> Branch </label>
 
@@ -695,6 +748,7 @@
             </div>
 
             <!-- CLASS GROUP -->
+
             <div class="mb-3">
               <label class="form-label"> Class Group </label>
 
@@ -719,6 +773,7 @@
             </div>
 
             <!-- CLASS -->
+
             <div class="mb-3">
               <label class="form-label"> Class </label>
 
@@ -739,6 +794,7 @@
             </div>
 
             <!-- SECTION -->
+
             <div class="mb-3">
               <label class="form-label"> Section </label>
 
@@ -759,6 +815,7 @@
             </div>
 
             <!-- SHIFT -->
+
             <div class="mb-3">
               <label class="form-label"> Shift </label>
 
@@ -779,6 +836,7 @@
             </div>
 
             <!-- MONTHLY FEE -->
+
             <div class="mb-3">
               <label class="form-label"> Monthly Fee </label>
 
@@ -801,74 +859,118 @@
         </div>
       </div>
     </div>
+
+    <!-- ========================================================= -->
+    <!-- QR STUDENT MODAL -->
+    <!-- ========================================================= -->
+
+    <div class="modal fade" id="qrModal" ref="qrModalRef">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content student-modal">
+          <div class="modal-header bg-dark text-white">
+            <h5>
+              <i class="bi bi-qr-code me-2"></i>
+
+              Student QR Code
+            </h5>
+
+            <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+
+          <div class="modal-body text-center">
+            <div v-if="qrStudent">
+              <h5 class="mb-1">
+                {{ qrStudent.full_name }}
+              </h5>
+
+              <p class="text-muted mb-3">
+                {{ qrStudent.student_id }}
+              </p>
+
+              <div class="qr-box mb-3">
+                <div v-if="qrLoading" class="text-muted">
+                  <div class="spinner-border text-primary mb-2" role="status"></div>
+
+                  <div>Generating QR Code...</div>
+                </div>
+
+                <img
+                  v-else-if="qrImage"
+                  :src="qrImage"
+                  alt="Student QR Code"
+                  class="student-qr-image"
+                />
+
+                <div v-else class="text-muted">QR Code could not be generated.</div>
+              </div>
+
+              <button v-if="qrImage" class="btn btn-dark" type="button" @click="printQr">
+                <i class="bi bi-printer me-1"></i>
+
+                Print QR
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import dashPageView from './dashPageView.vue'
-
 import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue'
-
 import api from '@/services/api'
-
 import * as bootstrap from 'bootstrap'
-
 import 'bootstrap/dist/css/bootstrap.min.css'
-
 import { getImageUrl } from '@/utils/img'
+import QRCode from 'qrcode'
 
 const defaultAvatar = 'https://i.pravatar.cc/150'
 
 const students = ref([])
-
 const sections = ref([])
-
 const classes = ref([])
-
 const classGroups = ref([])
-
 const shifts = ref([])
-
 const branches = ref([])
 
 const search = ref('')
-
 const selectedClass = ref('')
-
 const loading = ref(false)
 
 const currentPage = ref(1)
-
 const perPage = ref(10)
-
 const totalStudents = ref(0)
-
 const filteredTotal = ref(0)
-
 const totalPages = ref(1)
 
 const addImageFile = ref(null)
-
 const editImageFile = ref(null)
 
 const addPreview = ref(null)
-
 const editPreview = ref(null)
 
 const addFileInput = ref(null)
-
 const editFileInput = ref(null)
 
 const addModalRef = ref(null)
-
 const editModalRef = ref(null)
+
+/* =====================================================
+   QR
+===================================================== */
+
+const qrModalRef = ref(null)
+const qrStudent = ref(null)
+const qrImage = ref('')
+const qrLoading = ref(false)
 
 /* =====================================================
    USER ROLE + CURRENT USER
 ===================================================== */
 
 const isManager = ref(false)
-
 const currentUser = ref({})
 
 const getCurrentUserRole = () => {
@@ -916,6 +1018,7 @@ const loadCurrentUser = () => {
 
       if (data && typeof data === 'object') {
         currentUser.value = data
+
         return
       }
     }
@@ -938,67 +1041,38 @@ loadCurrentUser()
 
 const form = reactive({
   full_name: '',
-
   version: '',
-
   fathers_name: '',
-
   mothers_name: '',
-
   phone: '',
-
   email: '',
-
   course_name: '',
-
   branch_id: '',
-
   class_group_id: '',
-
   class_id: '',
-
   section_id: '',
-
   shift_id: '',
-
   admission_date: '',
-
   monthly_fee: '',
 })
 
 const selectedStudent = ref({
   id: null,
-
   full_name: '',
-
   version: '',
-
   fathers_name: '',
-
   mothers_name: '',
-
   student_id: '',
-
   phone: '',
-
   email: '',
-
   course_name: '',
-
   branch_id: '',
-
   class_group_id: '',
-
   class_id: '',
-
   section_id: '',
-
   shift_id: '',
-
   admission_date: '',
-
   monthly_fee: '',
-
   image: null,
 })
 
@@ -1134,11 +1208,8 @@ watch(
   (newBranchId) => {
     if (!newBranchId) {
       form.class_group_id = ''
-
       form.class_id = ''
-
       form.section_id = ''
-
       form.shift_id = ''
 
       return
@@ -1188,11 +1259,8 @@ watch(
   (newBranchId) => {
     if (!newBranchId) {
       selectedStudent.value.class_group_id = ''
-
       selectedStudent.value.class_id = ''
-
       selectedStudent.value.section_id = ''
-
       selectedStudent.value.shift_id = ''
 
       return
@@ -1292,6 +1360,7 @@ const resetForm = () => {
    * Non-manager:
    * নিজের assigned branch auto select
    */
+
   if (!isManager.value) {
     const ownBranchId = getOwnBranchId()
 
@@ -1510,6 +1579,7 @@ const openEdit = (student) => {
    * Non-manager:
    * force own assigned branch
    */
+
   if (!isManager.value) {
     const ownBranchId = getOwnBranchId()
 
@@ -1519,7 +1589,6 @@ const openEdit = (student) => {
   }
 
   editImageFile.value = null
-
   editPreview.value = null
 
   if (editFileInput.value) {
@@ -1623,6 +1692,158 @@ const deleteStudent = async (id) => {
   } finally {
     loading.value = false
   }
+}
+
+/* =====================================================
+   QR GENERATION
+===================================================== */
+
+const openQr = async (student) => {
+  qrStudent.value = {
+    ...student,
+  }
+
+  qrImage.value = ''
+  qrLoading.value = true
+
+  try {
+    qrImage.value = await QRCode.toDataURL(String(student.student_id), {
+      width: 280,
+      margin: 2,
+      errorCorrectionLevel: 'H',
+    })
+  } catch (error) {
+    console.error('QR generation error:', error)
+
+    alert('Failed to generate QR code.')
+  } finally {
+    qrLoading.value = false
+  }
+}
+
+/* =====================================================
+   PRINT QR
+===================================================== */
+
+const printQr = () => {
+  if (!qrImage.value || !qrStudent.value) {
+    return
+  }
+
+  const printWindow = window.open('', '_blank', 'width=600,height=700')
+
+  if (!printWindow) {
+    alert('Please allow pop-ups to print the QR code.')
+
+    return
+  }
+
+  printWindow.document.write(`
+
+    <!DOCTYPE html>
+
+    <html>
+
+      <head>
+
+        <title>
+          Student QR - ${qrStudent.value.student_id}
+        </title>
+
+        <style>
+
+          body {
+            margin: 0;
+            padding: 40px;
+            font-family: Arial, sans-serif;
+            text-align: center;
+          }
+
+          .card {
+            width: 360px;
+            margin: 0 auto;
+            padding: 30px;
+            border: 1px solid #ddd;
+            border-radius: 16px;
+          }
+
+          h2 {
+            margin-bottom: 8px;
+          }
+
+          p {
+            margin-top: 0;
+            color: #555;
+          }
+
+          img {
+            width: 280px;
+            height: 280px;
+            margin-top: 20px;
+          }
+
+          .student-id {
+            margin-top: 15px;
+            font-size: 18px;
+            font-weight: bold;
+          }
+
+          @media print {
+
+            body {
+              padding: 0;
+            }
+
+            .card {
+              border: none;
+            }
+
+          }
+
+        </style>
+
+      </head>
+
+      <body>
+
+        <div class="card">
+
+          <h2>
+            ${qrStudent.value.full_name}
+          </h2>
+
+          <p>
+            Student QR Code
+          </p>
+
+          <img
+            src="${qrImage.value}"
+            alt="Student QR Code"
+          />
+
+          <div class="student-id">
+            ${qrStudent.value.student_id}
+          </div>
+
+        </div>
+
+        <script>
+
+          window.onload = function () {
+
+            window.print()
+
+          }
+
+        <\/script>
+
+      </body>
+
+    </html>
+
+  `)
+
+  printWindow.document.close()
 }
 
 /* =====================================================
@@ -1798,9 +2019,13 @@ onMounted(async () => {
 .image-preview {
   width: 90px;
   height: 90px;
+
   object-fit: cover;
+
   border-radius: 50%;
+
   border: 3px solid #2563eb;
+
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
@@ -1810,8 +2035,11 @@ onMounted(async () => {
 
 .content {
   margin-left: 250px;
+
   padding: 25px;
+
   background: #f8fafc;
+
   min-height: 100vh;
 }
 
@@ -1841,17 +2069,21 @@ onMounted(async () => {
 
 .staff-header h2 {
   font-weight: 700;
+
   margin-bottom: 6px;
 }
 
 .staff-header p {
   margin: 0;
+
   color: #dbeafe;
 }
 
 .staff-header-right {
   display: flex;
+
   align-items: center;
+
   gap: 20px;
 }
 
@@ -1861,6 +2093,7 @@ onMounted(async () => {
 
 .staff-summary {
   background: white;
+
   color: #111827;
 
   padding: 12px 18px;
@@ -1895,16 +2128,19 @@ onMounted(async () => {
 
 .staff-summary h4 {
   margin: 0;
+
   font-weight: 700;
 }
 
 .staff-summary span {
   font-size: 13px;
+
   color: #6b7280;
 }
 
 .add-btn {
   color: #2563eb;
+
   font-weight: 600;
 
   border-radius: 12px;
@@ -1942,6 +2178,7 @@ onMounted(async () => {
 
 .search-box {
   position: relative;
+
   width: 350px;
 }
 
@@ -2151,6 +2388,16 @@ onMounted(async () => {
   color: #d97706;
 }
 
+/* =====================================================
+   QR BUTTON
+===================================================== */
+
+.action-btn.qr {
+  background: #e0f2fe;
+
+  color: #0369a1;
+}
+
 .action-btn.delete {
   background: #fee2e2;
 
@@ -2207,7 +2454,6 @@ onMounted(async () => {
   color: white;
 
   width: 38px;
-
   height: 38px;
 
   border-radius: 10px;
@@ -2259,6 +2505,30 @@ onMounted(async () => {
   border: 5px solid #dbeafe;
 
   object-fit: cover;
+}
+
+/* =====================================================
+   QR MODAL
+===================================================== */
+
+.qr-box {
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  min-height: 290px;
+}
+
+.student-qr-image {
+  width: 280px;
+
+  height: 280px;
+
+  max-width: 100%;
+
+  object-fit: contain;
 }
 
 /* =====================================================

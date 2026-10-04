@@ -155,6 +155,24 @@ const router = createRouter({
         role: ['Admin', 'Manager', 'Branch Manager'],
       },
     },
+    {
+      path: '/student-attendance-overview',
+      name: 'StudentAttendanceOverView',
+      component: () => import('../views/StudentAttendanceOverView.vue'),
+      meta: {
+        requiresAuth: true,
+        role: ['Admin', 'Manager', 'Branch Manager'],
+      },
+    },
+    {
+      path: '/student-attendance',
+      name: 'StudentAttendanceView',
+      component: () => import('../views/StudentAttendanceView.vue'),
+      meta: {
+        requiresAuth: true,
+        role: ['Admin', 'Manager', 'Branch Manager'],
+      },
+    },
 
     {
       path: '/subject',

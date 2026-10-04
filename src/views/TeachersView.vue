@@ -94,7 +94,12 @@
               </td>
 
               <td>
-                <img :src="item.image || defaultAvatar" class="staff-avatar" alt="Teacher Photo" />
+                <img
+                  :src="getTeacherImageUrl(item.image)"
+                  class="staff-avatar"
+                  alt="Teacher Photo"
+                  @error="handleImageError"
+                />
               </td>
 
               <td>
@@ -238,6 +243,7 @@
                 :src="addPreview || defaultAvatar"
                 class="image-preview mb-2"
                 alt="Add Preview"
+                @error="handleImageError"
               />
 
               <input
@@ -374,9 +380,10 @@
 
           <div class="modal-body text-center">
             <img
-              :src="selectedTeacher.image || defaultAvatar"
+              :src="getTeacherImageUrl(selectedTeacher.image)"
               class="teacher-modal-avatar mb-3"
               alt="Teacher Avatar"
+              @error="handleImageError"
             />
 
             <h4>
@@ -422,7 +429,6 @@
 
               <p>
                 <strong>Joining Date:</strong>
-
                 {{
                   formatDisplayDate(
                     selectedTeacher.joining_date ||
@@ -472,9 +478,10 @@
           <div class="modal-body">
             <div class="text-center mb-3">
               <img
-                :src="editPreview || selectedTeacher.image || defaultAvatar"
+                :src="editPreview || getTeacherImageUrl(selectedTeacher.image)"
                 class="image-preview mb-2"
                 alt="Edit Preview"
+                @error="handleImageError"
               />
 
               <input
@@ -609,7 +616,9 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
+
 import { onBeforeRouteLeave } from 'vue-router'
+
 import api from '@/services/api'
 import dashPageView from './dashPageView.vue'
 
@@ -621,24 +630,100 @@ const teachers = ref([])
 const allShifts = ref([])
 const branches = ref([])
 const loading = ref(false)
-
 const search = ref('')
 const selectedDepartment = ref('')
 const selectedBranch = ref('')
-
 const currentPage = ref(1)
 const perPage = ref(10)
-
 const totalTeachers = ref(0)
 const totalPages = ref(1)
 
-const defaultAvatar = ref('https://via.placeholder.com/150')
+const defaultAvatar = 'https://via.placeholder.com/150'
+
+/* =====================================================
+   TEACHER IMAGE URL
+===================================================== */
+
+const getTeacherImageUrl = (imagePath) => {
+  if (!imagePath) {
+    return defaultAvatar
+  }
+
+  let image = String(imagePath).trim()
+
+  if (!image) {
+    return defaultAvatar
+  }
+
+  /* ---------------------------------------------
+     Already full URL
+  --------------------------------------------- */
+  if (image.startsWith('http://') || image.startsWith('https://') || image.startsWith('blob:')) {
+    return image
+  }
+
+  /* ---------------------------------------------
+     API base URL
+  --------------------------------------------- */
+  const apiBaseUrl = api.defaults.baseURL
+    ? api.defaults.baseURL.replace(/\/api\/?$/, '')
+    : 'http://localhost:8000'
+
+  /* ---------------------------------------------
+     If backend returns:
+     /storage/teachers/file.jpg
+  --------------------------------------------- */
+  if (image.includes('/storage/')) {
+    const storageIndex = image.indexOf('/storage/')
+
+    const storagePath = image.substring(storageIndex + '/storage/'.length).replace(/^\/+/, '')
+
+    return `${apiBaseUrl}/storage/${storagePath}`
+  }
+
+  /* ---------------------------------------------
+     Remove common prefixes
+  --------------------------------------------- */
+
+  image = image
+    .replace(/^\/+/, '')
+    .replace(/^public\//, '')
+    .replace(/^storage\//, '')
+
+  /* ---------------------------------------------
+     If only filename is returned
+     teachers/photo.jpg -> storage/teachers/photo.jpg
+
+     photo.jpg -> storage/teachers/photo.jpg
+  --------------------------------------------- */
+
+  if (!image.startsWith('teachers/')) {
+    image = `teachers/${image}`
+  }
+
+  return `${apiBaseUrl}/storage/${image}`
+}
+
+/* =====================================================
+   IMAGE ERROR FALLBACK
+===================================================== */
+
+const handleImageError = (event) => {
+  if (!event?.target) {
+    return
+  }
+
+  if (event.target.src !== defaultAvatar) {
+    event.target.src = defaultAvatar
+  }
+}
 
 /* =====================================================
    ROLE + LOGGED IN USER
 ===================================================== */
 
 const currentRole = ref(localStorage.getItem('role') || '')
+
 const currentUser = ref({})
 
 const loadCurrentUser = () => {
@@ -647,12 +732,14 @@ const loadCurrentUser = () => {
 
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser)
+
       currentUser.value = parsedUser || {}
     } else {
       currentUser.value = {}
     }
   } catch (error) {
     console.error('Error reading logged-in user:', error)
+
     currentUser.value = {}
   }
 }
@@ -671,16 +758,9 @@ const isAdmin = computed(() => {
   return (currentRole.value || '').toLowerCase() === 'admin'
 })
 
-/*
-|--------------------------------------------------------------------------
-| IMPORTANT
-|--------------------------------------------------------------------------
-| ONLY MANAGER CAN SELECT BRANCH MANUALLY.
-|
-| Admin / Branch Manager / Other assigned roles
-| automatically use their own branch.
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   ONLY MANAGER CAN SELECT BRANCH MANUALLY
+===================================================== */
 
 const canSelectBranch = computed(() => {
   return isManager.value
@@ -776,7 +856,6 @@ const selectedTeacher = ref({
 
 const editImageFile = ref(null)
 const editPreview = ref(null)
-
 const addFileInput = ref(null)
 const editFileInput = ref(null)
 
@@ -861,6 +940,7 @@ const cleanupModals = () => {
   document.body.classList.remove('modal-open')
 
   document.body.style.removeProperty('overflow')
+
   document.body.style.removeProperty('padding-right')
 }
 
@@ -875,11 +955,9 @@ onMounted(async () => {
     loadCurrentUser()
 
     /*
-    |--------------------------------------------------------------------------
-    | Non-manager roles:
-    | Get their own branch.
-    |--------------------------------------------------------------------------
-    */
+     * Non-manager roles:
+     * Get their own branch.
+     */
 
     if (!canSelectBranch.value) {
       try {
@@ -896,50 +974,33 @@ onMounted(async () => {
         if (branchId) {
           form.value.branch_id = Number(branchId)
 
-          /*
-          | Keep localStorage updated so other pages
-          | can also use the same branch.
-          */
           localStorage.setItem('branch_id', String(branchId))
         }
       } catch (error) {
         console.error('Error loading staff branch:', error)
-
-        /*
-        |--------------------------------------------------------------------------
-        | If dashboard request fails, try local user branch.
-        |--------------------------------------------------------------------------
-        */
 
         setOwnBranch()
       }
     }
 
     /*
-    |--------------------------------------------------------------------------
-    | Load branches and shifts.
-    |--------------------------------------------------------------------------
-    */
+     * Load branches and shifts.
+     */
 
     await fetchBranches()
     await fetchShifts()
 
     /*
-    |--------------------------------------------------------------------------
-    | Make absolutely sure non-manager has own branch
-    | after user + branch data are loaded.
-    |--------------------------------------------------------------------------
-    */
+     * Make sure non-manager has own branch.
+     */
 
     if (!canSelectBranch.value) {
       setOwnBranch()
     }
 
     /*
-    |--------------------------------------------------------------------------
-    | Load teachers.
-    |--------------------------------------------------------------------------
-    */
+     * Load teachers.
+     */
 
     await fetchTeachers()
   } catch (error) {
@@ -958,7 +1019,6 @@ onMounted(async () => {
 watch(search, (newValue, oldValue) => {
   if (newValue !== oldValue) {
     currentPage.value = 1
-
     fetchTeachers(1)
   }
 })
@@ -969,7 +1029,6 @@ watch(search, (newValue, oldValue) => {
 
 watch(selectedDepartment, () => {
   currentPage.value = 1
-
   fetchTeachers(1)
 })
 
@@ -978,18 +1037,11 @@ watch(selectedDepartment, () => {
 ===================================================== */
 
 watch(selectedBranch, () => {
-  /*
-    |--------------------------------------------------------------------------
-    | Only Manager can manually filter branch.
-    |--------------------------------------------------------------------------
-    */
-
   if (!canSelectBranch.value) {
     return
   }
 
   currentPage.value = 1
-
   fetchTeachers(1)
 })
 
@@ -999,37 +1051,28 @@ watch(selectedBranch, () => {
 
 watch(
   () => form.value.branch_id,
-
   (newBranchId) => {
     /*
-    |--------------------------------------------------------------------------
-    | Non-manager must always keep own branch.
-    |--------------------------------------------------------------------------
-    */
+     * Non-manager must always keep own branch.
+     */
 
     if (!newBranchId && !canSelectBranch.value) {
       setOwnBranch()
-
       return
     }
 
     /*
-    |--------------------------------------------------------------------------
-    | No branch = no shifts.
-    |--------------------------------------------------------------------------
-    */
+     * No branch = no shifts.
+     */
 
     if (!newBranchId) {
       form.value.shift_ids = []
-
       return
     }
 
     /*
-    |--------------------------------------------------------------------------
-    | Remove shifts belonging to another branch.
-    |--------------------------------------------------------------------------
-    */
+     * Remove shifts belonging to another branch.
+     */
 
     form.value.shift_ids = form.value.shift_ids.filter((shiftId) => {
       const shift = allShifts.value.find((item) => Number(item.id) === Number(shiftId))
@@ -1045,7 +1088,6 @@ watch(
 
 watch(
   () => selectedTeacher.value.branch_id,
-
   (newBranchId) => {
     if (!newBranchId) {
       selectedTeacher.value.shift_ids = []
@@ -1099,10 +1141,8 @@ const fetchTeachers = async (page = currentPage.value) => {
     }
 
     /*
-    |--------------------------------------------------------------------------
-    | ONLY MANAGER can filter by selected branch.
-    |--------------------------------------------------------------------------
-    */
+     * ONLY Manager can filter by selected branch.
+     */
 
     if (canSelectBranch.value && selectedBranch.value) {
       params.branch_id = selectedBranch.value
@@ -1199,16 +1239,6 @@ const resetForm = () => {
     URL.revokeObjectURL(addPreview.value)
   }
 
-  /*
-  |--------------------------------------------------------------------------
-  | Manager:
-  | branch empty -> manually select
-  |
-  | Non-manager:
-  | own branch automatically selected
-  |--------------------------------------------------------------------------
-  */
-
   form.value = {
     full_name: '',
     designation: '',
@@ -1216,24 +1246,12 @@ const resetForm = () => {
     qualification: '',
     phone: '',
     email: '',
-
     joining_date: new Date().toISOString().slice(0, 10),
-
     salary: '',
-
     image: null,
-
     shift_ids: [],
-
     branch_id: canSelectBranch.value ? '' : currentUserBranchId.value,
   }
-
-  /*
-  |--------------------------------------------------------------------------
-  | Extra safety:
-  | if current user branch exists, force it.
-  |--------------------------------------------------------------------------
-  */
 
   if (!canSelectBranch.value) {
     setOwnBranch()
@@ -1252,33 +1270,26 @@ const resetForm = () => {
 
 const teacher_create = async () => {
   /*
-  |--------------------------------------------------------------------------
-  | Non-manager:
-  | force own branch before submit.
-  |--------------------------------------------------------------------------
-  */
+   * Non-manager:
+   * force own branch before submit.
+   */
 
   if (!canSelectBranch.value) {
     setOwnBranch()
   }
 
   /*
-  |--------------------------------------------------------------------------
-  | Manager must select branch.
-  |--------------------------------------------------------------------------
-  */
+   * Manager must select branch.
+   */
 
   if (canSelectBranch.value && !form.value.branch_id) {
     alert('Branch is required.')
-
     return
   }
 
   /*
-  |--------------------------------------------------------------------------
-  | Non-manager must have assigned branch.
-  |--------------------------------------------------------------------------
-  */
+   * Non-manager must have assigned branch.
+   */
 
   if (!canSelectBranch.value && !form.value.branch_id) {
     alert('Your account is not assigned to any branch.')
@@ -1308,30 +1319,24 @@ const teacher_create = async () => {
     formData.append('salary', form.value.salary || 0)
 
     /*
-    |--------------------------------------------------------------------------
-    | Branch
-    |--------------------------------------------------------------------------
-    */
+     * Branch
+     */
 
     formData.append('branch_id', form.value.branch_id)
 
     /*
-    |--------------------------------------------------------------------------
-    | Shifts
-    |--------------------------------------------------------------------------
-    */
+     * Shifts
+     */
 
     form.value.shift_ids.forEach((id) => {
       formData.append('shift_ids[]', id)
     })
 
     /*
-    |--------------------------------------------------------------------------
-    | Image
-    |--------------------------------------------------------------------------
-    */
+     * Image
+     */
 
-    if (form.value.image) {
+    if (form.value.image instanceof File) {
       formData.append('image', form.value.image)
     }
 
@@ -1368,7 +1373,6 @@ const teacher_create = async () => {
 const openView = (teacher) => {
   selectedTeacher.value = {
     ...teacher,
-
     shifts: teacher.shifts || [],
   }
 }
@@ -1391,21 +1395,12 @@ const openEdit = (teacher) => {
   }
 
   /*
-  |--------------------------------------------------------------------------
-  | NON-MANAGER:
-  | ALWAYS FORCE LOGGED-IN USER'S OWN BRANCH
-  |--------------------------------------------------------------------------
-  */
+   * NON-MANAGER:
+   * ALWAYS FORCE LOGGED-IN USER'S OWN BRANCH
+   */
 
   if (!canSelectBranch.value) {
     selectedTeacher.value.branch_id = currentUserBranchId.value
-
-    /*
-    |--------------------------------------------------------------------------
-    | If currentUserBranchId is temporarily empty,
-    | try setting from current form branch.
-    |--------------------------------------------------------------------------
-    */
 
     if (!selectedTeacher.value.branch_id && form.value.branch_id) {
       selectedTeacher.value.branch_id = form.value.branch_id
@@ -1417,7 +1412,6 @@ const openEdit = (teacher) => {
   }
 
   editPreview.value = null
-
   editImageFile.value = null
 
   if (editFileInput.value) {
@@ -1431,33 +1425,26 @@ const openEdit = (teacher) => {
 
 const updateTeacher = async () => {
   /*
-  |--------------------------------------------------------------------------
-  | Non-manager:
-  | force own branch.
-  |--------------------------------------------------------------------------
-  */
+   * Non-manager:
+   * force own branch.
+   */
 
   if (!canSelectBranch.value) {
     selectedTeacher.value.branch_id = currentUserBranchId.value
   }
 
   /*
-  |--------------------------------------------------------------------------
-  | Manager branch validation.
-  |--------------------------------------------------------------------------
-  */
+   * Manager branch validation.
+   */
 
   if (canSelectBranch.value && !selectedTeacher.value.branch_id) {
     alert('Branch is required.')
-
     return
   }
 
   /*
-  |--------------------------------------------------------------------------
-  | Non-manager branch validation.
-  |--------------------------------------------------------------------------
-  */
+   * Non-manager branch validation.
+   */
 
   if (!canSelectBranch.value && !selectedTeacher.value.branch_id) {
     alert('Your account is not assigned to any branch.')
@@ -1471,10 +1458,8 @@ const updateTeacher = async () => {
     const formData = new FormData()
 
     /*
-    |--------------------------------------------------------------------------
-    | Laravel method spoofing
-    |--------------------------------------------------------------------------
-    */
+     * Laravel method spoofing
+     */
 
     formData.append('_method', 'PUT')
 
@@ -1495,18 +1480,14 @@ const updateTeacher = async () => {
     formData.append('salary', selectedTeacher.value.salary || 0)
 
     /*
-    |--------------------------------------------------------------------------
-    | Branch
-    |--------------------------------------------------------------------------
-    */
+     * Branch
+     */
 
     formData.append('branch_id', selectedTeacher.value.branch_id)
 
     /*
-    |--------------------------------------------------------------------------
-    | Shifts
-    |--------------------------------------------------------------------------
-    */
+     * Shifts
+     */
 
     if (Array.isArray(selectedTeacher.value.shift_ids)) {
       selectedTeacher.value.shift_ids.forEach((id) => {
@@ -1515,12 +1496,10 @@ const updateTeacher = async () => {
     }
 
     /*
-    |--------------------------------------------------------------------------
-    | Image
-    |--------------------------------------------------------------------------
-    */
+     * Image
+     */
 
-    if (editImageFile.value) {
+    if (editImageFile.value instanceof File) {
       formData.append('image', editImageFile.value)
     }
 
