@@ -11,7 +11,8 @@
           <p class="text-muted mb-0">Manage your branches</p>
         </div>
 
-        <button class="btn btn-primary" @click="openCreateModal">
+        <!-- Only Manager can create -->
+        <button v-if="canManageBranches" class="btn btn-primary" @click="openCreateModal">
           <i class="bi bi-plus-lg me-1"></i>
           Add Branch
         </button>
@@ -32,7 +33,6 @@
           <!-- Loading -->
           <div v-if="loading" class="text-center py-5">
             <div class="spinner-border text-primary"></div>
-
             <p class="mt-2 text-muted mb-0">Loading branches...</p>
           </div>
 
@@ -40,7 +40,8 @@
           <div v-else-if="branches.length === 0" class="text-center py-5">
             <h5 class="text-muted">No branches found.</h5>
 
-            <button class="btn btn-primary mt-3" @click="openCreateModal">
+            <!-- Only Manager can create -->
+            <button v-if="canManageBranches" class="btn btn-primary mt-3" @click="openCreateModal">
               Create First Branch
             </button>
           </div>
@@ -56,7 +57,7 @@
                   <th>Phone</th>
                   <th>Email</th>
                   <th>Status</th>
-                  <th class="text-end">Action</th>
+                  <th v-if="canManageBranches" class="text-end">Action</th>
                 </tr>
               </thead>
 
@@ -90,7 +91,8 @@
                     <span v-else class="badge bg-danger-subtle text-danger"> Inactive </span>
                   </td>
 
-                  <td class="text-end">
+                  <!-- Only Manager can see actions -->
+                  <td v-if="canManageBranches" class="text-end">
                     <button
                       class="btn btn-sm btn-outline-primary me-2"
                       @click="openEditModal(branch)"
@@ -226,20 +228,24 @@ import api from '@/services/api'
 import dashPageView from './dashPageView.vue'
 
 // =============================
+// USER ROLE / PERMISSION
+// =============================
+
+const userRole = localStorage.getItem('role')
+
+const canManageBranches = userRole === 'Manager'
+
+// =============================
 // STATE
 // =============================
 
 const branches = ref([])
-
 const loading = ref(false)
 const saving = ref(false)
-
 const showModal = ref(false)
 const isEditing = ref(false)
-
 const successMessage = ref('')
 const errorMessage = ref('')
-
 const editingBranchId = ref(null)
 
 const form = ref({
@@ -294,13 +300,16 @@ const fetchBranches = async () => {
 // =============================
 
 const openCreateModal = () => {
+  // Extra frontend protection
+  if (!canManageBranches) {
+    return
+  }
+
   resetForm()
 
   isEditing.value = false
-
   successMessage.value = ''
   errorMessage.value = ''
-
   showModal.value = true
 }
 
@@ -309,6 +318,11 @@ const openCreateModal = () => {
 // =============================
 
 const openEditModal = (branch) => {
+  // Extra frontend protection
+  if (!canManageBranches) {
+    return
+  }
+
   isEditing.value = true
 
   editingBranchId.value = branch.id
@@ -324,7 +338,6 @@ const openEditModal = (branch) => {
 
   successMessage.value = ''
   errorMessage.value = ''
-
   showModal.value = true
 }
 
@@ -338,7 +351,6 @@ const closeModal = () => {
   }
 
   showModal.value = false
-
   resetForm()
 }
 
@@ -347,8 +359,12 @@ const closeModal = () => {
 // =============================
 
 const saveBranch = async () => {
-  saving.value = true
+  // Extra frontend protection
+  if (!canManageBranches) {
+    return
+  }
 
+  saving.value = true
   errorMessage.value = ''
   successMessage.value = ''
 
@@ -388,6 +404,11 @@ const saveBranch = async () => {
 // =============================
 
 const deleteBranch = async (branch) => {
+  // Extra frontend protection
+  if (!canManageBranches) {
+    return
+  }
+
   const confirmed = confirm(`Are you sure you want to delete "${branch.name}"?`)
 
   if (!confirmed) {
@@ -457,11 +478,9 @@ onMounted(() => {
   inset: 0;
   background: rgba(0, 0, 0, 0.45);
   z-index: 1050;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   padding: 20px;
 }
 

@@ -458,7 +458,7 @@ const getDashboardData = async () => {
       return total
     }, 0)
 
-    todayCollection.value = Number(data.today_collection || 0) + todayAdmissionExam
+    todayCollection.value = Number(data.today_collection || 0)
 
     /* =====================================================
        THIS MONTH STUDENT COLLECTION

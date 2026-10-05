@@ -90,7 +90,6 @@
 
                 <tr>
                   <td class="fw-bold">Type</td>
-
                   <td>: {{ examType }}</td>
                 </tr>
 
@@ -138,12 +137,12 @@
                 <td>{{ index + 1 }}.</td>
 
                 <td class="text-start ps-3">
-                  {{ subject.subject_name }}
+                  {{ getSubjectName(subject) }}
                 </td>
 
                 <!-- Marks -->
                 <td>
-                  {{ subject.marks }}
+                  {{ subject.marks ?? '-' }}
                 </td>
 
                 <!-- Grade -->
@@ -177,13 +176,13 @@
                   <td>{{ mainSubjects.length + index + 1 }}.</td>
 
                   <td class="text-start ps-3 fw-bold">
-                    {{ subject.subject_name }}
+                    {{ getSubjectName(subject) }}
 
                     <span class="badge bg-warning text-dark ms-2"> Additional </span>
                   </td>
 
                   <td>
-                    {{ subject.marks }}
+                    {{ subject.marks ?? '-' }}
                   </td>
 
                   <td>
@@ -271,7 +270,7 @@
             v-for="(subject, index) in additionalSubjects"
             :key="'info-' + (subject.id || index)"
           >
-            {{ subject.subject_name }}
+            {{ getSubjectName(subject) }}
 
             <span v-if="index < additionalSubjects.length - 1"> , </span>
           </span>
@@ -601,6 +600,32 @@ const examYear = computed(() => {
 })
 
 // ============================================================
+// SUBJECT NAME
+// ============================================================
+// Backend subject object-এ name আছে.
+// Fallback হিসেবে subject_name-ও রাখা হলো.
+const getSubjectName = (subject) => {
+  return (
+    subject?.name ||
+    subject?.subject_name ||
+    subject?.subject?.name ||
+    subject?.subject?.subject_name ||
+    'N/A'
+  )
+}
+
+// ============================================================
+// CHECK ADDITIONAL SUBJECT
+// ============================================================
+const isAdditionalSubject = (subject) => {
+  return (
+    subject?.is_additional === true ||
+    subject?.is_additional === 1 ||
+    subject?.is_additional === '1'
+  )
+}
+
+// ============================================================
 // MAIN SUBJECTS
 // ============================================================
 const mainSubjects = computed(() => {
@@ -608,7 +633,7 @@ const mainSubjects = computed(() => {
     return []
   }
 
-  return resultData.value.subjects.filter((subject) => subject.is_additional !== true)
+  return resultData.value.subjects.filter((subject) => !isAdditionalSubject(subject))
 })
 
 // ============================================================
@@ -626,7 +651,7 @@ const additionalSubjects = computed(() => {
 
   // Fallback: subjects থেকে বের করা
   if (Array.isArray(resultData.value.subjects)) {
-    return resultData.value.subjects.filter((subject) => subject.is_additional === true)
+    return resultData.value.subjects.filter((subject) => isAdditionalSubject(subject))
   }
 
   return []
@@ -644,6 +669,7 @@ const calculateGrade = (marks, fullMark = 100) => {
   }
 
   const obtainedMarks = Number(marks)
+
   const maximumMarks = Number(fullMark) || 100
 
   if (isNaN(obtainedMarks) || maximumMarks <= 0) {
@@ -736,6 +762,7 @@ const gpaWithAdditional = computed(() => {
 
     if (grade.point !== '-') {
       mainPointTotal += Number(grade.point)
+
       validMainSubjects++
     }
   })

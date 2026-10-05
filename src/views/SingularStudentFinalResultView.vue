@@ -248,9 +248,13 @@ const getClasses = async () => {
 
 const getClassGroups = async () => {
   try {
-    const res = await api.get('/class_group')
+    const res = await api.get('/class-groups')
+
+    console.log('CLASS GROUP API RESPONSE:', res.data)
 
     classGroups.value = res.data.classGroups || res.data.groups || res.data.data || res.data || []
+
+    console.log('CLASS GROUPS:', classGroups.value)
   } catch (error) {
     console.error('Error fetching class groups:', error.response?.data || error)
   }

@@ -44,6 +44,29 @@
 
     <!-- ================= TOP STAT CARDS ================= -->
     <div class="stats-grid">
+      <!-- Staff -->
+      <div class="stat-card staff-card">
+        <div class="stat-card-left">
+          <div class="stat-icon">
+            <i class="fa-solid fa-users"></i>
+          </div>
+
+          <div>
+            <div class="stat-label">Total Staff</div>
+
+            <div class="stat-value">
+              {{ totalStaff }}
+            </div>
+
+            <div class="stat-description">Administrative staff</div>
+          </div>
+        </div>
+
+        <div class="stat-card-decoration">
+          <i class="fa-solid fa-users"></i>
+        </div>
+      </div>
+
       <!-- Students -->
       <div class="stat-card student-card">
         <div class="stat-card-left">
@@ -127,7 +150,6 @@
 
               <div>
                 <h5>Attendance Trend Overview</h5>
-
                 <p>Tracking Present, Absent, and Leave records cleanly</p>
               </div>
             </div>
@@ -214,13 +236,9 @@
           <div class="chart-area">
             <!-- Grid Lines -->
             <div class="chart-grid-line" style="top: 0%"></div>
-
             <div class="chart-grid-line" style="top: 25%"></div>
-
             <div class="chart-grid-line" style="top: 50%"></div>
-
             <div class="chart-grid-line" style="top: 75%"></div>
-
             <div class="chart-grid-line" style="top: 100%"></div>
 
             <!-- SVG Multi-Line Chart -->
@@ -396,7 +414,6 @@
 
             <div>
               <h5>Upcoming Holidays</h5>
-
               <p>Upcoming holidays</p>
             </div>
           </div>
@@ -455,7 +472,6 @@
 
             <div>
               <h5>Recent Notifications</h5>
-
               <p>Latest updates</p>
             </div>
           </div>
@@ -498,8 +514,7 @@
           <!-- Empty State -->
           <div v-if="!notifications.length" class="notification-empty">
             <i class="fa-regular fa-bell-slash"></i>
-
-            <span> No recent notifications. </span>
+            <span>No recent notifications.</span>
           </div>
         </div>
       </div>
@@ -617,7 +632,6 @@
 
             <div>
               <h5>Monthly Attendance</h5>
-
               <p>Current attendance summary</p>
             </div>
           </div>
@@ -645,7 +659,6 @@
 
               <div>
                 <strong>Present</strong>
-
                 <span> {{ monthlyAttendance.present_percentage }}% </span>
               </div>
             </div>
@@ -656,7 +669,6 @@
 
               <div>
                 <strong>Absent</strong>
-
                 <span> {{ monthlyAttendance.absent_percentage }}% </span>
               </div>
             </div>
@@ -667,7 +679,6 @@
 
               <div>
                 <strong>Leave</strong>
-
                 <span> {{ monthlyAttendance.leave_percentage }}% </span>
               </div>
             </div>
@@ -683,12 +694,11 @@ import { ref, onMounted, watch, computed } from 'vue'
 import api from '@/services/api'
 import dashPageView from './dashPageView.vue'
 
-/*
-|--------------------------------------------------------------------------
-| Dashboard Summary
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   Dashboard Summary
+===================================================== */
 
+const totalStaff = ref(0)
 const totalStudents = ref(0)
 const totalTeachers = ref(0)
 const totalShifts = ref(0)
@@ -700,11 +710,9 @@ const currentUser = ref({
   image: '',
 })
 
-/*
-|--------------------------------------------------------------------------
-| Selected Date
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   Selected Date
+===================================================== */
 
 const getTodayDate = () => {
   const date = new Date()
@@ -719,32 +727,22 @@ const getTodayDate = () => {
 const selectedDate = ref(getTodayDate())
 const selectedGrade = ref('All Grades')
 
-/*
-|--------------------------------------------------------------------------
-| Existing Dashboard Data
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   Existing Dashboard Data
+===================================================== */
 
 const upcomingHolidays = ref([])
 
-/*
-|--------------------------------------------------------------------------
-| Dynamic Notifications
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   Dynamic Notifications
+===================================================== */
 
 const notifications = ref([])
 
-/*
-|--------------------------------------------------------------------------
-| Notification Helpers
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   Notification Helpers
+===================================================== */
 
-/**
- * Different API responses can have different structures.
- * This helper extracts the actual array safely.
- */
 const extractArray = (response) => {
   const root = response?.data
 
@@ -775,9 +773,6 @@ const extractArray = (response) => {
   return []
 }
 
-/**
- * Get a usable date from an object.
- */
 const getNotificationDate = (item, fields = []) => {
   for (const field of fields) {
     if (item?.[field]) {
@@ -788,13 +783,6 @@ const getNotificationDate = (item, fields = []) => {
   return item?.created_at || null
 }
 
-/**
- * Convert date into:
- * Today
- * Yesterday
- * 2 days ago
- * Oct 4
- */
 const formatNotificationTime = (dateString) => {
   if (!dateString) {
     return 'Recently'
@@ -833,9 +821,6 @@ const formatNotificationTime = (dateString) => {
   })
 }
 
-/**
- * Get student class name safely.
- */
 const getStudentClassName = (student) => {
   return (
     student?.class_info?.name ||
@@ -848,62 +833,36 @@ const getStudentClassName = (student) => {
   )
 }
 
-/*
-|--------------------------------------------------------------------------
-| Get Dynamic Notifications
-|--------------------------------------------------------------------------
-|
-| 1. New Admission
-| 2. Upcoming Examination
-| 3. Recent Published Result
-|
-| These use the existing APIs.
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   Get Dynamic Notifications
+===================================================== */
 
 const getNotifications = async () => {
   try {
     const [studentsResult, resultsResult, examinationsResult] = await Promise.allSettled([
-      /*
-      |--------------------------------------------------------------------------
-      | Latest Student / New Admission
-      |--------------------------------------------------------------------------
-      */
-
+      /* Latest Student / New Admission */
       api.get('/students', {
         params: {
           per_page: 1,
         },
       }),
 
-      /*
-      |--------------------------------------------------------------------------
-      | Latest Result
-      |--------------------------------------------------------------------------
-      */
-
+      /* Latest Result */
       api.get('/results', {
         params: {
           per_page: 1,
         },
       }),
 
-      /*
-      |--------------------------------------------------------------------------
-      | Latest Examination
-      |--------------------------------------------------------------------------
-      */
-
+      /* Latest Examination */
       api.get('/examinations'),
     ])
 
     const newNotifications = []
 
-    /*
-    |--------------------------------------------------------------------------
-    | 1. NEW ADMISSION
-    |--------------------------------------------------------------------------
-    */
+    /* =================================================
+       1. NEW ADMISSION
+    ================================================= */
 
     if (studentsResult.status === 'fulfilled') {
       const students = extractArray(studentsResult.value)
@@ -927,11 +886,9 @@ const getNotifications = async () => {
       }
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | 2. RECENT PUBLISHED RESULT
-    |--------------------------------------------------------------------------
-    */
+    /* =================================================
+       2. RECENT PUBLISHED RESULT
+    ================================================= */
 
     if (resultsResult.status === 'fulfilled') {
       const results = extractArray(resultsResult.value)
@@ -947,10 +904,6 @@ const getNotifications = async () => {
 
         const examType = result?.exam_type || 'Examination'
 
-        /*
-         * Current Result system does not have published_at.
-         * So created_at is used as the result publication/creation time.
-         */
         const resultDate = getNotificationDate(result, ['published_at', 'result_date'])
 
         newNotifications.push({
@@ -963,11 +916,9 @@ const getNotifications = async () => {
       }
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | 3. UPCOMING EXAMINATION
-    |--------------------------------------------------------------------------
-    */
+    /* =================================================
+       3. UPCOMING EXAMINATION
+    ================================================= */
 
     if (examinationsResult.status === 'fulfilled') {
       const examinations = extractArray(examinationsResult.value)
@@ -979,21 +930,18 @@ const getNotifications = async () => {
 
         const examinationYear = examination?.examination_year || ''
 
-        /*
-         * Current Examination table does not have
-         * a proper exam date yet.
-         *
-         * If exam_date/examination_date exists later,
-         * this code will automatically use it.
-         */
         const examinationDate = getNotificationDate(examination, ['examination_date', 'exam_date'])
 
         let examinationText = ''
 
         if (examinationDate) {
-          examinationText = `${examinationType} examination for ${examinationYear} is scheduled for ${formatNotificationTime(examinationDate).toLowerCase()}.`
+          examinationText =
+            `${examinationType} examination for ${examinationYear} ` +
+            `is scheduled for ${formatNotificationTime(examinationDate).toLowerCase()}.`
         } else {
-          examinationText = `${examinationType} examination for ${examinationYear} has been added to the examination schedule.`
+          examinationText =
+            `${examinationType} examination for ${examinationYear} ` +
+            `has been added to the examination schedule.`
         }
 
         newNotifications.push({
@@ -1006,14 +954,9 @@ const getNotifications = async () => {
       }
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Final Notifications
-    |--------------------------------------------------------------------------
-    |
-    | Maximum 3 notifications.
-    |--------------------------------------------------------------------------
-    */
+    /* =================================================
+       Final Notifications
+    ================================================= */
 
     notifications.value = newNotifications.slice(0, 3)
 
@@ -1025,11 +968,9 @@ const getNotifications = async () => {
   }
 }
 
-/*
-|--------------------------------------------------------------------------
-| Attendance Trend
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   Attendance Trend
+===================================================== */
 
 const attendanceTrend = ref({
   total_students: 0,
@@ -1047,11 +988,9 @@ const attendanceTrend = ref({
 
 const attendanceLoading = ref(false)
 
-/*
-|--------------------------------------------------------------------------
-| Monthly Student Attendance
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   Monthly Student Attendance
+===================================================== */
 
 const monthlyAttendance = ref({
   total_records: 0,
@@ -1065,11 +1004,9 @@ const monthlyAttendance = ref({
 
 const monthlyAttendanceLoading = ref(false)
 
-/*
-|--------------------------------------------------------------------------
-| Monthly Attendance API
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   Monthly Attendance API
+===================================================== */
 
 const getMonthlyAttendance = async () => {
   try {
@@ -1077,7 +1014,7 @@ const getMonthlyAttendance = async () => {
 
     const today = new Date()
 
-    const month = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`
+    const month = `${today.getFullYear()}-` + `${String(today.getMonth() + 1).padStart(2, '0')}`
 
     const response = await api.get('/student-attendance/monthly-summary', {
       params: {
@@ -1111,11 +1048,9 @@ const getMonthlyAttendance = async () => {
   }
 }
 
-/*
-|--------------------------------------------------------------------------
-| Monthly Attendance 3-Color Circle
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   Monthly Attendance 3-Color Circle
+===================================================== */
 
 const monthlyAttendancePieStyle = computed(() => {
   const present = Number(monthlyAttendance.value.present_percentage) || 0
@@ -1144,11 +1079,9 @@ const monthlyAttendancePieStyle = computed(() => {
   }
 })
 
-/*
-|--------------------------------------------------------------------------
-| Current Staff & Teachers Attendance
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   Current Staff & Teachers Attendance
+===================================================== */
 
 const currentStaffTeachersAttendance = ref({
   is_holiday: false,
@@ -1228,11 +1161,9 @@ const getCurrentStaffTeachersAttendance = async () => {
   }
 }
 
-/*
-|--------------------------------------------------------------------------
-| Dashboard Data
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   Dashboard Data
+===================================================== */
 
 const getDashboardData = async () => {
   try {
@@ -1249,37 +1180,19 @@ const getDashboardData = async () => {
 
     const response = await api.get('/staff/dashboard')
 
-    /*
-    |--------------------------------------------------------------------------
-    | Existing Dashboard Values
-    |--------------------------------------------------------------------------
-    */
+    /* =================================================
+       Existing Dashboard Values
+    ================================================= */
+
+    totalStaff.value = Number(response.data.total_staff) || 0
 
     totalStudents.value = Number(response.data.total_students) || 0
 
     totalTeachers.value = Number(response.data.total_teachers) || 0
 
-    /*
-    |--------------------------------------------------------------------------
-    | IMPORTANT
-    |--------------------------------------------------------------------------
-    |
-    | Notifications are NOT taken from:
-    | response.data.notifications
-    |
-    | because our backend dashboard API does not currently
-    | return notifications.
-    |
-    | They are loaded separately by getNotifications().
-    |
-    |--------------------------------------------------------------------------
-    */
-
-    /*
-    |--------------------------------------------------------------------------
-    | Current User
-    |--------------------------------------------------------------------------
-    */
+    /* =================================================
+       Current User
+    ================================================= */
 
     if (response.data.user) {
       currentUser.value = {
@@ -1297,11 +1210,9 @@ const getDashboardData = async () => {
   }
 }
 
-/*
-|--------------------------------------------------------------------------
-| Shift Count
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   Shift Count
+===================================================== */
 
 const getShiftCount = async () => {
   try {
@@ -1325,11 +1236,9 @@ const getShiftCount = async () => {
   }
 }
 
-/*
-|--------------------------------------------------------------------------
-| Upcoming Holidays
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   Upcoming Holidays
+===================================================== */
 
 const getUpcomingHolidays = async () => {
   try {
@@ -1345,6 +1254,7 @@ const getUpcomingHolidays = async () => {
 
         return startDate && startDate >= today
       })
+
       .sort((a, b) => {
         const aDate = String(a.start_date || '').slice(0, 10)
 
@@ -1352,7 +1262,9 @@ const getUpcomingHolidays = async () => {
 
         return aDate.localeCompare(bDate)
       })
+
       .slice(0, 4)
+
       .map((holiday) => {
         const dateString = String(holiday.start_date || '').slice(0, 10)
 
@@ -1381,11 +1293,9 @@ const getUpcomingHolidays = async () => {
   }
 }
 
-/*
-|--------------------------------------------------------------------------
-| Date Helpers
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   Date Helpers
+===================================================== */
 
 const formatDate = (date) => {
   const year = date.getFullYear()
@@ -1413,11 +1323,9 @@ const getDateAfter = (dateString, days) => {
   return formatDate(date)
 }
 
-/*
-|--------------------------------------------------------------------------
-| Day Label
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   Day Label
+===================================================== */
 
 const getDayName = (dateString) => {
   const date = new Date(`${dateString}T00:00:00`)
@@ -1433,11 +1341,9 @@ const getDayNumber = (dateString) => {
   return String(date.getDate()).padStart(2, '0')
 }
 
-/*
-|--------------------------------------------------------------------------
-| Single Day Attendance API
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   Single Day Attendance API
+===================================================== */
 
 const getAttendanceByDate = async (date) => {
   try {
@@ -1485,11 +1391,9 @@ const getAttendanceByDate = async (date) => {
   }
 }
 
-/*
-|--------------------------------------------------------------------------
-| Attendance Trend API
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   Attendance Trend API
+===================================================== */
 
 const getAttendanceTrend = async () => {
   try {
@@ -1511,11 +1415,9 @@ const getAttendanceTrend = async () => {
 
     const validResults = results.filter(Boolean)
 
-    /*
-    |--------------------------------------------------------------------------
-    | Selected Date Summary
-    |--------------------------------------------------------------------------
-    */
+    /* =================================================
+       Selected Date Summary
+    ================================================= */
 
     const selectedDayData = validResults.find((item) => item.date === selectedDate.value) || {
       total_students: 0,
@@ -1530,11 +1432,9 @@ const getAttendanceTrend = async () => {
       average_status: 0,
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Store Everything
-    |--------------------------------------------------------------------------
-    */
+    /* =================================================
+       Store Everything
+    ================================================= */
 
     attendanceTrend.value = {
       total_students: selectedDayData.total_students,
@@ -1566,17 +1466,9 @@ const getAttendanceTrend = async () => {
   }
 }
 
-/*
-|--------------------------------------------------------------------------
-| Dynamic Attendance Chart Points
-|--------------------------------------------------------------------------
-|
-| IMPORTANT:
-| Actual percentage/value কখনো পরিবর্তন করা হচ্ছে না।
-| শুধু label position আলাদা করা হচ্ছে।
-|
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   Dynamic Attendance Chart Points
+===================================================== */
 
 const chartPoints = computed(() => {
   const trend = attendanceTrend.value.trend || []
@@ -1593,7 +1485,6 @@ const chartPoints = computed(() => {
 
   const left = 50
   const right = 830
-
   const top = 15
   const bottom = 210
 
@@ -1610,20 +1501,10 @@ const chartPoints = computed(() => {
       return {
         x,
         y,
-
         value: Number(value.toFixed(2)),
-
         date: item.date,
-
         day: item.day,
-
         day_number: item.day_number,
-
-        /*
-          |--------------------------------------------------------------------------
-          | Label Offset Only
-          |--------------------------------------------------------------------------
-          */
 
         labelY: Math.max(top + 10, Math.min(bottom - 5, y + labelOffset)),
       }
@@ -1631,37 +1512,20 @@ const chartPoints = computed(() => {
   }
 
   return {
-    /*
-    |--------------------------------------------------------------------------
-    | Present → label above
-    |--------------------------------------------------------------------------
-    */
-
+    /* Present → label above */
     present: makePoints('present_percentage', -12),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Absent → label below
-    |--------------------------------------------------------------------------
-    */
-
+    /* Absent → label below */
     absent: makePoints('absent_percentage', 18),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Leave → label further above
-    |--------------------------------------------------------------------------
-    */
-
+    /* Leave → label further above */
     leave: makePoints('leave_percentage', -27),
   }
 })
 
-/*
-|--------------------------------------------------------------------------
-| Diamond Marker
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   Diamond Marker
+===================================================== */
 
 const getDiamondPoints = (point) => {
   const size = 5
@@ -1674,11 +1538,9 @@ const getDiamondPoints = (point) => {
   ].join(' ')
 }
 
-/*
-|--------------------------------------------------------------------------
-| SVG Chart Paths
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   SVG Chart Paths
+===================================================== */
 
 const makeChartPath = (points) => {
   if (!points.length) {
@@ -1698,27 +1560,21 @@ const absentChartPath = computed(() => makeChartPath(chartPoints.value.absent))
 
 const leaveChartPath = computed(() => makeChartPath(chartPoints.value.leave))
 
-/*
-|--------------------------------------------------------------------------
-| Chart Labels
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   Chart Labels
+===================================================== */
 
 const chartLabels = computed(() => {
   return (attendanceTrend.value.trend || []).map((item) => ({
     date: item.date,
-
     day: item.day,
-
     day_number: item.day_number,
   }))
 })
 
-/*
-|--------------------------------------------------------------------------
-| Helpers
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   Helpers
+===================================================== */
 
 const getInitials = (name) => {
   if (!name) {
@@ -1746,47 +1602,31 @@ const getStaffImage = (image) => {
   return `${window.location.origin}/storage/${image}`
 }
 
-/*
-|--------------------------------------------------------------------------
-| Selected Date Watch
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   Selected Date Watch
+===================================================== */
 
 watch(selectedDate, () => {
   getAttendanceTrend()
 })
 
-/*
-|--------------------------------------------------------------------------
-| Initial Load
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   Initial Load
+===================================================== */
 
 onMounted(async () => {
   await Promise.all([
     getDashboardData(),
-
     getShiftCount(),
-
     getAttendanceTrend(),
-
     getUpcomingHolidays(),
-
     getCurrentStaffTeachersAttendance(),
-
     getMonthlyAttendance(),
-
-    /*
-    |--------------------------------------------------------------------------
-    | IMPORTANT:
-    | Dynamic notifications load here.
-    |--------------------------------------------------------------------------
-    */
-
     getNotifications(),
   ])
 })
 </script>
+
 <style scoped>
 /* =====================================================
    MAIN LAYOUT
@@ -1889,7 +1729,7 @@ onMounted(async () => {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
   margin-bottom: 22px;
 }
@@ -1914,16 +1754,25 @@ onMounted(async () => {
   box-shadow: 0 12px 30px rgba(15, 23, 42, 0.1);
 }
 
+/* Staff */
+.staff-card {
+  background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+  color: #ffffff;
+}
+
+/* Student */
 .student-card {
   background: linear-gradient(135deg, #2563eb, #3b82f6);
   color: #ffffff;
 }
 
+/* Teacher */
 .teacher-card {
   background: linear-gradient(135deg, #059669, #10b981);
   color: #ffffff;
 }
 
+/* Shift */
 .shift-card {
   background: linear-gradient(135deg, #f59e0b, #f97316);
   color: #ffffff;
@@ -2119,6 +1968,24 @@ onMounted(async () => {
 }
 
 .overview-filter select:focus {
+  border-color: #b8cdfc;
+  background: #ffffff;
+}
+
+/* Date input */
+.date-picker-input {
+  border: 1px solid #e5e9f0;
+  background: #f9fafc;
+  border-radius: 9px;
+  padding: 7px 10px;
+  font-size: 11px;
+  color: #667085;
+  outline: none;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.date-picker-input:focus {
   border-color: #b8cdfc;
   background: #ffffff;
 }
@@ -2867,6 +2734,12 @@ onMounted(async () => {
    RESPONSIVE DESIGN
 ===================================================== */
 
+@media (max-width: 1300px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 1200px) {
   .main-dashboard-grid {
     grid-template-columns: 1fr;
@@ -2959,20 +2832,15 @@ onMounted(async () => {
     width: 100%;
   }
 
-  .overview-filter select {
+  .overview-filter select,
+  .date-picker-input {
     flex: 1;
   }
 }
-/*
-|--------------------------------------------------------------------------
-| Attendance Trend - Readability Fix
-|--------------------------------------------------------------------------
-|
-| Existing dashboard CSS থাকলে নিচের অংশগুলো সেই CSS-এর সাথে merge করবে।
-| এই rules শুধু chart-এর line/marker/label-এর জন্য।
-|
-|--------------------------------------------------------------------------
-*/
+
+/* =====================================================
+   Attendance Trend - Readability Fix
+===================================================== */
 
 .trend-line-present-clean {
   stroke: #10b981;
@@ -2997,11 +2865,9 @@ onMounted(async () => {
   stroke-dasharray: 2 5;
 }
 
-/*
-|--------------------------------------------------------------------------
-| Present Marker
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   Present Marker
+===================================================== */
 
 .present-points-clean circle {
   fill: #10b981;
@@ -3009,11 +2875,9 @@ onMounted(async () => {
   stroke-width: 2;
 }
 
-/*
-|--------------------------------------------------------------------------
-| Absent Marker
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   Absent Marker
+===================================================== */
 
 .absent-points-clean rect {
   fill: #ef4444;
@@ -3021,11 +2885,9 @@ onMounted(async () => {
   stroke-width: 2;
 }
 
-/*
-|--------------------------------------------------------------------------
-| Leave Marker
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   Leave Marker
+===================================================== */
 
 .leave-points-clean polygon {
   fill: #f59e0b;
@@ -3033,11 +2895,9 @@ onMounted(async () => {
   stroke-width: 2;
 }
 
-/*
-|--------------------------------------------------------------------------
-| Chart Labels
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   Chart Labels
+===================================================== */
 
 .present-point-label {
   fill: #059669;
@@ -3057,11 +2917,9 @@ onMounted(async () => {
   font-weight: 700;
 }
 
-/*
-|--------------------------------------------------------------------------
-| Chart Legend
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   Chart Legend
+===================================================== */
 
 .present-legend .chart-legend-line {
   display: inline-block;
@@ -3099,11 +2957,9 @@ onMounted(async () => {
   border-radius: 3px;
 }
 
-/*
-|--------------------------------------------------------------------------
-| Dynamic Notification Empty State
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   Dynamic Notification Empty State
+===================================================== */
 
 .notification-empty {
   min-height: 140px;
@@ -3121,11 +2977,9 @@ onMounted(async () => {
   color: #cbd5e1;
 }
 
-/*
-|--------------------------------------------------------------------------
-| Holiday Empty State
-|--------------------------------------------------------------------------
-*/
+/* =====================================================
+   Holiday Empty State
+===================================================== */
 
 .holiday-empty {
   padding: 25px 15px;
