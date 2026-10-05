@@ -623,13 +623,31 @@ const downloadPdf = async () => {
     await Promise.all(
       Array.from(images).map((img) => {
         return new Promise((resolve) => {
+          // Image already loaded successfully
           if (img.complete && img.naturalWidth > 0) {
             resolve()
             return
           }
 
-          img.onload = () => resolve()
-          img.onerror = () => resolve()
+          // Image already failed / broken
+          if (img.complete && img.naturalWidth === 0) {
+            resolve()
+            return
+          }
+
+          let finished = false
+
+          const done = () => {
+            if (finished) return
+            finished = true
+            resolve()
+          }
+
+          img.onload = done
+          img.onerror = done
+
+          // Safety timeout so PDF generation can never hang forever
+          setTimeout(done, 5000)
         })
       }),
     )
