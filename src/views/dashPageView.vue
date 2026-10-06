@@ -507,27 +507,79 @@ const runBackup = async () => {
     const token = localStorage.getItem('token')
 
     const response = await api.post(
-      '/run-backup',
+      '/backup',
       {},
       {
+        responseType: 'blob',
         headers: {
           Authorization: `Bearer ${token}`,
         },
       },
     )
 
-    message.value = response.data.message || 'Backup completed successfully.'
+    // =========================
+    // CREATE DOWNLOAD FILE
+    // =========================
+    const blob = new Blob([response.data], {
+      type: 'application/sql',
+    })
+
+    // =========================
+    // GET FILE NAME
+    // =========================
+    let fileName = 'backup.sql'
+
+    const contentDisposition = response.headers['content-disposition']
+
+    if (contentDisposition) {
+      const fileNameMatch = contentDisposition.match(/filename="?([^"]+)"?/)
+
+      if (fileNameMatch && fileNameMatch[1]) {
+        fileName = fileNameMatch[1]
+      }
+    }
+
+    // =========================
+    // DOWNLOAD
+    // =========================
+    const url = window.URL.createObjectURL(blob)
+
+    const link = document.createElement('a')
+
+    link.href = url
+    link.setAttribute('download', fileName)
+
+    document.body.appendChild(link)
+
+    link.click()
+
+    link.remove()
+
+    window.URL.revokeObjectURL(url)
+
+    message.value = 'Backup downloaded successfully.'
   } catch (error) {
     console.error('Backup failed:', error)
 
     isError.value = true
 
-    message.value = error.response?.data?.message || 'Backup failed. Please try again.'
+    // Blob response হলে Laravel error message পড়ার চেষ্টা
+    if (error.response && error.response.data instanceof Blob) {
+      try {
+        const text = await error.response.data.text()
+        const errorData = JSON.parse(text)
+
+        message.value = errorData.message || 'Backup failed. Please try again.'
+      } catch (e) {
+        message.value = 'Backup failed. Please try again.'
+      }
+    } else {
+      message.value = error.response?.data?.message || 'Backup failed. Please try again.'
+    }
   } finally {
     loading.value = false
   }
 }
-
 // =====================================================
 // LOGOUT
 // =====================================================
