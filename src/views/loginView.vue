@@ -39,7 +39,9 @@
 
         <div class="footer-note">
           Need Help?
-          <a :href="whatsappUrl" target="_blank" rel="noopener noreferrer"> Contact Support </a>
+          <a :href="whatsappUrl" target="_blank" rel="noopener noreferrer">
+            Click me for Support
+          </a>
         </div>
       </div>
 
