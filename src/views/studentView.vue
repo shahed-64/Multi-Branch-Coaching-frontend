@@ -306,7 +306,11 @@
               <select v-model="form.version" class="form-select">
                 <option value="" disabled>Select Version</option>
 
-                <option value="Bangla Version">Bangla Version</option>
+                <option value="Bangla Medium (Special Care)">Bangla Medium (Special Care)</option>
+
+                <option value="Bangla Medium (School Section)">
+                  Bangla Medium (School Section)
+                </option>
 
                 <option value="English Version">English Version</option>
               </select>
@@ -688,7 +692,11 @@
               <select v-model="selectedStudent.version" class="form-select">
                 <option value="" disabled>Select Version</option>
 
-                <option value="Bangla Version">Bangla Version</option>
+                <option value="Bangla Medium (Special Care)">Bangla Medium (Special Care)</option>
+
+                <option value="Bangla Medium (School Section)">
+                  Bangla Medium (School Section)
+                </option>
 
                 <option value="English Version">English Version</option>
               </select>
@@ -1739,19 +1747,12 @@ const printQr = () => {
   }
 
   printWindow.document.write(`
-
     <!DOCTYPE html>
-
     <html>
-
       <head>
-
-        <title>
-          Student QR - ${qrStudent.value.student_id}
-        </title>
+        <title>Student QR - ${qrStudent.value.student_id}</title>
 
         <style>
-
           body {
             margin: 0;
             padding: 40px;
@@ -1789,7 +1790,6 @@ const printQr = () => {
           }
 
           @media print {
-
             body {
               padding: 0;
             }
@@ -1797,24 +1797,15 @@ const printQr = () => {
             .card {
               border: none;
             }
-
           }
-
         </style>
-
       </head>
 
       <body>
-
         <div class="card">
+          <h2>${qrStudent.value.full_name}</h2>
 
-          <h2>
-            ${qrStudent.value.full_name}
-          </h2>
-
-          <p>
-            Student QR Code
-          </p>
+          <p>Student QR Code</p>
 
           <img
             src="${qrImage.value}"
@@ -1824,26 +1815,16 @@ const printQr = () => {
           <div class="student-id">
             ${qrStudent.value.student_id}
           </div>
-
         </div>
-
-        <script>
-
-          window.onload = function () {
-
-            window.print()
-
-          }
-
-        <\/script>
-
       </body>
-
     </html>
-
   `)
 
   printWindow.document.close()
+
+  printWindow.onload = () => {
+    printWindow.print()
+  }
 }
 
 /* =====================================================
