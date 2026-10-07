@@ -388,6 +388,12 @@
               </option>
             </select>
           </div>
+          <!-- PAYMENT DATE -->
+          <div class="form-group mb-3">
+            <label class="form-label fw-semibold text-secondary"> Payment Date </label>
+
+            <input v-model="form.payment_date" type="date" class="form-control custom-input" />
+          </div>
 
           <!-- EXTRA FEES -->
           <div class="row g-3 mb-3">
