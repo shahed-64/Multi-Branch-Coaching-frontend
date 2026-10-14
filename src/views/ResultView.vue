@@ -5,91 +5,65 @@
 
   <div class="result-page-wrapper py-4">
     <div class="container-fluid px-4">
-      <!-- =====================================================
-           SUMMARY CARDS
-      ====================================================== -->
-
-      <!-- Exam Participants -->
+      <!-- SUMMARY CARDS -->
       <div class="row g-4 mb-4">
         <div class="col-md-3 col-sm-6">
           <div class="card border-0 shadow-sm rounded-4 p-3 border-start border-success border-4">
             <div class="d-flex justify-content-between align-items-center">
               <div>
                 <p class="text-muted mb-1 small fw-bold">Exam Participants</p>
-
-                <h4 class="fw-bold text-dark mb-0">
-                  {{ totalStudents }}
-                </h4>
+                <h4 class="fw-bold text-dark mb-0">{{ totalStudents }}</h4>
               </div>
-
               <div class="icon-box bg-success-subtle text-success rounded-3 p-3">🎓</div>
             </div>
           </div>
         </div>
 
-        <!-- Published Results -->
         <div class="col-md-3 col-sm-6">
           <div class="card border-0 shadow-sm rounded-4 p-3 border-start border-primary border-4">
             <div class="d-flex justify-content-between align-items-center">
               <div>
                 <p class="text-muted mb-1 small fw-bold">Published Results</p>
-
-                <h4 class="fw-bold text-dark mb-0">
-                  {{ publishedResults }}
-                </h4>
+                <h4 class="fw-bold text-dark mb-0">{{ publishedResults }}</h4>
               </div>
-
               <div class="icon-box bg-primary-subtle text-primary rounded-3 p-3">📄</div>
             </div>
           </div>
         </div>
 
-        <!-- Pass Rate -->
         <div class="col-md-3 col-sm-6">
           <div class="card border-0 shadow-sm rounded-4 p-3 border-start border-warning border-4">
             <div class="d-flex justify-content-between align-items-center">
               <div>
                 <p class="text-muted mb-1 small fw-bold">Pass Rate</p>
-
                 <h4 class="fw-bold text-dark mb-0">{{ passRate }}%</h4>
               </div>
-
               <div class="icon-box bg-warning-subtle text-warning rounded-3 p-3">📈</div>
             </div>
           </div>
         </div>
 
-        <!-- GPA 5 -->
         <div class="col-md-3 col-sm-6">
           <div class="card border-0 shadow-sm rounded-4 p-3 border-start border-info border-4">
             <div class="d-flex justify-content-between align-items-center">
               <div>
                 <p class="text-muted mb-1 small fw-bold">Total GPA 5.00</p>
-
-                <h4 class="fw-bold text-dark mb-0">
-                  {{ totalGpaFive }}
-                </h4>
+                <h4 class="fw-bold text-dark mb-0">{{ totalGpaFive }}</h4>
               </div>
-
               <div class="icon-box bg-info-subtle text-info rounded-3 p-3">⭐</div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- =====================================================
-           RESULT LIST
-      ====================================================== -->
-
+      <!-- RESULT LIST -->
       <div class="card border-0 shadow-sm rounded-4 p-4">
-        <!-- Header -->
         <div
           class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 mb-4"
         >
           <h4 class="fw-bold text-dark mb-0">Student Result List</h4>
 
           <div class="d-flex align-items-center gap-3">
-            <!-- Search -->
             <div class="search-box position-relative" style="width: 260px">
               <input
                 type="text"
@@ -97,13 +71,11 @@
                 v-model="search"
                 placeholder="Search by Student ID or Name..."
               />
-
-              <span class="position-absolute top-50 end-0 translate-middle-y me-3 text-muted">
-                🔍
-              </span>
+              <span class="position-absolute top-50 end-0 translate-middle-y me-3 text-muted"
+                >🔍</span
+              >
             </div>
 
-            <!-- Add Result -->
             <button
               type="button"
               class="btn btn-success btn-sm px-4 py-2 fw-bold rounded-pill shadow-sm d-flex align-items-center gap-2 text-nowrap result-add-btn"
@@ -114,30 +86,21 @@
           </div>
         </div>
 
-        <!-- =====================================================
-             TABLE
-        ====================================================== -->
-
+        <!-- RESULT TABLE -->
         <div class="table-responsive">
           <table class="table align-middle table-hover mb-0">
             <thead class="table-light text-uppercase fs-7 text-muted">
               <tr>
                 <th class="py-3 ps-3" style="width: 8%">#</th>
-
                 <th class="py-3">Student ID</th>
-
                 <th class="py-3">Student Name</th>
-
                 <th class="py-3">Exam Info</th>
-
                 <th class="py-3">Exam Year</th>
-
                 <th class="py-3 text-center" style="width: 20%">Action / Receipt</th>
               </tr>
             </thead>
 
             <tbody>
-              <!-- Result Rows -->
               <tr v-for="(result, index) in filteredResults" :key="result?.id ?? `result-${index}`">
                 <td class="ps-3 fw-semibold text-muted">
                   {{ (currentPage - 1) * perPage + index + 1 }}
@@ -172,7 +135,6 @@
                 </td>
               </tr>
 
-              <!-- Empty -->
               <tr v-if="filteredResults.length === 0">
                 <td colspan="6" class="text-center py-5 text-muted">No result found!</td>
               </tr>
@@ -180,38 +142,18 @@
           </table>
         </div>
 
-        <!-- =====================================================
-             PAGINATION FOOTER
-        ====================================================== -->
-
+        <!-- PAGINATION -->
         <div
           v-if="filteredTotal > 0"
           class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 mt-4 pt-3 border-top"
         >
-          <!-- Showing -->
-
           <p class="text-muted small mb-0">
-            Showing
-
-            <b>{{ showingFrom }}</b>
-
-            to
-
-            <b>{{ showingTo }}</b>
-
-            of
-
-            <b>{{ filteredTotal }}</b>
-
-            result(s)
+            Showing <b>{{ showingFrom }}</b> to <b>{{ showingTo }}</b> of
+            <b>{{ filteredTotal }}</b> result(s)
           </p>
-
-          <!-- Pagination -->
 
           <nav v-if="totalPages > 1">
             <ul class="pagination pagination-sm mb-0">
-              <!-- Previous -->
-
               <li class="page-item" :class="{ disabled: currentPage === 1 }">
                 <button
                   type="button"
@@ -222,8 +164,6 @@
                   Previous
                 </button>
               </li>
-
-              <!-- Page Numbers -->
 
               <li
                 v-for="(page, index) in pageNumbers"
@@ -242,11 +182,8 @@
                 >
                   {{ page }}
                 </button>
-
-                <span v-else class="page-link"> ... </span>
+                <span v-else class="page-link">...</span>
               </li>
-
-              <!-- Next -->
 
               <li class="page-item" :class="{ disabled: currentPage === totalPages }">
                 <button
@@ -265,11 +202,7 @@
     </div>
   </div>
 
-  <!-- =========================================================
-       ADD RESULT MODAL
-       TELEPORT TO BODY
-  ========================================================== -->
-
+  <!-- ADD RESULT MODAL -->
   <Teleport to="body">
     <div
       v-if="isAddModalOpen"
@@ -280,10 +213,9 @@
     >
       <div class="result-modal-dialog" @click.stop>
         <div class="result-modal-content">
-          <!-- Modal Header -->
-
+          <!-- MODAL HEADER -->
           <div class="result-modal-header">
-            <h5 class="fw-bold text-dark mb-0">Insert Student Result & Marks</h5>
+            <h5 class="fw-bold text-dark mb-0">Insert Student Result &amp; Marks</h5>
 
             <button
               type="button"
@@ -292,18 +224,12 @@
             ></button>
           </div>
 
-          <!-- Modal Body -->
-
+          <!-- MODAL BODY -->
           <div class="result-modal-body">
             <form @submit.prevent="saveNewResult">
-              <!-- =================================================
-                   STUDENT / YEAR / EXAM
-              ================================================== -->
-
+              <!-- STUDENT SELECTION -->
               <div class="row">
-                <!-- Student -->
-
-                <div class="col-md-4 mb-3 position-relative">
+                <div class="col-md-3 mb-3 position-relative">
                   <label class="form-label small fw-bold text-muted"> Student ID / Name </label>
 
                   <div class="input-group">
@@ -326,8 +252,6 @@
                     </button>
                   </div>
 
-                  <!-- Student Dropdown -->
-
                   <div
                     v-if="isStudentDropdownOpen"
                     class="dropdown-menu show shadow-lg border rounded-3 bg-white position-absolute w-100 mt-1"
@@ -340,28 +264,17 @@
                       class="dropdown-item py-2 px-3 border-bottom text-wrap text-start"
                       @click="selectStudent(student)"
                     >
-                      <span class="fw-bold text-primary">
-                        {{ student.student_id }}
-                      </span>
-
-                      -
-
-                      {{ student.full_name }}
+                      <span class="fw-bold text-primary">{{ student.student_id }}</span>
+                      - {{ student.full_name }}
 
                       <small class="text-muted d-block">
-                        Class:
-
+                        Current Class:
                         {{
                           student.class_info?.class_name ||
                           student.class_name ||
                           student.batch_name ||
                           'N/A'
                         }}
-
-                        <span v-if="getStudentGroupName(student)">
-                          | Group:
-                          {{ getStudentGroupName(student) }}
-                        </span>
                       </small>
                     </button>
 
@@ -374,9 +287,35 @@
                   </div>
                 </div>
 
-                <!-- Exam Year -->
+                <!-- ACADEMIC SESSION -->
+                <div class="col-md-3 mb-3">
+                  <label class="form-label small fw-bold text-muted"> Academic Session </label>
 
-                <div class="col-md-4 mb-3 position-relative">
+                  <select
+                    class="form-select rounded-3"
+                    v-model="form.student_session_id"
+                    @change="selectStudentSession"
+                    :disabled="!selectedStudent"
+                    required
+                  >
+                    <option value="">Select Session</option>
+
+                    <option
+                      v-for="session in studentSessions"
+                      :key="session.id"
+                      :value="String(session.id)"
+                    >
+                      {{ getSessionLabel(session) }}
+                    </option>
+                  </select>
+
+                  <small v-if="selectedStudent && studentSessions.length === 0" class="text-danger">
+                    No academic session found.
+                  </small>
+                </div>
+
+                <!-- EXAM YEAR -->
+                <div class="col-md-3 mb-3 position-relative">
                   <label class="form-label small fw-bold text-muted"> Exam Year </label>
 
                   <div class="input-group">
@@ -384,9 +323,9 @@
                       type="text"
                       class="form-control rounded-3"
                       v-model="yearSearchText"
-                      placeholder="Search or select year..."
+                      placeholder="Select session first..."
+                      readonly
                       @focus="isYearDropdownOpen = true"
-                      @input="isYearDropdownOpen = true"
                     />
 
                     <button
@@ -398,8 +337,6 @@
                       ✕
                     </button>
                   </div>
-
-                  <!-- Year Dropdown -->
 
                   <div
                     v-if="isYearDropdownOpen"
@@ -422,14 +359,13 @@
                       v-if="searchableYears.length === 0"
                       class="p-3 text-muted text-center small"
                     >
-                      No year found!
+                      No examination year found for this session.
                     </div>
                   </div>
                 </div>
 
-                <!-- Exam Type -->
-
-                <div class="col-md-4 mb-3 position-relative">
+                <!-- EXAM TYPE -->
+                <div class="col-md-3 mb-3 position-relative">
                   <label class="form-label small fw-bold text-muted"> Exam Type </label>
 
                   <div class="input-group">
@@ -437,9 +373,10 @@
                       type="text"
                       class="form-control rounded-3"
                       v-model="examSearchText"
-                      placeholder="Search or select exam type..."
+                      placeholder="Select exam type..."
                       @focus="isExamDropdownOpen = true"
                       @input="isExamDropdownOpen = true"
+                      :disabled="!form.student_session_id"
                     />
 
                     <button
@@ -451,8 +388,6 @@
                       ✕
                     </button>
                   </div>
-
-                  <!-- Exam Dropdown -->
 
                   <div
                     v-if="isExamDropdownOpen"
@@ -475,7 +410,7 @@
                       v-if="searchableExaminations.length === 0"
                       class="p-3 text-muted text-center small"
                     >
-                      No examination found!
+                      No examination found for this session.
                     </div>
                   </div>
                 </div>
@@ -483,28 +418,20 @@
 
               <hr class="my-3 text-muted opacity-25" />
 
-              <!-- =========================================================
-                   STUDENT CLASS & GROUP INFO
-              ========================================================== -->
-
-              <div v-if="form.student_id && selectedStudent" class="mb-4">
+              <!-- SELECTED SESSION INFORMATION -->
+              <div v-if="form.student_id && selectedStudent && selectedStudentSession" class="mb-4">
                 <div class="card border-0 bg-light rounded-3">
                   <div class="card-body py-3">
-                    <div class="row align-items-center">
-                      <!-- CLASS -->
-
-                      <div class="col-md-6 mb-2 mb-md-0">
+                    <div class="row">
+                      <div class="col-md-4 mb-3">
                         <div class="d-flex align-items-center gap-2">
-                          <i class="bi bi-mortarboard-fill text-primary fs-5"></i>
-
+                          <i class="bi bi-calendar-check text-primary fs-5"></i>
                           <div>
-                            <small class="text-muted d-block fw-semibold"> Class </small>
-
+                            <small class="text-muted d-block fw-semibold"> Academic Session </small>
                             <span class="fw-bold text-dark">
                               {{
-                                selectedStudent.class_info?.class_name ||
-                                selectedStudent.class_name ||
-                                selectedStudent.batch_name ||
+                                selectedStudentSession.academic_session?.name ||
+                                selectedStudentSession.academicSession?.name ||
                                 'N/A'
                               }}
                             </span>
@@ -512,58 +439,88 @@
                         </div>
                       </div>
 
-                      <!-- GROUP -->
-
-                      <div class="col-md-6">
+                      <div class="col-md-4 mb-3">
                         <div class="d-flex align-items-center gap-2">
-                          <i class="bi bi-people-fill text-success fs-5"></i>
-
+                          <i class="bi bi-mortarboard-fill text-primary fs-5"></i>
                           <div>
-                            <small class="text-muted d-block fw-semibold"> Group </small>
-
+                            <small class="text-muted d-block fw-semibold">Class</small>
                             <span class="fw-bold text-dark">
-                              {{ getStudentGroupName(selectedStudent) }}
+                              {{
+                                selectedStudentSession.class_info?.class_name ||
+                                selectedStudentSession.class_info?.name ||
+                                'N/A'
+                              }}
                             </span>
                           </div>
                         </div>
+                      </div>
+
+                      <div class="col-md-4 mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                          <i class="bi bi-people-fill text-success fs-5"></i>
+                          <div>
+                            <small class="text-muted d-block fw-semibold">Group</small>
+                            <span class="fw-bold text-dark">
+                              {{
+                                selectedStudentSession.class_group?.group_name ||
+                                selectedStudentSession.class_group?.name ||
+                                'N/A'
+                              }}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="col-md-6">
+                        <small class="text-muted d-block fw-semibold">Section</small>
+                        <span class="fw-bold text-dark">
+                          {{
+                            selectedStudentSession.section?.name ||
+                            selectedStudentSession.section?.section_name ||
+                            'N/A'
+                          }}
+                        </span>
+                      </div>
+
+                      <div class="col-md-6">
+                        <small class="text-muted d-block fw-semibold">Shift</small>
+                        <span class="fw-bold text-dark">
+                          {{
+                            selectedStudentSession.shift?.name ||
+                            selectedStudentSession.shift?.shift_name ||
+                            'N/A'
+                          }}
+                        </span>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <!-- =========================================================
-                   SUBJECT MARKS
-              ========================================================== -->
-
+              <!-- SUBJECT MARKS -->
               <h6 class="fw-bold text-dark mb-3">Subject Marks</h6>
-
-              <!-- NO STUDENT -->
 
               <div v-if="!form.student_id" class="alert alert-info">
                 <i class="bi bi-info-circle me-2"></i>
-
                 Please select a student first.
               </div>
 
-              <!-- NO SUBJECT -->
+              <div v-else-if="!form.student_session_id" class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                Please select the student's academic session first.
+              </div>
 
               <div v-else-if="currentSubjects.length === 0" class="alert alert-warning">
                 <i class="bi bi-exclamation-triangle me-2"></i>
-
-                No subjects are assigned to this student's class/group.
+                No subjects are assigned to this session's class/group.
               </div>
-
-              <!-- SUBJECTS -->
 
               <div v-else>
                 <!-- MAIN SUBJECTS -->
-
                 <div v-if="mainSubjects.length" class="mb-4">
                   <div class="d-flex justify-content-between align-items-center mb-3">
                     <h6 class="fw-bold text-primary mb-0">
                       <i class="bi bi-book me-2"></i>
-
                       Main Subjects
                     </h6>
 
@@ -581,7 +538,6 @@
                       <div class="border rounded-3 p-3 bg-white shadow-sm">
                         <label class="form-label fw-bold mb-2">
                           {{ subject.name }}
-
                           <span v-if="subject.code" class="text-muted small">
                             ({{ subject.code }})
                           </span>
@@ -602,18 +558,16 @@
                   </div>
                 </div>
 
-                <!-- ADDITIONAL SUBJECT -->
-
+                <!-- ADDITIONAL SUBJECTS -->
                 <div v-if="additionalSubjects.length" class="mt-4">
                   <div class="d-flex justify-content-between align-items-center mb-3">
                     <h6 class="fw-bold text-success mb-0">
                       <i class="bi bi-plus-circle me-2"></i>
-
                       Additional Subject
                     </h6>
 
                     <span class="badge bg-success-subtle text-success">
-                      {{ additionalSubjects.length }} Subject
+                      {{ additionalSubjects.length }} Subjects
                     </span>
                   </div>
 
@@ -628,7 +582,6 @@
                       >
                         <label class="form-label fw-bold mb-2">
                           {{ subject.name }}
-
                           <span v-if="subject.code" class="text-muted small">
                             ({{ subject.code }})
                           </span>
@@ -650,10 +603,7 @@
                 </div>
               </div>
 
-              <!-- =================================================
-                   MODAL FOOTER
-              ================================================== -->
-
+              <!-- MODAL FOOTER -->
               <div class="modal-footer border-0 px-0 pb-0 pt-3">
                 <button
                   type="button"
@@ -668,9 +618,8 @@
                   class="btn btn-success rounded-pill px-4 fw-bold shadow-sm"
                   :disabled="isSaving"
                 >
-                  <span v-if="isSaving"> Saving... </span>
-
-                  <span v-else> Add Result </span>
+                  <span v-if="isSaving">Saving...</span>
+                  <span v-else>Add Result</span>
                 </button>
               </div>
             </form>
@@ -687,9 +636,9 @@ import dashPageView from './dashPageView.vue'
 import api from '@/services/api'
 
 /**
- * |--------------------------------------------------------------------------
- * | STATE
- * |--------------------------------------------------------------------------
+ * =========================================================
+ * STATE
+ * =========================================================
  */
 
 const resultsList = ref([])
@@ -703,9 +652,9 @@ const isAddModalOpen = ref(false)
 const isSaving = ref(false)
 
 /**
- * |--------------------------------------------------------------------------
- * | PAGINATION
- * |--------------------------------------------------------------------------
+ * =========================================================
+ * PAGINATION
+ * =========================================================
  */
 
 const currentPage = ref(1)
@@ -718,9 +667,9 @@ const showingFrom = ref(0)
 const showingTo = ref(0)
 
 /**
- * |--------------------------------------------------------------------------
- * | SEARCH STATES
- * |--------------------------------------------------------------------------
+ * =========================================================
+ * SEARCH STATES
+ * =========================================================
  */
 
 const studentSearchText = ref('')
@@ -732,22 +681,23 @@ const isYearDropdownOpen = ref(false)
 const isExamDropdownOpen = ref(false)
 
 /**
- * |--------------------------------------------------------------------------
- * | FORM
- * |--------------------------------------------------------------------------
+ * =========================================================
+ * FORM
+ * =========================================================
  */
 
 const form = reactive({
   student_id: '',
+  student_session_id: '',
   exam_year: '',
   exam_type: '',
   subjects: [],
 })
 
 /**
- * |--------------------------------------------------------------------------
- * | SELECTED STUDENT
- * |--------------------------------------------------------------------------
+ * =========================================================
+ * SELECTED STUDENT
+ * =========================================================
  */
 
 const selectedStudent = computed(() => {
@@ -755,13 +705,71 @@ const selectedStudent = computed(() => {
     return null
   }
 
-  return studentsList.value.find((student) => student && student.id == form.student_id) || null
+  return (
+    studentsList.value.find(
+      (student) => student && String(student.id) === String(form.student_id),
+    ) || null
+  )
 })
 
 /**
- * |--------------------------------------------------------------------------
- * | GET STUDENT GROUP NAME
- * |--------------------------------------------------------------------------
+ * =========================================================
+ * STUDENT SESSIONS
+ * =========================================================
+ */
+
+const studentSessions = computed(() => {
+  const sessions = selectedStudent.value?.student_sessions
+
+  return Array.isArray(sessions) ? sessions : []
+})
+
+const selectedStudentSession = computed(() => {
+  if (!form.student_session_id) {
+    return null
+  }
+
+  return (
+    studentSessions.value.find(
+      (session) => String(session.id) === String(form.student_session_id),
+    ) || null
+  )
+})
+
+/**
+ * =========================================================
+ * SESSION LABEL
+ * =========================================================
+ */
+
+const getSessionLabel = (session) => {
+  if (!session) {
+    return 'Unknown Session'
+  }
+
+  const academicYear =
+    session.academic_session?.name || session.academicSession?.name || 'Unknown Session'
+
+  const className = session.class_info?.class_name || session.class_info?.name || 'N/A'
+
+  const sectionName = session.section?.name || session.section?.section_name || ''
+
+  const groupName = session.class_group?.group_name || session.class_group?.name || ''
+
+  return [
+    academicYear,
+    `Class: ${className}`,
+    sectionName ? `Section: ${sectionName}` : '',
+    groupName ? `Group: ${groupName}` : '',
+  ]
+    .filter(Boolean)
+    .join(' | ')
+}
+
+/**
+ * =========================================================
+ * STUDENT GROUP NAME
+ * =========================================================
  */
 
 const getStudentGroupName = (student) => {
@@ -770,6 +778,8 @@ const getStudentGroupName = (student) => {
   }
 
   return (
+    student.class_group?.group_name ||
+    student.class_group?.name ||
     student.group?.group_name ||
     student.group?.name ||
     student.group_name ||
@@ -779,9 +789,9 @@ const getStudentGroupName = (student) => {
 }
 
 /**
- * |--------------------------------------------------------------------------
- * | MAIN SUBJECTS
- * |--------------------------------------------------------------------------
+ * =========================================================
+ * MAIN SUBJECTS
+ * =========================================================
  */
 
 const mainSubjects = computed(() => {
@@ -789,9 +799,9 @@ const mainSubjects = computed(() => {
 })
 
 /**
- * |--------------------------------------------------------------------------
- * | ADDITIONAL SUBJECTS
- * |--------------------------------------------------------------------------
+ * =========================================================
+ * ADDITIONAL SUBJECTS
+ * =========================================================
  */
 
 const additionalSubjects = computed(() => {
@@ -799,9 +809,9 @@ const additionalSubjects = computed(() => {
 })
 
 /**
- * |--------------------------------------------------------------------------
- * | FETCH RESULTS + STUDENTS
- * |--------------------------------------------------------------------------
+ * =========================================================
+ * FETCH RESULTS AND STUDENTS
+ * =========================================================
  */
 
 const fetchData = async (page = 1) => {
@@ -814,72 +824,44 @@ const fetchData = async (page = 1) => {
       },
     })
 
-    /**
-     * ==========================================================
-     * IMPORTANT FIX
-     *
-     * Laravel paginate() returns:
-     *
-     * response.data.results.data
-     *
-     * NOT:
-     *
-     * response.data.results
-     * ==========================================================
-     */
-
     const resultData = response.data.results?.data ?? []
 
     resultsList.value = Array.isArray(resultData)
       ? resultData.filter((result) => result !== null && typeof result === 'object')
       : []
 
-    /**
-     * |--------------------------------------------------------------------------
-     * | Student list
-     * |--------------------------------------------------------------------------
-     */
-
     studentsList.value = Array.isArray(response.data.students)
       ? response.data.students.filter((student) => student !== null && typeof student === 'object')
       : []
 
-    /**
-     * |--------------------------------------------------------------------------
-     * | Result pagination
-     * |--------------------------------------------------------------------------
-     */
-
     const resultPagination = response.data.results_pagination || {}
 
     currentPage.value = resultPagination.current_page || 1
-
     totalPages.value = resultPagination.last_page || 1
-
     filteredTotal.value = resultPagination.total || 0
-
     showingFrom.value = resultPagination.from || 0
-
     showingTo.value = resultPagination.to || 0
 
     console.log('Students:', studentsList.value)
-
     console.log('Results:', resultsList.value)
-
     console.log('Result Pagination:', resultPagination)
   } catch (error) {
     console.error('Error fetching result data:', error)
 
     resultsList.value = []
-
     studentsList.value = []
+
+    filteredTotal.value = 0
+    totalPages.value = 1
+    showingFrom.value = 0
+    showingTo.value = 0
   }
 }
 
 /**
- * |--------------------------------------------------------------------------
- * | PAGINATION - GO TO PAGE
- * |--------------------------------------------------------------------------
+ * =========================================================
+ * PAGINATION
+ * =========================================================
  */
 
 const goToPage = (page) => {
@@ -890,35 +872,17 @@ const goToPage = (page) => {
   fetchData(page)
 }
 
-/**
- * |--------------------------------------------------------------------------
- * | PAGINATION - PREVIOUS
- * |--------------------------------------------------------------------------
- */
-
 const previousPage = () => {
   if (currentPage.value > 1) {
     fetchData(currentPage.value - 1)
   }
 }
 
-/**
- * |--------------------------------------------------------------------------
- * | PAGINATION - NEXT
- * |--------------------------------------------------------------------------
- */
-
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
     fetchData(currentPage.value + 1)
   }
 }
-
-/**
- * |--------------------------------------------------------------------------
- * | PAGINATION - PAGE NUMBERS
- * |--------------------------------------------------------------------------
- */
 
 const pageNumbers = computed(() => {
   const pages = []
@@ -941,7 +905,6 @@ const pageNumbers = computed(() => {
   }
 
   const start = Math.max(2, current - 1)
-
   const end = Math.min(total - 1, current + 1)
 
   for (let i = start; i <= end; i++) {
@@ -958,9 +921,9 @@ const pageNumbers = computed(() => {
 })
 
 /**
- * |--------------------------------------------------------------------------
- * | FETCH EXAMINATIONS
- * |--------------------------------------------------------------------------
+ * =========================================================
+ * FETCH EXAMINATIONS
+ * =========================================================
  */
 
 const fetchExaminations = async () => {
@@ -982,9 +945,9 @@ const fetchExaminations = async () => {
 }
 
 /**
- * |--------------------------------------------------------------------------
- * | SEARCHABLE STUDENTS
- * |--------------------------------------------------------------------------
+ * =========================================================
+ * SEARCHABLE STUDENTS
+ * =========================================================
  */
 
 const searchableStudents = computed(() => {
@@ -1010,27 +973,36 @@ const searchableStudents = computed(() => {
 })
 
 /**
- * |--------------------------------------------------------------------------
- * | SEARCHABLE EXAMINATIONS
- * |--------------------------------------------------------------------------
+ * =========================================================
+ * EXAMINATIONS FOR SELECTED BRANCH AND SESSION
+ * =========================================================
  */
 
 const searchableExaminations = computed(() => {
   const text = examSearchText.value.toLowerCase().trim()
 
+  const sessionYear =
+    selectedStudentSession.value?.academic_session?.name ||
+    selectedStudentSession.value?.academicSession?.name ||
+    ''
+
+  if (!selectedStudent.value || !sessionYear) {
+    return []
+  }
+
   let examinations = examinationsList.value.filter(
     (exam) => exam !== null && typeof exam === 'object',
   )
 
-  /**
-   * Selected student's branch অনুযায়ী
-   */
-
-  if (selectedStudent.value?.branch_id) {
+  if (selectedStudent.value.branch_id != null) {
     examinations = examinations.filter(
       (exam) => Number(exam.branch_id) === Number(selectedStudent.value.branch_id),
     )
   }
+
+  examinations = examinations.filter(
+    (exam) => String(exam.examination_year) === String(sessionYear),
+  )
 
   if (!text) {
     return examinations.slice(0, 50)
@@ -1044,53 +1016,58 @@ const searchableExaminations = computed(() => {
 })
 
 /**
- * |--------------------------------------------------------------------------
- * | SEARCHABLE YEARS
- * |--------------------------------------------------------------------------
+ * =========================================================
+ * YEARS FOR SELECTED SESSION
+ * =========================================================
  */
 
 const searchableYears = computed(() => {
-  const map = new Map()
+  const sessionYear =
+    selectedStudentSession.value?.academic_session?.name ||
+    selectedStudentSession.value?.academicSession?.name ||
+    ''
+
+  if (!selectedStudent.value || !sessionYear) {
+    return []
+  }
 
   let examinations = examinationsList.value.filter(
-    (exam) => exam !== null && typeof exam === 'object',
+    (exam) =>
+      exam !== null &&
+      typeof exam === 'object' &&
+      String(exam.examination_year) === String(sessionYear),
   )
 
-  /**
-   * Selected student's branch অনুযায়ী
-   */
-
-  if (selectedStudent.value?.branch_id) {
+  if (selectedStudent.value.branch_id != null) {
     examinations = examinations.filter(
       (exam) => Number(exam.branch_id) === Number(selectedStudent.value.branch_id),
     )
   }
 
+  const uniqueYears = new Map()
+
   examinations.forEach((exam) => {
-    if (exam.examination_year && !map.has(exam.examination_year)) {
-      map.set(exam.examination_year, exam)
+    const year = String(exam.examination_year)
+
+    if (!uniqueYears.has(year)) {
+      uniqueYears.set(year, exam)
     }
   })
 
-  const years = Array.from(map.values())
-
+  const years = Array.from(uniqueYears.values())
   const text = yearSearchText.value.toLowerCase().trim()
 
   if (!text) {
     return years.slice(0, 50)
   }
 
-  return years.filter((exam) => {
-    const year = exam.examination_year?.toString().toLowerCase() || ''
-
-    return year.includes(text)
-  })
+  return years.filter((exam) => String(exam.examination_year).toLowerCase().includes(text))
 })
 
 /**
- * |--------------------------------------------------------------------------
- * | SELECT STUDENT
- * |--------------------------------------------------------------------------
+ * =========================================================
+ * SELECT STUDENT
+ * =========================================================
  */
 
 const selectStudent = (student) => {
@@ -1099,230 +1076,126 @@ const selectStudent = (student) => {
   }
 
   form.student_id = student.id
+  form.student_session_id = ''
+  form.exam_year = ''
+  form.exam_type = ''
+  form.subjects = []
 
   studentSearchText.value = `${student.student_id} - ${student.full_name}`
-
-  isStudentDropdownOpen.value = false
-
-  /**
-   * Student change হলে পুরোনো exam/year selection clear
-   */
-
-  form.exam_year = ''
-  form.exam_type = ''
-
-  yearSearchText.value = ''
-  examSearchText.value = ''
-
-  loadStudentSubjects()
-}
-
-/**
- * |--------------------------------------------------------------------------
- * | CLEAR STUDENT
- * |--------------------------------------------------------------------------
- */
-
-const clearStudentSelection = () => {
-  form.student_id = ''
-
-  studentSearchText.value = ''
-
-  form.exam_year = ''
-  form.exam_type = ''
 
   yearSearchText.value = ''
   examSearchText.value = ''
 
   currentSubjects.value = []
-  form.subjects = []
 
-  isStudentDropdownOpen.value = true
+  isStudentDropdownOpen.value = false
+  isYearDropdownOpen.value = false
+  isExamDropdownOpen.value = false
 }
 
 /**
- * |--------------------------------------------------------------------------
- * | LOAD STUDENT SUBJECTS
- * |--------------------------------------------------------------------------
+ * =========================================================
+ * CLEAR STUDENT
+ * =========================================================
  */
 
-const loadStudentSubjects = () => {
-  const student = studentsList.value.find((item) => item && item.id == form.student_id)
+const clearStudentSelection = () => {
+  form.student_id = ''
+  form.student_session_id = ''
+  form.exam_year = ''
+  form.exam_type = ''
+  form.subjects = []
 
-  if (!student) {
-    currentSubjects.value = []
-    form.subjects = []
+  studentSearchText.value = ''
+  yearSearchText.value = ''
+  examSearchText.value = ''
+
+  currentSubjects.value = []
+
+  isStudentDropdownOpen.value = true
+  isYearDropdownOpen.value = false
+  isExamDropdownOpen.value = false
+}
+
+/**
+ * =========================================================
+ * SELECT ACADEMIC SESSION
+ * =========================================================
+ */
+
+const selectStudentSession = () => {
+  // Reset marks and exam type when the session changes.
+  currentSubjects.value = []
+  form.subjects = []
+  form.exam_type = ''
+  examSearchText.value = ''
+
+  const session = selectedStudentSession.value
+
+  if (!session) {
+    form.exam_year = ''
+    yearSearchText.value = ''
+
+    isYearDropdownOpen.value = false
+    isExamDropdownOpen.value = false
 
     return
   }
 
-  console.log('====================================')
+  const year = session.academic_session?.name || session.academicSession?.name || ''
 
-  console.log('SELECTED STUDENT:', student)
+  form.exam_year = String(year)
+  yearSearchText.value = String(year)
 
-  console.log('STUDENT BRANCH:', student.branch_id)
+  isYearDropdownOpen.value = false
+  isExamDropdownOpen.value = false
 
-  console.log('CLASS INFO:', student.class_info)
+  loadStudentSubjects()
+}
 
-  console.log('GROUP:', student.group)
+/**
+ * =========================================================
+ * LOAD SUBJECTS FROM SELECTED STUDENT SESSION
+ * =========================================================
+ */
 
-  console.log('GROUP NAME:', getStudentGroupName(student))
+const loadStudentSubjects = () => {
+  const session = selectedStudentSession.value
 
-  console.log('GROUP SUBJECTS:', student.group_subjects)
+  currentSubjects.value = []
+  form.subjects = []
 
-  console.log('MAPPED GROUP SUBJECTS:', student.mapped_group_subjects)
-
-  console.log('====================================')
-
-  /**
-   * ==========================================================
-   * 1. CLASS SUBJECTS
-   * ==========================================================
-   */
-
-  let classSubjects = []
-
-  if (student.class_info && Array.isArray(student.class_info.subjects)) {
-    classSubjects = student.class_info.subjects
-  } else if (Array.isArray(student.subjects)) {
-    classSubjects = student.subjects
-  } else if (Array.isArray(student.class_subjects)) {
-    classSubjects = student.class_subjects
+  if (!session) {
+    return
   }
 
-  /**
-   * ==========================================================
-   * 2. EXISTING GROUP SUBJECTS
-   * ==========================================================
-   */
+  // Prefer backend-prepared subjects for the selected session.
+  let subjects = Array.isArray(session.assigned_subjects) ? session.assigned_subjects : []
 
-  let groupSubjects = []
+  // Fallback to subjects belonging to this session's class/group.
+  if (subjects.length === 0) {
+    const classSubjects = Array.isArray(session.class_info?.subjects)
+      ? session.class_info.subjects
+      : []
 
-  if (Array.isArray(student.group_subjects)) {
-    groupSubjects = student.group_subjects
+    const groupSubjects = Array.isArray(session.class_group?.subjects)
+      ? session.class_group.subjects
+      : []
+
+    subjects = [...classSubjects, ...groupSubjects]
   }
 
-  /**
-   * ==========================================================
-   * 3. GROUP SUBJECT MAPPINGS
-   * ==========================================================
-   */
+  const subjectMap = new Map()
 
-  let mappedGroupSubjects = []
+  subjects.forEach((subject) => {
+    if (!subject || typeof subject !== 'object' || subject.id == null) {
+      return
+    }
 
-  if (Array.isArray(student.mapped_group_subjects)) {
-    mappedGroupSubjects = student.mapped_group_subjects
-  }
+    const id = Number(subject.id)
 
-  /**
-   * ==========================================================
-   * 4. MAPPED SUBJECT ID SET
-   * ==========================================================
-   */
-
-  const mappedSubjectIds = new Set(
-    mappedGroupSubjects
-
-      .filter((subject) => subject !== null && typeof subject === 'object')
-
-      .map((subject) => Number(subject.id))
-
-      .filter((id) => !Number.isNaN(id)),
-  )
-
-  /**
-   * ==========================================================
-   * 5. GROUP SUBJECT ID SET
-   * ==========================================================
-   */
-
-  const additionalSubjectIds = new Set(
-    groupSubjects
-
-      .filter((subject) => subject !== null && typeof subject === 'object')
-
-      .map((subject) => Number(subject.id))
-
-      .filter((id) => !Number.isNaN(id)),
-  )
-
-  /**
-   * ==========================================================
-   * 6. NORMALIZE CLASS SUBJECTS
-   * ==========================================================
-   */
-
-  const normalizedClassSubjects = classSubjects
-
-    .filter((subject) => subject !== null && typeof subject === 'object')
-
-    .filter((subject) => {
-      const subjectId = Number(subject.id)
-
-      if (additionalSubjectIds.has(subjectId)) {
-        return false
-      }
-
-      return true
-    })
-
-    .map((subject) => ({
-      unique_key: `main_${subject.id}`,
-
-      id: subject.id,
-
-      name: subject.name || subject.subject_name || subject.subject?.name || 'Unknown Subject',
-
-      code: subject.code || subject.subject_code || subject.subject?.code || null,
-
-      is_additional: false,
-
-      marks: '',
-    }))
-
-  /**
-   * ==========================================================
-   * 7. NORMALIZE GROUP MAPPED SUBJECTS
-   * ==========================================================
-   */
-
-  const normalizedMappedGroupSubjects = mappedGroupSubjects
-
-    .filter((subject) => subject !== null && typeof subject === 'object')
-
-    .filter((subject) => {
-      const subjectId = Number(subject.id)
-
-      return !Number.isNaN(subjectId) && !additionalSubjectIds.has(subjectId)
-    })
-
-    .map((subject) => ({
-      unique_key: `mapped_group_${subject.id}`,
-
-      id: subject.id,
-
-      name: subject.name || subject.subject_name || subject.subject?.name || 'Unknown Subject',
-
-      code: subject.code || subject.subject_code || subject.subject?.code || null,
-
-      is_additional: false,
-
-      marks: '',
-    }))
-
-  /**
-   * ==========================================================
-   * 8. NORMALIZE EXISTING GROUP SUBJECTS
-   * ==========================================================
-   */
-
-  const normalizedGroupSubjects = groupSubjects
-
-    .filter((subject) => subject !== null && typeof subject === 'object')
-
-    .map((subject) => ({
-      unique_key: `group_${subject.id}`,
-
+    const normalized = {
+      unique_key: `subject_${id}`,
       id: subject.id,
 
       name: subject.name || subject.subject_name || subject.subject?.name || 'Unknown Subject',
@@ -1335,77 +1208,27 @@ const loadStudentSubjects = () => {
         subject.is_additional === '1',
 
       marks: '',
-    }))
-
-  /**
-   * ==========================================================
-   * 9. MERGE SUBJECTS
-   * ==========================================================
-   */
-
-  const mergedSubjects = [
-    ...normalizedClassSubjects,
-
-    ...normalizedMappedGroupSubjects,
-
-    ...normalizedGroupSubjects,
-  ]
-
-  /**
-   * ==========================================================
-   * 10. REMOVE DUPLICATES
-   * ==========================================================
-   */
-
-  const subjectMap = new Map()
-
-  mergedSubjects.forEach((subject) => {
-    if (!subject) {
-      return
     }
 
-    const subjectId = Number(subject.id)
+    const existing = subjectMap.get(id)
 
-    const existing = subjectMap.get(subjectId)
-
-    if (!existing) {
-      subjectMap.set(subjectId, subject)
-
-      return
-    }
-
-    if (subject.is_additional && !existing.is_additional) {
-      subjectMap.set(subjectId, subject)
+    if (!existing || normalized.is_additional) {
+      subjectMap.set(id, normalized)
     }
   })
 
-  /**
-   * ==========================================================
-   * 11. FINAL SUBJECTS
-   * ==========================================================
-   */
-
   currentSubjects.value = Array.from(subjectMap.values())
 
-  console.log('FINAL CURRENT SUBJECTS:', currentSubjects.value)
-
-  console.log('MAIN SUBJECTS:', mainSubjects.value)
-
-  console.log('ADDITIONAL SUBJECTS:', additionalSubjects.value)
-
-  /**
-   * ==========================================================
-   * 12. SYNC FORM
-   * ==========================================================
-   */
-
   syncFormSubjects()
+
+  console.log('Selected Student Session:', session)
+  console.log('Session Subjects:', currentSubjects.value)
 }
 
 /**
- * |--------------------------------------------------------------------------
- * | UPDATE SUBJECT MARKS
- * |--------------------------------------------------------------------------
+ * =========================================================
+ * UPDATE SUBJECT MARKS
+ * =========================================================
  */
 
 const updateSubjectMarks = (subjectKey, marks) => {
@@ -1421,16 +1244,14 @@ const updateSubjectMarks = (subjectKey, marks) => {
 }
 
 /**
- * |--------------------------------------------------------------------------
- * | SYNC FORM SUBJECTS
- * |--------------------------------------------------------------------------
+ * =========================================================
+ * SYNC SUBJECTS WITH FORM
+ * =========================================================
  */
 
 const syncFormSubjects = () => {
   form.subjects = currentSubjects.value
-
     .filter((subject) => subject !== null && typeof subject === 'object')
-
     .map((subject) => ({
       subject_id: subject.id,
 
@@ -1441,9 +1262,9 @@ const syncFormSubjects = () => {
 }
 
 /**
- * |--------------------------------------------------------------------------
- * | SELECT EXAM
- * |--------------------------------------------------------------------------
+ * =========================================================
+ * SELECT EXAM TYPE
+ * =========================================================
  */
 
 const selectExam = (exam) => {
@@ -1451,85 +1272,122 @@ const selectExam = (exam) => {
     return
   }
 
-  form.exam_type = exam.examination_type
+  const sessionYear =
+    selectedStudentSession.value?.academic_session?.name ||
+    selectedStudentSession.value?.academicSession?.name ||
+    ''
 
+  if (!sessionYear || String(exam.examination_year) !== String(sessionYear)) {
+    alert('Exam year must match the selected academic session.')
+    return
+  }
+
+  if (
+    selectedStudent.value?.branch_id != null &&
+    Number(exam.branch_id) !== Number(selectedStudent.value.branch_id)
+  ) {
+    alert('Please select an examination from the student branch.')
+    return
+  }
+
+  form.exam_year = String(sessionYear)
+  yearSearchText.value = String(sessionYear)
+
+  form.exam_type = exam.examination_type
   examSearchText.value = exam.examination_type
 
   isExamDropdownOpen.value = false
+  isYearDropdownOpen.value = false
 }
 
 /**
- * |--------------------------------------------------------------------------
- * | CLEAR EXAM
- * |--------------------------------------------------------------------------
+ * =========================================================
+ * CLEAR EXAM TYPE
+ * =========================================================
  */
 
 const clearExamSelection = () => {
   form.exam_type = ''
-
   examSearchText.value = ''
 
   isExamDropdownOpen.value = true
 }
 
 /**
- * |--------------------------------------------------------------------------
- * | SELECT YEAR
- * |--------------------------------------------------------------------------
+ * =========================================================
+ * SELECT EXAM YEAR
+ * =========================================================
  */
 
 const selectYear = (exam) => {
-  if (!exam) {
+  const sessionYear =
+    selectedStudentSession.value?.academic_session?.name ||
+    selectedStudentSession.value?.academicSession?.name ||
+    ''
+
+  if (!exam || !sessionYear) {
     return
   }
 
-  form.exam_year = exam.examination_year
+  if (String(exam.examination_year) !== String(sessionYear)) {
+    alert('Exam year must match the selected academic session.')
+    return
+  }
 
-  yearSearchText.value = exam.examination_year
+  form.exam_year = String(sessionYear)
+  yearSearchText.value = String(sessionYear)
 
   isYearDropdownOpen.value = false
 }
 
 /**
- * |--------------------------------------------------------------------------
- * | CLEAR YEAR
- * |--------------------------------------------------------------------------
+ * =========================================================
+ * CLEAR EXAM YEAR
+ * =========================================================
  */
 
 const clearYearSelection = () => {
-  form.exam_year = ''
+  // Academic session determines the year.
+  // Clearing the displayed year must not silently change sessions.
+  if (selectedStudentSession.value) {
+    const year =
+      selectedStudentSession.value.academic_session?.name ||
+      selectedStudentSession.value.academicSession?.name ||
+      ''
 
-  yearSearchText.value = ''
+    form.exam_year = String(year)
+    yearSearchText.value = String(year)
+  } else {
+    form.exam_year = ''
+    yearSearchText.value = ''
+  }
 
-  isYearDropdownOpen.value = true
+  isYearDropdownOpen.value = false
 }
 
 /**
- * |--------------------------------------------------------------------------
- * | CLOSE MODAL
- * |--------------------------------------------------------------------------
+ * =========================================================
+ * CLOSE MODAL
+ * =========================================================
  */
 
 const closeAddModal = () => {
   isAddModalOpen.value = false
 
   isStudentDropdownOpen.value = false
-
   isYearDropdownOpen.value = false
-
   isExamDropdownOpen.value = false
 }
 
 /**
- * |--------------------------------------------------------------------------
- * | OPEN MODAL
- * |--------------------------------------------------------------------------
+ * =========================================================
+ * OPEN MODAL
+ * =========================================================
  */
 
 const openAddModal = () => {
-  console.log('ADD RESULT BUTTON CLICKED')
-
   form.student_id = ''
+  form.student_session_id = ''
   form.exam_year = ''
   form.exam_type = ''
   form.subjects = []
@@ -1541,20 +1399,16 @@ const openAddModal = () => {
   currentSubjects.value = []
 
   isStudentDropdownOpen.value = false
-
   isYearDropdownOpen.value = false
-
   isExamDropdownOpen.value = false
 
   isAddModalOpen.value = true
-
-  console.log('isAddModalOpen:', isAddModalOpen.value)
 }
 
 /**
- * |--------------------------------------------------------------------------
- * | SAVE RESULT
- * |--------------------------------------------------------------------------
+ * =========================================================
+ * SAVE RESULT
+ * =========================================================
  */
 
 const saveNewResult = async () => {
@@ -1564,25 +1418,50 @@ const saveNewResult = async () => {
 
   if (!form.student_id) {
     alert('Please select a student.')
+    return
+  }
 
+  if (!form.student_session_id) {
+    alert('Please select an academic session.')
+    return
+  }
+
+  if (!selectedStudentSession.value) {
+    alert('The selected academic session could not be found. Please select it again.')
     return
   }
 
   if (!form.exam_year) {
-    alert('Please select exam year.')
-
+    alert('Please select an exam year.')
     return
   }
 
   if (!form.exam_type) {
-    alert('Please select examination.')
-
+    alert('Please select an examination.')
     return
   }
 
   if (!form.subjects || form.subjects.length === 0) {
-    alert('Please enter marks for at least one subject.')
+    alert('No subjects are available for this session.')
+    return
+  }
 
+  // Validate entered marks before sending the request.
+  const enteredSubjects = form.subjects.filter(
+    (subject) => subject.marks !== null && subject.marks !== undefined && subject.marks !== '',
+  )
+
+  if (enteredSubjects.length === 0) {
+    alert('Please enter marks for at least one subject.')
+    return
+  }
+
+  const invalidMarks = enteredSubjects.some(
+    (subject) => !Number.isFinite(Number(subject.marks)) || Number(subject.marks) < 0,
+  )
+
+  if (invalidMarks) {
+    alert('Marks must be valid non-negative numbers.')
     return
   }
 
@@ -1592,24 +1471,19 @@ const saveNewResult = async () => {
     const payload = {
       student_id: form.student_id,
 
+      student_session_id: Number(form.student_session_id),
+
       exam_year: form.exam_year,
 
       exam_type: form.exam_type,
 
-      subjects: form.subjects.map((subject) => ({
+      subjects: enteredSubjects.map((subject) => ({
         subject_id: subject.subject_id,
-
-        marks: subject.marks,
+        marks: Number(subject.marks),
       })),
     }
 
     console.log('RESULT SAVE PAYLOAD:', payload)
-
-    /**
-     * ==========================================================
-     * CREATE RESULT
-     * ==========================================================
-     */
 
     const response = await api.post('/results', payload)
 
@@ -1617,39 +1491,15 @@ const saveNewResult = async () => {
 
     if (!response.data.status) {
       alert(response.data.message || 'Failed to save result.')
-
       return
     }
 
-    /**
-     * ==========================================================
-     * IMPORTANT FIX
-     *
-     * Backend database থেকে fresh result list
-     * আবার load করা হবে।
-     *
-     * এখানে আর manually resultList-এর মধ্যে
-     * নতুন result push করা হচ্ছে না।
-     * ==========================================================
-     */
-
     await fetchData(1)
-
-    /**
-     * ==========================================================
-     * CLOSE MODAL
-     * ==========================================================
-     */
 
     closeAddModal()
 
-    /**
-     * ==========================================================
-     * FORM RESET
-     * ==========================================================
-     */
-
     form.student_id = ''
+    form.student_session_id = ''
     form.exam_year = ''
     form.exam_type = ''
     form.subjects = []
@@ -1663,19 +1513,26 @@ const saveNewResult = async () => {
     alert(response.data.message || 'Result saved successfully.')
   } catch (error) {
     console.error('Error saving result:', error)
-
     console.error('Response:', error.response?.data)
 
-    alert(error.response?.data?.message || 'Failed to save result. Please try again.')
+    const errors = error.response?.data?.errors
+
+    if (errors && typeof errors === 'object') {
+      const firstError = Object.values(errors).flat().find(Boolean)
+
+      alert(firstError || error.response?.data?.message || 'Failed to save result.')
+    } else {
+      alert(error.response?.data?.message || 'Failed to save result. Please try again.')
+    }
   } finally {
     isSaving.value = false
   }
 }
 
 /**
- * |--------------------------------------------------------------------------
- * | FILTER RESULTS
- * |--------------------------------------------------------------------------
+ * =========================================================
+ * FILTER RESULTS
+ * =========================================================
  */
 
 const filteredResults = computed(() => {
@@ -1708,9 +1565,9 @@ const filteredResults = computed(() => {
 })
 
 /**
- * |--------------------------------------------------------------------------
- * | GRADE POINT
- * |--------------------------------------------------------------------------
+ * =========================================================
+ * GRADE POINT
+ * =========================================================
  */
 
 const getPoint = (marks) => {
@@ -1718,22 +1575,22 @@ const getPoint = (marks) => {
     return null
   }
 
-  const m = Number(marks)
+  const value = Number(marks)
 
-  if (m >= 80) return 5.0
-  if (m >= 70) return 4.0
-  if (m >= 60) return 3.5
-  if (m >= 50) return 3.0
-  if (m >= 40) return 2.0
-  if (m >= 33) return 1.0
+  if (value >= 80) return 5.0
+  if (value >= 70) return 4.0
+  if (value >= 60) return 3.5
+  if (value >= 50) return 3.0
+  if (value >= 40) return 2.0
+  if (value >= 33) return 1.0
 
   return 0.0
 }
 
 /**
- * |--------------------------------------------------------------------------
- * | CALCULATE RESULT
- * |--------------------------------------------------------------------------
+ * =========================================================
+ * CALCULATE RESULT DETAILS
+ * =========================================================
  */
 
 const calculateResultDetails = (result) => {
@@ -1751,9 +1608,7 @@ const calculateResultDetails = (result) => {
   let hasFailed = false
 
   subjects
-
     .filter((resultSubject) => resultSubject !== null && typeof resultSubject === 'object')
-
     .forEach((resultSubject) => {
       const marks = resultSubject.marks
 
@@ -1768,7 +1623,6 @@ const calculateResultDetails = (result) => {
       }
 
       totalPoints += point
-
       subjectCount++
 
       if (point === 0) {
@@ -1787,15 +1641,14 @@ const calculateResultDetails = (result) => {
 
   return {
     gpa: Number(gpa.toFixed(2)),
-
     status: 'Pass',
   }
 }
 
 /**
- * |--------------------------------------------------------------------------
- * | DASHBOARD COUNTS
- * |--------------------------------------------------------------------------
+ * =========================================================
+ * DASHBOARD COUNTS
+ * =========================================================
  */
 
 const totalStudents = computed(() => {
@@ -1811,7 +1664,7 @@ const passRate = computed(() => {
     (result) => result !== null && typeof result === 'object',
   )
 
-  if (!validResults.length) {
+  if (validResults.length === 0) {
     return '0.0'
   }
 
@@ -1823,9 +1676,9 @@ const passRate = computed(() => {
 })
 
 /**
- * |--------------------------------------------------------------------------
- * | TOTAL GPA 5.00
- * |--------------------------------------------------------------------------
+ * =========================================================
+ * TOTAL GPA 5.00
+ * =========================================================
  */
 
 const totalGpaFive = computed(() => {
@@ -1835,7 +1688,6 @@ const totalGpaFive = computed(() => {
 
   return validResults.filter((result) => {
     const details = calculateResultDetails(result)
-
     const gpa = Number(details.gpa)
 
     return details.status === 'Pass' && Number.isFinite(gpa) && gpa >= 5
@@ -1843,23 +1695,21 @@ const totalGpaFive = computed(() => {
 })
 
 /**
- * |--------------------------------------------------------------------------
- * | CLOSE DROPDOWNS
- * |--------------------------------------------------------------------------
+ * =========================================================
+ * CLOSE DROPDOWNS
+ * =========================================================
  */
 
 const closeDropdowns = () => {
   isStudentDropdownOpen.value = false
-
   isYearDropdownOpen.value = false
-
   isExamDropdownOpen.value = false
 }
 
 /**
- * |--------------------------------------------------------------------------
- * | ON MOUNT
- * |--------------------------------------------------------------------------
+ * =========================================================
+ * ON MOUNT
+ * =========================================================
  */
 
 onMounted(async () => {

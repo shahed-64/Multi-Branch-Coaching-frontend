@@ -3,9 +3,8 @@
 
   <div v-else-if="payment" class="receipt-page">
     <div class="receipt-container">
-      <!-- Receipt -->
       <div class="receipt-box">
-        <!-- Top Header: Logo, Institute Info & Receipt Meta -->
+        <!-- Header -->
         <div class="receipt-top-header">
           <div class="header-left">
             <div class="institute-logo-wrapper" v-if="getLogoUrl(institute?.logo)">
@@ -13,10 +12,7 @@
             </div>
 
             <div class="institute-info">
-              <h1>
-                {{ institute?.institute_name || 'Coaching MS' }}
-              </h1>
-
+              <h1>{{ institute?.institute_name || 'Coaching MS' }}</h1>
               <div class="receipt-subtitle">
                 <span>— Money Receipt —</span>
               </div>
@@ -38,9 +34,8 @@
 
         <hr class="divider-line" />
 
-        <!-- Info Cards Grid (Student Info & Payment Info Side-by-Side) -->
+        <!-- Student and Payment Information -->
         <div class="info-cards-grid">
-          <!-- Student Information Card -->
           <div class="info-card">
             <div class="card-header-title student-header">STUDENT INFO</div>
 
@@ -55,11 +50,24 @@
               <div class="info-row">
                 <span class="label">Class</span>
                 <span class="val">
-                  {{ payment.student?.class_info?.class_name || 'N/A' }}
+                  {{ payment.student_session?.class_info?.class_name || 'N/A' }}
                 </span>
               </div>
 
-              <!-- Version -->
+              <div class="info-row">
+                <span class="label">Academic Session</span>
+                <span class="val">
+                  {{ getAcademicSessionName(payment.student_session?.academic_session) }}
+                </span>
+              </div>
+
+              <div class="info-row">
+                <span class="label">Group</span>
+                <span class="val">
+                  {{ getClassGroupName(payment.student_session?.class_group) }}
+                </span>
+              </div>
+
               <div class="info-row">
                 <span class="label">Version</span>
                 <span class="val">
@@ -70,7 +78,14 @@
               <div class="info-row">
                 <span class="label">Section</span>
                 <span class="val">
-                  {{ payment.student?.section?.section_name || 'N/A' }}
+                  {{ payment.student_session?.section?.section_name || 'N/A' }}
+                </span>
+              </div>
+
+              <div class="info-row">
+                <span class="label">Shift</span>
+                <span class="val">
+                  {{ payment.student_session?.shift?.name || 'N/A' }}
                 </span>
               </div>
 
@@ -83,7 +98,6 @@
             </div>
           </div>
 
-          <!-- Payment Information Card -->
           <div class="info-card">
             <div class="card-header-title payment-header-tag">PAYMENT INFO</div>
 
@@ -104,7 +118,6 @@
 
               <div class="info-row">
                 <span class="label">Status</span>
-
                 <span class="val">
                   <span
                     class="status-badge"
@@ -129,31 +142,24 @@
           </thead>
 
           <tbody>
-            <!-- 1. Monthly Fee -->
             <tr>
               <td class="col-index">1</td>
               <td>Monthly Fee</td>
-              <td class="amount-column">
-                BDT
-                {{ formatAmount(payment.student?.monthly_fee || payment.monthly_fee || 0) }}
-              </td>
+              <td class="amount-column">BDT {{ formatAmount(monthlyFee) }}</td>
             </tr>
 
-            <!-- 2. Paid Amount -->
             <tr>
               <td class="col-index">2</td>
               <td>Paid Amount</td>
               <td class="amount-column">BDT {{ formatAmount(payment.paid_amount) }}</td>
             </tr>
 
-            <!-- 3. Admission Fee -->
             <tr v-if="Number(payment.admission_fee) > 0">
               <td class="col-index">3</td>
               <td>Admission Fee</td>
               <td class="amount-column">BDT {{ formatAmount(payment.admission_fee) }}</td>
             </tr>
 
-            <!-- 4. Exam Fee -->
             <tr v-if="Number(payment.exam_fee) > 0">
               <td class="col-index">4</td>
               <td>Exam Fee</td>
@@ -162,10 +168,9 @@
           </tbody>
         </table>
 
-        <!-- Total Paid Banner Box -->
+        <!-- Total Paid -->
         <div class="total-paid-box">
           <span class="total-title">TOTAL PAID</span>
-
           <span class="total-amount"> BDT {{ formatAmount(totalPaid) }} </span>
         </div>
 
@@ -177,7 +182,7 @@
         </div>
       </div>
 
-      <!-- Action Buttons -->
+      <!-- Actions -->
       <div class="receipt-actions no-print">
         <button type="button" class="btn btn-primary" @click="printReceipt">
           <i class="bi bi-printer"></i>
@@ -197,7 +202,6 @@
     </div>
   </div>
 
-  <!-- Loading / Not Found -->
   <div v-else class="empty-state">
     <h4>Payment not found</h4>
 
@@ -233,9 +237,7 @@ const formatAmount = (amount) => {
 |--------------------------------------------------------------------------
 */
 const formatDate = (date) => {
-  if (!date) {
-    return 'N/A'
-  }
+  if (!date) return 'N/A'
 
   const parsedDate = new Date(date)
 
@@ -252,7 +254,25 @@ const formatDate = (date) => {
 
 /*
 |--------------------------------------------------------------------------
-| Total Paid
+| Payment's Own Student Session
+|--------------------------------------------------------------------------
+*/
+const studentSession = computed(() => {
+  return payment.value?.student_session || null
+})
+
+/*
+|--------------------------------------------------------------------------
+| Monthly Fee From Payment's Session
+|--------------------------------------------------------------------------
+*/
+const monthlyFee = computed(() => {
+  return Number(studentSession.value?.monthly_fee || 0)
+})
+
+/*
+|--------------------------------------------------------------------------
+| Total Paid For This Payment Only
 |--------------------------------------------------------------------------
 */
 const totalPaid = computed(() => {
@@ -265,13 +285,33 @@ const totalPaid = computed(() => {
 
 /*
 |--------------------------------------------------------------------------
+| Academic Session Name
+|--------------------------------------------------------------------------
+*/
+const getAcademicSessionName = (session) => {
+  if (!session) return 'N/A'
+
+  return session.session_name || session.name || session.year || 'N/A'
+}
+
+/*
+|--------------------------------------------------------------------------
+| Class Group Name
+|--------------------------------------------------------------------------
+*/
+const getClassGroupName = (group) => {
+  if (!group) return 'N/A'
+
+  return group.group_name || group.name || 'N/A'
+}
+
+/*
+|--------------------------------------------------------------------------
 | Institute Logo URL
 |--------------------------------------------------------------------------
 */
 const getLogoUrl = (logo) => {
-  if (!logo) {
-    return ''
-  }
+  if (!logo) return ''
 
   if (logo.startsWith('http://') || logo.startsWith('https://')) {
     return logo
@@ -292,7 +332,6 @@ const getLogoUrl = (logo) => {
 const fetchInstitute = async () => {
   try {
     const response = await api.get('/institute-info')
-
     institute.value = response.data.data
   } catch (error) {
     console.error('Failed to fetch institute information:', error)
@@ -301,17 +340,20 @@ const fetchInstitute = async () => {
 
 /*
 |--------------------------------------------------------------------------
-| Fetch Payment
+| Fetch One Payment
 |--------------------------------------------------------------------------
 */
 const getPayment = async (id) => {
   try {
-    const response = await api.get(`/payments/${id}`)
+    if (!id) {
+      payment.value = null
+      return
+    }
 
-    payment.value = response.data.payment
+    const response = await api.get(`/payments/${id}`)
+    payment.value = response.data.payment || null
   } catch (error) {
     console.error('Failed to fetch payment:', error)
-
     payment.value = null
   }
 }
@@ -332,9 +374,7 @@ const printReceipt = () => {
 */
 const sendWhatsApp = async () => {
   try {
-    if (!payment.value) {
-      return
-    }
+    if (!payment.value) return
 
     const phoneNumber = payment.value.student?.phone
 
@@ -343,16 +383,10 @@ const sendWhatsApp = async () => {
       return
     }
 
-    /*
-     * Get receipt PDF URL from backend
-     */
     const response = await api.get(`/payments/${payment.value.id}/receipt`)
 
     const pdfUrl = response.data?.url || response.data?.pdf_url || response.data?.receipt_url
 
-    /*
-     * Normalize Bangladesh phone number
-     */
     let phone = String(phoneNumber).replace(/\D/g, '')
 
     if (phone.startsWith('0')) {
@@ -376,15 +410,21 @@ Receipt ID: ${payment.value.id}
 
 Student: ${payment.value.student?.full_name || 'N/A'}
 
-Class: ${payment.value.student?.class_info?.class_name || 'N/A'}
+Class: ${studentSession.value?.class_info?.class_name || 'N/A'}
+
+Academic Session: ${getAcademicSessionName(studentSession.value?.academic_session)}
+
+Group: ${getClassGroupName(studentSession.value?.class_group)}
+
+Section: ${studentSession.value?.section?.section_name || 'N/A'}
+
+Shift: ${studentSession.value?.shift?.shift_name || 'N/A'}
 
 Version: ${payment.value.student?.version || 'N/A'}
 
-Section: ${payment.value.student?.section?.section_name || 'N/A'}
-
 Month: ${payment.value.month || 'N/A'}
 
-Total Paid: ৳${formatAmount(totalPaid.value)}
+Total Paid: BDT ${formatAmount(totalPaid.value)}
 
 Payment Status: ${payment.value.status || 'N/A'}
 
@@ -397,8 +437,7 @@ Thank you.
 
     window.open(waLink, '_blank')
   } catch (error) {
-    console.error('Failed to send WhatsApp receipt:', error)
-
+    console.error('Failed to prepare WhatsApp receipt:', error)
     alert('Unable to prepare WhatsApp receipt.')
   }
 }
@@ -422,11 +461,11 @@ watch(
   () => route.params.id,
   async (newId) => {
     if (!newId) {
+      payment.value = null
       return
     }
 
     payment.value = null
-
     await getPayment(newId)
   },
 )
@@ -452,7 +491,6 @@ watch(
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
-/* Top Header Layout */
 .receipt-top-header {
   display: flex;
   justify-content: space-between;
@@ -515,10 +553,9 @@ watch(
 .divider-line {
   border: none;
   border-top: 2px solid #2563eb;
-  margin: 20px 0 25px 0;
+  margin: 20px 0 25px;
 }
 
-/* Info Cards Grid (Side-by-Side) */
 .info-cards-grid {
   display: grid;
   grid-template-columns: 1.3fr 1fr;
@@ -562,21 +599,23 @@ watch(
 .info-row {
   display: flex;
   justify-content: space-between;
+  gap: 12px;
   font-size: 13.5px;
 }
 
 .info-row .label {
   color: #64748b;
   font-weight: 600;
+  flex-shrink: 0;
 }
 
 .info-row .val {
   color: #1e293b;
   font-weight: 500;
   text-align: right;
+  overflow-wrap: anywhere;
 }
 
-/* Payment Table */
 .payment-table {
   width: 100%;
   border-collapse: collapse;
@@ -610,7 +649,6 @@ watch(
   text-align: right;
 }
 
-/* Total Paid Box */
 .total-paid-box {
   border: 1px solid #bfdbfe;
   background: #f8fafc;
@@ -635,7 +673,6 @@ watch(
   font-weight: 800;
 }
 
-/* Footer */
 .receipt-footer {
   text-align: center;
   color: #64748b;
@@ -664,7 +701,6 @@ watch(
   font-weight: 500;
 }
 
-/* Status Badges */
 .status-badge {
   display: inline-block;
   padding: 2px 10px;
@@ -684,7 +720,6 @@ watch(
   color: #991b1b;
 }
 
-/* Actions */
 .receipt-actions {
   display: flex;
   justify-content: center;
@@ -696,7 +731,6 @@ watch(
   min-width: 150px;
 }
 
-/* Empty */
 .empty-state {
   min-height: 70vh;
   display: flex;
@@ -705,7 +739,6 @@ watch(
   align-items: center;
 }
 
-/* Print */
 @media print {
   @page {
     size: A4;
@@ -736,7 +769,6 @@ watch(
   }
 }
 
-/* Mobile Responsiveness */
 @media (max-width: 768px) {
   .receipt-top-header {
     flex-direction: column;
@@ -748,6 +780,7 @@ watch(
     width: 100%;
     flex-direction: row;
     justify-content: space-between;
+    flex-wrap: wrap;
   }
 
   .info-cards-grid {

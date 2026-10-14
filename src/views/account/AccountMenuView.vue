@@ -106,7 +106,49 @@
           <i class="fa-solid fa-user-check"></i>
           <span>Single Student Payment</span>
         </router-link>
+        <div class="dropdown sidebar-dropdown">
+          <button class="student-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            <span>
+              <i class="fa-solid fa-user-graduate"></i>
+              Register
+            </span>
+          </button>
 
+          <ul class="dropdown-menu">
+            <li>
+              <router-link
+                class="dropdown-item"
+                to="/registerKhata"
+                active-class="active-menu"
+                @click="closeSidebar"
+              >
+                <i class="fa-solid fa-users"></i>
+                All History Of Register
+              </router-link>
+              <router-link
+                class="dropdown-item"
+                to="/student-attendance"
+                active-class="active-menu"
+                @click="closeSidebar"
+              >
+                <i class="fa-solid fa-users"></i>
+                Select a Class
+              </router-link>
+            </li>
+
+            <li>
+              <button
+                type="button"
+                class="dropdown-item"
+                data-bs-toggle="modal"
+                data-bs-target="#addModal"
+              >
+                <i class="fa-solid fa-user-plus"></i>
+                Add Student
+              </button>
+            </li>
+          </ul>
+        </div>
         <!-- ================= EXPENSE ================= -->
 
         <router-link to="/expense" class="menu-item" active-class="active-menu" @click="closeMenu">
@@ -671,5 +713,80 @@ onMounted(() => {
 .menu-item:active,
 .logout-btn:active {
   transform: scale(0.98);
+}
+
+.sidebar-dropdown {
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+.student-btn {
+  width: 100%;
+  background: transparent !important;
+  border: none !important;
+  outline: none;
+  color: #e5e7eb !important;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.25s ease;
+}
+
+.student-btn > span {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.student-btn:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #fff !important;
+}
+
+.student-btn > span > i {
+  width: 22px;
+  text-align: center;
+  font-size: 15px;
+}
+
+/* =========================================================
+   DROPDOWN MENU
+========================================================= */
+
+.dropdown-menu {
+  width: 100%;
+  background: #1f2937 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 6px;
+  margin-top: 4px !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #e5e7eb !important;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  transition: all 0.25s ease;
+}
+
+.dropdown-item:hover {
+  background: #2563eb !important;
+  color: #fff !important;
+  transform: translateX(3px);
+}
+
+.dropdown-item i {
+  width: 19px;
+  text-align: center;
 }
 </style>

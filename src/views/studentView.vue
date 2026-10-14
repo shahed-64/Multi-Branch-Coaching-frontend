@@ -4,8 +4,7 @@
   <dashPageView />
 
   <div class="content">
-    <!-- ================= HEADER ================= -->
-
+    <!-- HEADER -->
     <div class="staff-header">
       <div>
         <h2>Student Management</h2>
@@ -17,7 +16,6 @@
           <div class="summary-icon">
             <i class="bi bi-mortarboard-fill"></i>
           </div>
-
           <div>
             <h4>{{ totalStudents }}</h4>
             <span>Total Students</span>
@@ -36,31 +34,23 @@
       </div>
     </div>
 
-    <!-- ================= MAIN CARD ================= -->
-
+    <!-- MAIN CARD -->
     <div class="staff-table-card">
-      <!-- TOOLBAR -->
-
       <div class="staff-toolbar">
         <div class="search-box">
           <i class="bi bi-search"></i>
-
           <input v-model="search" type="text" placeholder="Search student..." />
         </div>
 
-        <!-- CLASS FILTER -->
-
         <select v-model="selectedClass" class="class-filter">
           <option value="">All Classes</option>
-
           <option v-for="cls in classes" :key="cls.id" :value="String(cls.id)">
             {{ cls.class_name }}
           </option>
         </select>
       </div>
 
-      <!-- TABLE -->
-
+      <!-- STUDENT TABLE -->
       <div class="table-responsive">
         <table class="table staff-table align-middle">
           <thead>
@@ -77,22 +67,15 @@
           </thead>
 
           <tbody>
-            <!-- LOADING -->
-
             <tr v-if="loading">
               <td colspan="8" class="text-center py-5">
                 <div class="spinner-border text-primary" role="status"></div>
-
                 <div class="mt-2 text-muted">Loading students...</div>
               </td>
             </tr>
 
-            <!-- STUDENTS -->
-
             <tr v-for="(item, index) in students" :key="item.id" v-else>
-              <td>
-                {{ (currentPage - 1) * perPage + index + 1 }}
-              </td>
+              <td>{{ (currentPage - 1) * perPage + index + 1 }}</td>
 
               <td>
                 <img :src="getImageUrl(item)" class="staff-avatar" alt="Student Photo" />
@@ -100,17 +83,10 @@
 
               <td>
                 <div class="staff-name">
-                  <strong>
-                    {{ item.full_name }}
-                  </strong>
-
-                  <small>
-                    {{ item.student_id }}
-                  </small>
+                  <strong>{{ item.full_name }}</strong>
+                  <small>{{ item.student_id }}</small>
                 </div>
               </td>
-
-              <!-- VERSION -->
 
               <td>
                 <span class="version-badge">
@@ -118,36 +94,23 @@
                 </span>
               </td>
 
-              <!-- CLASS -->
-
               <td>
                 <span class="skill-badge">
-                  {{ item.class_info ? item.class_info.class_name : 'N/A' }}
+                  {{ getStudentClassName(item) }}
                 </span>
               </td>
 
-              <!-- GROUP -->
-
               <td>
-                <span v-if="item.class_group" class="group-badge">
-                  {{ item.class_group.group_name }}
+                <span v-if="getStudentGroupName(item) !== 'N/A'" class="group-badge">
+                  {{ getStudentGroupName(item) }}
                 </span>
-
-                <span v-else class="text-muted"> N/A </span>
+                <span v-else class="text-muted">N/A</span>
               </td>
 
-              <!-- EMAIL -->
-
-              <td>
-                {{ item.email || 'N/A' }}
-              </td>
-
-              <!-- ACTION -->
+              <td>{{ item.email || 'N/A' }}</td>
 
               <td>
                 <div class="action-buttons">
-                  <!-- VIEW -->
-
                   <button
                     class="action-btn view"
                     @click="openView(item)"
@@ -157,8 +120,6 @@
                   >
                     <i class="bi bi-eye"></i>
                   </button>
-
-                  <!-- EDIT -->
 
                   <button
                     class="action-btn edit"
@@ -170,8 +131,6 @@
                     <i class="bi bi-pencil"></i>
                   </button>
 
-                  <!-- QR -->
-
                   <button
                     class="action-btn qr"
                     @click="openQr(item)"
@@ -182,8 +141,6 @@
                     <i class="bi bi-qr-code"></i>
                   </button>
 
-                  <!-- DELETE -->
-
                   <button class="action-btn delete" @click="deleteStudent(item.id)" title="Delete">
                     <i class="bi bi-trash"></i>
                   </button>
@@ -191,15 +148,11 @@
               </td>
             </tr>
 
-            <!-- EMPTY STATE -->
-
             <tr v-if="!loading && students.length === 0">
               <td colspan="8" class="text-center py-5">
                 <div class="empty-state">
                   <i class="bi bi-person-x"></i>
-
                   <h5>No Student Found</h5>
-
                   <p>Try changing search or filter</p>
                 </div>
               </td>
@@ -209,19 +162,9 @@
       </div>
 
       <!-- PAGINATION -->
-
       <div v-if="filteredTotal > 0" class="pagination-box">
         <div>
-          Showing
-
-          <b>{{ showingFrom }}</b>
-
-          to
-
-          <b>{{ showingTo }}</b>
-
-          of
-
+          Showing <b>{{ showingFrom }}</b> to <b>{{ showingTo }}</b> of
           <b>{{ filteredTotal }}</b>
         </div>
 
@@ -230,7 +173,7 @@
             <i class="bi bi-chevron-left"></i>
           </button>
 
-          <span> {{ currentPage }} / {{ totalPages }} </span>
+          <span>{{ currentPage }} / {{ totalPages }}</span>
 
           <button
             class="page-btn"
@@ -243,25 +186,17 @@
       </div>
     </div>
 
-    <!-- ========================================================= -->
     <!-- ADD STUDENT MODAL -->
-    <!-- ========================================================= -->
-
     <div class="modal fade" id="addModal" ref="addModalRef">
       <div class="modal-dialog modal-lg">
         <div class="modal-content student-modal">
           <div class="modal-header">
-            <h5>
-              <i class="bi bi-person-plus-fill me-2"></i>
-              Add Student
-            </h5>
-
+            <h5><i class="bi bi-person-plus-fill me-2"></i>Add Student</h5>
             <button class="btn-close" data-bs-dismiss="modal"></button>
           </div>
 
           <div class="modal-body">
             <!-- IMAGE -->
-
             <div class="text-center mb-4">
               <img
                 :src="addPreview || defaultAvatar"
@@ -279,13 +214,8 @@
             </div>
 
             <!-- FULL NAME -->
-
             <div class="mb-3">
-              <label class="form-label">
-                Full Name
-                <span class="text-danger">*</span>
-              </label>
-
+              <label class="form-label"> Full Name <span class="text-danger">*</span> </label>
               <input
                 v-model="form.full_name"
                 type="text"
@@ -295,36 +225,21 @@
             </div>
 
             <!-- VERSION -->
-
             <div class="mb-3">
-              <label class="form-label">
-                Version
-
-                <span class="text-danger">*</span>
-              </label>
-
+              <label class="form-label"> Version <span class="text-danger">*</span> </label>
               <select v-model="form.version" class="form-select">
                 <option value="" disabled>Select Version</option>
-
                 <option value="Bangla Medium (Special Care)">Bangla Medium (Special Care)</option>
-
                 <option value="Bangla Medium (School Section)">
                   Bangla Medium (School Section)
                 </option>
-
                 <option value="English Version">English Version</option>
               </select>
             </div>
 
             <!-- FATHER -->
-
             <div class="mb-3">
-              <label class="form-label">
-                Father's Name
-
-                <span class="text-danger">*</span>
-              </label>
-
+              <label class="form-label"> Father's Name <span class="text-danger">*</span> </label>
               <input
                 v-model="form.fathers_name"
                 type="text"
@@ -334,14 +249,8 @@
             </div>
 
             <!-- MOTHER -->
-
             <div class="mb-3">
-              <label class="form-label">
-                Mother's Name
-
-                <span class="text-danger">*</span>
-              </label>
-
+              <label class="form-label"> Mother's Name <span class="text-danger">*</span> </label>
               <input
                 v-model="form.mothers_name"
                 type="text"
@@ -351,14 +260,8 @@
             </div>
 
             <!-- PHONE -->
-
             <div class="mb-3">
-              <label class="form-label">
-                Phone
-
-                <span class="text-danger">*</span>
-              </label>
-
+              <label class="form-label"> Phone <span class="text-danger">*</span> </label>
               <input
                 v-model="form.phone"
                 type="text"
@@ -368,10 +271,8 @@
             </div>
 
             <!-- EMAIL -->
-
             <div class="mb-3">
-              <label class="form-label"> Email </label>
-
+              <label class="form-label">Email</label>
               <input
                 v-model="form.email"
                 type="email"
@@ -380,24 +281,13 @@
               />
             </div>
 
-            <!-- ================================================= -->
             <!-- BRANCH -->
-            <!-- MANAGER ONLY -->
-            <!-- ================================================= -->
-
             <div class="mb-3">
-              <!-- MANAGER -->
-
               <template v-if="isManager">
-                <label class="form-label">
-                  Branch
-
-                  <span class="text-danger">*</span>
-                </label>
+                <label class="form-label"> Branch <span class="text-danger">*</span> </label>
 
                 <select v-model="form.branch_id" class="form-select">
                   <option value="">Select Branch</option>
-
                   <option v-for="branch in branches" :key="branch.id" :value="branch.id">
                     {{ branch.name || branch.branch_name }}
                   </option>
@@ -406,27 +296,54 @@
                 <small class="text-muted"> Select the branch where this student belongs. </small>
               </template>
 
-              <!-- NON-MANAGER -->
-
               <template v-else-if="form.branch_id">
-                <label class="form-label"> Branch </label>
-
+                <label class="form-label">Branch</label>
                 <input class="form-control" :value="getBranchName(form.branch_id)" readonly />
               </template>
             </div>
 
-            <!-- CLASS GROUP -->
-
+            <!-- ACADEMIC SESSION -->
             <div class="mb-3">
               <label class="form-label">
-                Class Group
-
-                <span class="text-danger">*</span>
+                Academic Session <span class="text-danger">*</span>
               </label>
+
+              <select
+                v-model="form.academic_session_id"
+                class="form-select"
+                :disabled="!form.branch_id || availableAcademicSessions.length === 0"
+              >
+                <option value="">Select Academic Session</option>
+
+                <option
+                  v-for="session in availableAcademicSessions"
+                  :key="session.id"
+                  :value="String(session.id)"
+                >
+                  {{ session.name }}
+                  {{ session.is_active ? '(Active)' : '' }}
+                </option>
+              </select>
+
+              <small v-if="!form.branch_id" class="text-muted">
+                Please select a branch first.
+              </small>
+
+              <small v-else-if="availableAcademicSessions.length === 0" class="text-danger">
+                No academic sessions found for this branch. Please create a session first.
+              </small>
+
+              <small v-else class="text-muted">
+                Select the academic year in which this student is enrolling.
+              </small>
+            </div>
+
+            <!-- CLASS GROUP -->
+            <div class="mb-3">
+              <label class="form-label"> Class Group <span class="text-danger">*</span> </label>
 
               <select v-model="form.class_group_id" class="form-select">
                 <option value="" disabled>Select Group</option>
-
                 <option v-for="group in availableClassGroups" :key="group.id" :value="group.id">
                   {{ group.group_name }}
                 </option>
@@ -442,17 +359,11 @@
             </div>
 
             <!-- CLASS -->
-
             <div class="mb-3">
-              <label class="form-label">
-                Class
-
-                <span class="text-danger">*</span>
-              </label>
+              <label class="form-label"> Class <span class="text-danger">*</span> </label>
 
               <select v-model="form.class_id" class="form-select">
                 <option value="" disabled>Select Class</option>
-
                 <option v-for="cls in availableClasses" :key="cls.id" :value="cls.id">
                   {{ cls.class_name }}
                 </option>
@@ -468,13 +379,10 @@
             </div>
 
             <!-- SECTION -->
-
             <div class="mb-3">
-              <label class="form-label"> Section </label>
-
+              <label class="form-label">Section</label>
               <select v-model="form.section_id" class="form-select">
                 <option value="">Select Section</option>
-
                 <option v-for="sec in availableSections" :key="sec.id" :value="sec.id">
                   {{ sec.section_name }}
                 </option>
@@ -486,16 +394,12 @@
             </div>
 
             <!-- SHIFT -->
-
             <div class="mb-3">
-              <label class="form-label"> Assign Shift </label>
-
+              <label class="form-label">Assign Shift</label>
               <select v-model="form.shift_id" class="form-select">
                 <option value="" disabled>Select Shift</option>
-
                 <option v-for="shift in availableShifts" :key="shift.id" :value="shift.id">
-                  {{ shift.name }}
-                  ({{ shift.start_time }} - {{ shift.end_time }})
+                  {{ shift.name }} ({{ shift.start_time }} - {{ shift.end_time }})
                 </option>
               </select>
 
@@ -505,10 +409,8 @@
             </div>
 
             <!-- MONTHLY FEE -->
-
             <div class="mb-3">
-              <label class="form-label"> Monthly Fee </label>
-
+              <label class="form-label">Monthly Fee</label>
               <input
                 v-model="form.monthly_fee"
                 type="number"
@@ -523,33 +425,20 @@
             <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 
             <button class="btn btn-primary" :disabled="loading" @click="student_create">
-              <span v-if="loading"> Saving... </span>
-
-              <span v-else>
-                <i class="bi bi-person-plus-fill me-1"></i>
-
-                Save Student
-              </span>
+              <span v-if="loading">Saving...</span>
+              <span v-else> <i class="bi bi-person-plus-fill me-1"></i>Save Student </span>
             </button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- ========================================================= -->
     <!-- VIEW STUDENT MODAL -->
-    <!-- ========================================================= -->
-
     <div class="modal fade" id="viewModal" ref="viewModalRef">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content student-modal">
           <div class="modal-header bg-primary text-white">
-            <h5>
-              <i class="bi bi-person-vcard-fill me-2"></i>
-
-              Student Details
-            </h5>
-
+            <h5><i class="bi bi-person-vcard-fill me-2"></i>Student Details</h5>
             <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
           </div>
 
@@ -560,14 +449,8 @@
               alt="Student Avatar"
             />
 
-            <h4>
-              {{ selectedStudent.full_name }}
-            </h4>
-
-            <p class="text-muted">
-              {{ selectedStudent.student_id }}
-            </p>
-
+            <h4>{{ selectedStudent.full_name }}</h4>
+            <p class="text-muted">{{ selectedStudent.student_id }}</p>
             <hr />
 
             <div class="text-start px-3">
@@ -602,28 +485,37 @@
               </p>
 
               <p>
+                <strong>Academic Session:</strong>
+                {{ getLatestStudentEnrollment(selectedStudent)?.academic_session?.name || 'N/A' }}
+              </p>
+
+              <p>
                 <strong>Class:</strong>
-                {{ selectedStudent.class_info?.class_name || 'N/A' }}
+                {{ getStudentClassName(selectedStudent) }}
               </p>
 
               <p>
                 <strong>Group:</strong>
-                {{ selectedStudent.class_group?.group_name || 'N/A' }}
+                {{ getStudentGroupName(selectedStudent) }}
               </p>
 
               <p>
                 <strong>Section:</strong>
-                {{ selectedStudent.section?.section_name || 'N/A' }}
+                {{ getStudentSectionName(selectedStudent) }}
               </p>
 
               <p>
                 <strong>Shift:</strong>
-                {{ selectedStudent.shift?.name || 'N/A' }}
+                {{ getStudentShiftName(selectedStudent) }}
               </p>
 
               <p>
                 <strong>Monthly Fee:</strong>
-                {{ selectedStudent.monthly_fee ? '৳ ' + selectedStudent.monthly_fee : 'N/A' }}
+                {{
+                  getEnrollmentValue(selectedStudent, 'monthly_fee') !== ''
+                    ? '৳ ' + getEnrollmentValue(selectedStudent, 'monthly_fee')
+                    : 'N/A'
+                }}
               </p>
 
               <p>
@@ -636,26 +528,16 @@
       </div>
     </div>
 
-    <!-- ========================================================= -->
     <!-- EDIT STUDENT MODAL -->
-    <!-- ========================================================= -->
-
     <div class="modal fade" id="editModal" ref="editModalRef">
       <div class="modal-dialog modal-lg">
         <div class="modal-content student-modal">
           <div class="modal-header">
-            <h5>
-              <i class="bi bi-pencil-square me-2"></i>
-
-              Edit Student
-            </h5>
-
+            <h5><i class="bi bi-pencil-square me-2"></i>Edit Student</h5>
             <button class="btn-close" data-bs-dismiss="modal"></button>
           </div>
 
           <div class="modal-body">
-            <!-- IMAGE -->
-
             <div class="text-center mb-4">
               <img
                 :src="editPreview || getImageUrl(selectedStudent)"
@@ -672,81 +554,49 @@
               />
             </div>
 
-            <!-- FULL NAME -->
-
             <div class="mb-3">
-              <label class="form-label"> Full Name </label>
-
+              <label class="form-label">Full Name</label>
               <input v-model="selectedStudent.full_name" class="form-control" placeholder="Name" />
             </div>
 
-            <!-- VERSION -->
-
             <div class="mb-3">
-              <label class="form-label">
-                Version
-
-                <span class="text-danger">*</span>
-              </label>
+              <label class="form-label"> Version <span class="text-danger">*</span> </label>
 
               <select v-model="selectedStudent.version" class="form-select">
                 <option value="" disabled>Select Version</option>
-
                 <option value="Bangla Medium (Special Care)">Bangla Medium (Special Care)</option>
-
                 <option value="Bangla Medium (School Section)">
                   Bangla Medium (School Section)
                 </option>
-
                 <option value="English Version">English Version</option>
               </select>
             </div>
 
-            <!-- PHONE -->
-
             <div class="mb-3">
-              <label class="form-label"> Phone </label>
-
+              <label class="form-label">Phone</label>
               <input v-model="selectedStudent.phone" class="form-control" placeholder="Phone" />
             </div>
 
-            <!-- EMAIL -->
-
             <div class="mb-3">
-              <label class="form-label"> Email </label>
-
+              <label class="form-label">Email</label>
               <input v-model="selectedStudent.email" class="form-control" placeholder="Email" />
             </div>
 
-            <!-- ================================================= -->
             <!-- BRANCH -->
-            <!-- MANAGER ONLY -->
-            <!-- ================================================= -->
-
             <div class="mb-3">
-              <!-- MANAGER -->
-
               <template v-if="isManager">
-                <label class="form-label">
-                  Branch
-
-                  <span class="text-danger">*</span>
-                </label>
+                <label class="form-label"> Branch <span class="text-danger">*</span> </label>
 
                 <select v-model="selectedStudent.branch_id" class="form-select">
                   <option value="">Select Branch</option>
-
                   <option v-for="branch in branches" :key="branch.id" :value="branch.id">
                     {{ branch.name || branch.branch_name }}
                   </option>
                 </select>
               </template>
 
-              <!-- NON-MANAGER -->
-
               <template v-else-if="selectedStudent.branch_id">
-                <label class="form-label"> Branch </label>
-
+                <label class="form-label">Branch</label>
                 <input
                   class="form-control"
                   :value="getBranchName(selectedStudent.branch_id)"
@@ -755,14 +605,48 @@
               </template>
             </div>
 
-            <!-- CLASS GROUP -->
-
+            <!-- ACADEMIC SESSION -->
             <div class="mb-3">
-              <label class="form-label"> Class Group </label>
+              <label class="form-label">
+                Academic Session <span class="text-danger">*</span>
+              </label>
+
+              <select
+                v-model="selectedStudent.academic_session_id"
+                class="form-select"
+                :disabled="!selectedStudent.branch_id || editAvailableAcademicSessions.length === 0"
+              >
+                <option value="">Select Academic Session</option>
+
+                <option
+                  v-for="session in editAvailableAcademicSessions"
+                  :key="session.id"
+                  :value="String(session.id)"
+                >
+                  {{ session.name }}
+                  {{ session.is_active ? '(Active)' : '' }}
+                </option>
+              </select>
+
+              <small v-if="!selectedStudent.branch_id" class="text-muted">
+                Please select a branch first.
+              </small>
+
+              <small v-else-if="editAvailableAcademicSessions.length === 0" class="text-danger">
+                No academic sessions found for this branch.
+              </small>
+
+              <small v-else class="text-muted">
+                Select the academic session whose class information you want to edit.
+              </small>
+            </div>
+
+            <!-- CLASS GROUP -->
+            <div class="mb-3">
+              <label class="form-label">Class Group</label>
 
               <select v-model="selectedStudent.class_group_id" class="form-select">
                 <option value="" disabled>Select Group</option>
-
                 <option v-for="group in editAvailableClassGroups" :key="group.id" :value="group.id">
                   {{ group.group_name }}
                 </option>
@@ -781,13 +665,11 @@
             </div>
 
             <!-- CLASS -->
-
             <div class="mb-3">
-              <label class="form-label"> Class </label>
+              <label class="form-label">Class</label>
 
               <select v-model="selectedStudent.class_id" class="form-select">
                 <option value="" disabled>Select Class</option>
-
                 <option v-for="cls in editAvailableClasses" :key="cls.id" :value="cls.id">
                   {{ cls.class_name }}
                 </option>
@@ -802,13 +684,11 @@
             </div>
 
             <!-- SECTION -->
-
             <div class="mb-3">
-              <label class="form-label"> Section </label>
+              <label class="form-label">Section</label>
 
               <select v-model="selectedStudent.section_id" class="form-select">
                 <option value="">Select Section</option>
-
                 <option v-for="sec in editAvailableSections" :key="sec.id" :value="sec.id">
                   {{ sec.section_name }}
                 </option>
@@ -823,13 +703,11 @@
             </div>
 
             <!-- SHIFT -->
-
             <div class="mb-3">
-              <label class="form-label"> Shift </label>
+              <label class="form-label">Shift</label>
 
               <select v-model="selectedStudent.shift_id" class="form-select">
                 <option value="">Select Shift</option>
-
                 <option v-for="shift in editAvailableShifts" :key="shift.id" :value="shift.id">
                   {{ shift.name }}
                 </option>
@@ -844,10 +722,8 @@
             </div>
 
             <!-- MONTHLY FEE -->
-
             <div class="mb-3">
-              <label class="form-label"> Monthly Fee </label>
-
+              <label class="form-label">Monthly Fee</label>
               <input
                 v-model="selectedStudent.monthly_fee"
                 type="number"
@@ -868,37 +744,23 @@
       </div>
     </div>
 
-    <!-- ========================================================= -->
     <!-- QR STUDENT MODAL -->
-    <!-- ========================================================= -->
-
     <div class="modal fade" id="qrModal" ref="qrModalRef">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content student-modal">
           <div class="modal-header bg-dark text-white">
-            <h5>
-              <i class="bi bi-qr-code me-2"></i>
-
-              Student QR Code
-            </h5>
-
+            <h5><i class="bi bi-qr-code me-2"></i>Student QR Code</h5>
             <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
           </div>
 
           <div class="modal-body text-center">
             <div v-if="qrStudent">
-              <h5 class="mb-1">
-                {{ qrStudent.full_name }}
-              </h5>
-
-              <p class="text-muted mb-3">
-                {{ qrStudent.student_id }}
-              </p>
+              <h5 class="mb-1">{{ qrStudent.full_name }}</h5>
+              <p class="text-muted mb-3">{{ qrStudent.student_id }}</p>
 
               <div class="qr-box mb-3">
                 <div v-if="qrLoading" class="text-muted">
                   <div class="spinner-border text-primary mb-2" role="status"></div>
-
                   <div>Generating QR Code...</div>
                 </div>
 
@@ -913,9 +775,7 @@
               </div>
 
               <button v-if="qrImage" class="btn btn-dark" type="button" @click="printQr">
-                <i class="bi bi-printer me-1"></i>
-
-                Print QR
+                <i class="bi bi-printer me-1"></i>Print QR
               </button>
             </div>
           </div>
@@ -942,6 +802,7 @@ const classes = ref([])
 const classGroups = ref([])
 const shifts = ref([])
 const branches = ref([])
+const academicSessions = ref([])
 
 const search = ref('')
 const selectedClass = ref('')
@@ -965,19 +826,12 @@ const editFileInput = ref(null)
 const addModalRef = ref(null)
 const editModalRef = ref(null)
 
-/* =====================================================
-   QR
-===================================================== */
-
 const qrModalRef = ref(null)
 const qrStudent = ref(null)
 const qrImage = ref('')
 const qrLoading = ref(false)
 
-/* =====================================================
-   USER ROLE + CURRENT USER
-===================================================== */
-
+/* USER ROLE + CURRENT USER */
 const isManager = ref(false)
 const currentUser = ref({})
 
@@ -987,28 +841,20 @@ const getCurrentUserRole = () => {
 
     for (const key of possibleKeys) {
       const stored = localStorage.getItem(key)
-
       if (!stored) continue
 
       const data = JSON.parse(stored)
-
       const role = data?.role || data?.staff?.role || data?.user?.role
 
-      if (role) {
-        return String(role).toLowerCase()
-      }
+      if (role) return String(role).toLowerCase()
     }
 
     const directRole = localStorage.getItem('role')
-
-    if (directRole) {
-      return String(directRole).toLowerCase()
-    }
+    if (directRole) return String(directRole).toLowerCase()
 
     return ''
   } catch (error) {
     console.error('Unable to read user role:', error)
-
     return ''
   }
 }
@@ -1019,14 +865,12 @@ const loadCurrentUser = () => {
 
     for (const key of possibleKeys) {
       const stored = localStorage.getItem(key)
-
       if (!stored) continue
 
       const data = JSON.parse(stored)
 
       if (data && typeof data === 'object') {
         currentUser.value = data
-
         return
       }
     }
@@ -1034,19 +878,14 @@ const loadCurrentUser = () => {
     currentUser.value = {}
   } catch (error) {
     console.error('Unable to read current user:', error)
-
     currentUser.value = {}
   }
 }
 
 isManager.value = getCurrentUserRole() === 'manager'
-
 loadCurrentUser()
 
-/* =====================================================
-   FORM
-===================================================== */
-
+/* ADD FORM */
 const form = reactive({
   full_name: '',
   version: '',
@@ -1056,6 +895,7 @@ const form = reactive({
   email: '',
   course_name: '',
   branch_id: '',
+  academic_session_id: '',
   class_group_id: '',
   class_id: '',
   section_id: '',
@@ -1064,6 +904,7 @@ const form = reactive({
   monthly_fee: '',
 })
 
+/* EDIT STUDENT */
 const selectedStudent = ref({
   id: null,
   full_name: '',
@@ -1075,6 +916,7 @@ const selectedStudent = ref({
   email: '',
   course_name: '',
   branch_id: '',
+  academic_session_id: '',
   class_group_id: '',
   class_id: '',
   section_id: '',
@@ -1084,92 +926,81 @@ const selectedStudent = ref({
   image: null,
 })
 
-/* =====================================================
-   OWN ASSIGNED BRANCH
-===================================================== */
-
+/* OWN ASSIGNED BRANCH */
 const getOwnBranchId = () => {
   const directBranchId =
     currentUser.value?.branch_id ||
     currentUser.value?.staff?.branch_id ||
     currentUser.value?.user?.branch_id
 
-  if (directBranchId) {
-    return directBranchId
-  }
+  if (directBranchId) return directBranchId
 
   const nestedBranchId =
     currentUser.value?.branch?.id ||
     currentUser.value?.staff?.branch?.id ||
     currentUser.value?.user?.branch?.id
 
-  if (nestedBranchId) {
-    return nestedBranchId
-  }
+  if (nestedBranchId) return nestedBranchId
 
   const storedBranchId = localStorage.getItem('branch_id')
-
-  if (storedBranchId) {
-    return storedBranchId
-  }
+  if (storedBranchId) return storedBranchId
 
   return ''
 }
 
-/* =====================================================
-   BRANCH NAME
-===================================================== */
-
+/* BRANCH NAME */
 const getBranchName = (branchId) => {
   const branch = branches.value.find((item) => Number(item.id) === Number(branchId))
 
   return branch?.name || branch?.branch_name || 'N/A'
 }
 
-/* =====================================================
-   BRANCH-WISE DEPENDENT DATA
-===================================================== */
+/* ADD: BRANCH-WISE ACADEMIC SESSIONS */
+const availableAcademicSessions = computed(() => {
+  if (!form.branch_id) return []
 
+  return academicSessions.value.filter(
+    (session) => Number(session.branch_id) === Number(form.branch_id),
+  )
+})
+
+/* EDIT: BRANCH-WISE ACADEMIC SESSIONS */
+const editAvailableAcademicSessions = computed(() => {
+  if (!selectedStudent.value.branch_id) return []
+
+  return academicSessions.value.filter(
+    (session) => Number(session.branch_id) === Number(selectedStudent.value.branch_id),
+  )
+})
+
+/* ADD: BRANCH-WISE DEPENDENT DATA */
 const availableClassGroups = computed(() => {
-  if (!form.branch_id) {
-    return []
-  }
+  if (!form.branch_id) return []
 
   return classGroups.value.filter((group) => Number(group.branch_id) === Number(form.branch_id))
 })
 
 const availableClasses = computed(() => {
-  if (!form.branch_id) {
-    return []
-  }
+  if (!form.branch_id) return []
 
   return classes.value.filter((cls) => Number(cls.branch_id) === Number(form.branch_id))
 })
 
 const availableSections = computed(() => {
-  if (!form.branch_id) {
-    return []
-  }
+  if (!form.branch_id) return []
 
   return sections.value.filter((section) => Number(section.branch_id) === Number(form.branch_id))
 })
 
 const availableShifts = computed(() => {
-  if (!form.branch_id) {
-    return []
-  }
+  if (!form.branch_id) return []
 
   return shifts.value.filter((shift) => Number(shift.branch_id) === Number(form.branch_id))
 })
 
-/* =====================================================
-   EDIT BRANCH-WISE DEPENDENT DATA
-===================================================== */
-
+/* EDIT: BRANCH-WISE DEPENDENT DATA */
 const editAvailableClassGroups = computed(() => {
-  if (!selectedStudent.value.branch_id) {
-    return []
-  }
+  if (!selectedStudent.value.branch_id) return []
 
   return classGroups.value.filter(
     (group) => Number(group.branch_id) === Number(selectedStudent.value.branch_id),
@@ -1177,9 +1008,7 @@ const editAvailableClassGroups = computed(() => {
 })
 
 const editAvailableClasses = computed(() => {
-  if (!selectedStudent.value.branch_id) {
-    return []
-  }
+  if (!selectedStudent.value.branch_id) return []
 
   return classes.value.filter(
     (cls) => Number(cls.branch_id) === Number(selectedStudent.value.branch_id),
@@ -1187,9 +1016,7 @@ const editAvailableClasses = computed(() => {
 })
 
 const editAvailableSections = computed(() => {
-  if (!selectedStudent.value.branch_id) {
-    return []
-  }
+  if (!selectedStudent.value.branch_id) return []
 
   return sections.value.filter(
     (section) => Number(section.branch_id) === Number(selectedStudent.value.branch_id),
@@ -1197,29 +1024,155 @@ const editAvailableSections = computed(() => {
 })
 
 const editAvailableShifts = computed(() => {
-  if (!selectedStudent.value.branch_id) {
-    return []
-  }
+  if (!selectedStudent.value.branch_id) return []
 
   return shifts.value.filter(
     (shift) => Number(shift.branch_id) === Number(selectedStudent.value.branch_id),
   )
 })
 
-/* =====================================================
-   CLEAR INVALID ADD DATA WHEN BRANCH CHANGES
-===================================================== */
+/* FIND ENROLLMENT FOR SELECTED SESSION */
+const getStudentEnrollment = (student, sessionId) => {
+  const enrollments = Array.isArray(student?.student_sessions) ? student.student_sessions : []
 
+  return (
+    enrollments.find(
+      (enrollment) => Number(enrollment.academic_session_id) === Number(sessionId),
+    ) || null
+  )
+}
+
+/*
+ * GET LATEST ENROLLMENT.
+ * The backend currently orders student_sessions by academic_session_id DESC.
+ * Use the highest academic_session_id to match that existing behavior.
+ */
+/* GET ACTIVE ACADEMIC SESSION ENROLLMENT */
+const getLatestStudentEnrollment = (student) => {
+  const enrollments = Array.isArray(student?.student_sessions) ? student.student_sessions : []
+
+  if (!enrollments.length) return null
+
+  const activeSession = academicSessions.value.find(
+    (session) =>
+      Number(session.branch_id) === Number(student?.branch_id) && Boolean(session.is_active),
+  )
+
+  if (!activeSession) return null
+
+  return (
+    enrollments.find(
+      (enrollment) => Number(enrollment.academic_session_id) === Number(activeSession.id),
+    ) || null
+  )
+}
+
+/* GET CLASS NAME FROM LATEST ENROLLMENT */
+const getStudentClassName = (student) => {
+  const enrollment = getLatestStudentEnrollment(student)
+
+  const classId = enrollment?.class_id ?? student?.class_id
+
+  const className =
+    enrollment?.class_info?.class_name ??
+    enrollment?.classInfo?.class_name ??
+    student?.class_info?.class_name ??
+    classes.value.find((item) => Number(item.id) === Number(classId))?.class_name
+
+  return className || 'N/A'
+}
+
+/* GET GROUP NAME FROM LATEST ENROLLMENT */
+const getStudentGroupName = (student) => {
+  const enrollment = getLatestStudentEnrollment(student)
+
+  const groupId = enrollment?.class_group_id ?? student?.class_group_id
+
+  const groupName =
+    enrollment?.class_group?.group_name ??
+    enrollment?.classGroup?.group_name ??
+    student?.class_group?.group_name ??
+    classGroups.value.find((item) => Number(item.id) === Number(groupId))?.group_name
+
+  return groupName || 'N/A'
+}
+
+/* GET SECTION NAME FROM LATEST ENROLLMENT */
+const getStudentSectionName = (student) => {
+  const enrollment = getLatestStudentEnrollment(student)
+
+  const sectionId = enrollment?.section_id ?? student?.section_id
+
+  const sectionName =
+    enrollment?.section?.section_name ??
+    student?.section?.section_name ??
+    sections.value.find((item) => Number(item.id) === Number(sectionId))?.section_name
+
+  return sectionName || 'N/A'
+}
+
+/* GET SHIFT NAME FROM LATEST ENROLLMENT */
+const getStudentShiftName = (student) => {
+  const enrollment = getLatestStudentEnrollment(student)
+
+  const shiftId = enrollment?.shift_id ?? student?.shift_id
+
+  const shiftName =
+    enrollment?.shift?.name ??
+    student?.shift?.name ??
+    shifts.value.find((item) => Number(item.id) === Number(shiftId))?.name
+
+  return shiftName || 'N/A'
+}
+
+/* GET A FIELD FROM THE LATEST ENROLLMENT */
+const getEnrollmentValue = (student, field) => {
+  const enrollment = getLatestStudentEnrollment(student)
+
+  if (enrollment && enrollment[field] !== null && enrollment[field] !== undefined) {
+    return enrollment[field]
+  }
+
+  return student?.[field] ?? ''
+}
+
+/* LOAD SELECTED SESSION'S ACADEMIC DETAILS */
+const loadEnrollmentDetails = (sessionId) => {
+  if (!sessionId) return
+
+  const enrollment = getStudentEnrollment(selectedStudent.value, sessionId)
+
+  /*
+   * Only load details from an existing enrollment.
+   * Do not silently copy another session's class information.
+   */
+  if (!enrollment) {
+    selectedStudent.value.class_group_id = ''
+    selectedStudent.value.class_id = ''
+    selectedStudent.value.section_id = ''
+    selectedStudent.value.shift_id = ''
+    selectedStudent.value.monthly_fee = ''
+    return
+  }
+
+  selectedStudent.value.class_group_id = enrollment.class_group_id ?? ''
+  selectedStudent.value.class_id = enrollment.class_id ?? ''
+  selectedStudent.value.section_id = enrollment.section_id ?? ''
+  selectedStudent.value.shift_id = enrollment.shift_id ?? ''
+  selectedStudent.value.monthly_fee = enrollment.monthly_fee ?? ''
+}
+
+/* ADD: CLEAR INVALID DATA WHEN BRANCH CHANGES */
 watch(
   () => form.branch_id,
-
   (newBranchId) => {
+    form.academic_session_id = ''
+
     if (!newBranchId) {
       form.class_group_id = ''
       form.class_id = ''
       form.section_id = ''
       form.shift_id = ''
-
       return
     }
 
@@ -1227,50 +1180,52 @@ watch(
       (group) => Number(group.id) === Number(form.class_group_id),
     )
 
-    if (!groupExists) {
-      form.class_group_id = ''
-    }
+    if (!groupExists) form.class_group_id = ''
 
     const classExists = availableClasses.value.some(
       (cls) => Number(cls.id) === Number(form.class_id),
     )
 
-    if (!classExists) {
-      form.class_id = ''
-    }
+    if (!classExists) form.class_id = ''
 
     const sectionExists = availableSections.value.some(
       (section) => Number(section.id) === Number(form.section_id),
     )
 
-    if (!sectionExists) {
-      form.section_id = ''
-    }
+    if (!sectionExists) form.section_id = ''
 
     const shiftExists = availableShifts.value.some(
       (shift) => Number(shift.id) === Number(form.shift_id),
     )
 
-    if (!shiftExists) {
-      form.shift_id = ''
-    }
+    if (!shiftExists) form.shift_id = ''
   },
 )
 
-/* =====================================================
-   CLEAR INVALID EDIT DATA WHEN BRANCH CHANGES
-===================================================== */
-
+/* EDIT: CLEAR INVALID DATA WHEN BRANCH CHANGES */
 watch(
   () => selectedStudent.value.branch_id,
-
-  (newBranchId) => {
+  (newBranchId, oldBranchId) => {
     if (!newBranchId) {
+      selectedStudent.value.academic_session_id = ''
       selectedStudent.value.class_group_id = ''
       selectedStudent.value.class_id = ''
       selectedStudent.value.section_id = ''
       selectedStudent.value.shift_id = ''
+      return
+    }
 
+    /*
+     * If the branch was actually changed, reset the session
+     * and dependent academic details.
+     */
+    if (oldBranchId && Number(newBranchId) !== Number(oldBranchId)) {
+      selectedStudent.value.academic_session_id = ''
+      selectedStudent.value.class_group_id = ''
+      selectedStudent.value.class_id = ''
+      selectedStudent.value.section_id = ''
+      selectedStudent.value.shift_id = ''
+      selectedStudent.value.monthly_fee = ''
       return
     }
 
@@ -1278,96 +1233,74 @@ watch(
       (group) => Number(group.id) === Number(selectedStudent.value.class_group_id),
     )
 
-    if (!groupExists) {
-      selectedStudent.value.class_group_id = ''
-    }
+    if (!groupExists) selectedStudent.value.class_group_id = ''
 
     const classExists = editAvailableClasses.value.some(
       (cls) => Number(cls.id) === Number(selectedStudent.value.class_id),
     )
 
-    if (!classExists) {
-      selectedStudent.value.class_id = ''
-    }
+    if (!classExists) selectedStudent.value.class_id = ''
 
     const sectionExists = editAvailableSections.value.some(
       (section) => Number(section.id) === Number(selectedStudent.value.section_id),
     )
 
-    if (!sectionExists) {
-      selectedStudent.value.section_id = ''
-    }
+    if (!sectionExists) selectedStudent.value.section_id = ''
 
     const shiftExists = editAvailableShifts.value.some(
       (shift) => Number(shift.id) === Number(selectedStudent.value.shift_id),
     )
 
-    if (!shiftExists) {
-      selectedStudent.value.shift_id = ''
-    }
+    if (!shiftExists) selectedStudent.value.shift_id = ''
   },
 )
 
-/* =====================================================
-   PAGINATION INFO
-===================================================== */
+/* EDIT: LOAD DETAILS WHEN SESSION CHANGES */
+watch(
+  () => selectedStudent.value.academic_session_id,
+  (newSessionId, oldSessionId) => {
+    if (!newSessionId) return
 
+    if (oldSessionId && Number(newSessionId) === Number(oldSessionId)) {
+      return
+    }
+
+    loadEnrollmentDetails(newSessionId)
+  },
+)
+
+/* PAGINATION INFO */
 const showingFrom = computed(() => {
-  if (filteredTotal.value === 0) {
-    return 0
-  }
+  if (filteredTotal.value === 0) return 0
 
   return (currentPage.value - 1) * perPage.value + 1
 })
 
-const showingTo = computed(() => {
-  return Math.min(currentPage.value * perPage.value, filteredTotal.value)
-})
+const showingTo = computed(() => Math.min(currentPage.value * perPage.value, filteredTotal.value))
 
-/* =====================================================
-   IMAGE
-===================================================== */
-
+/* IMAGE */
 const handleFileChange = (event, type) => {
   const file = event.target.files[0]
-
   if (!file) return
 
   if (type === 'add') {
-    if (addPreview.value) {
-      URL.revokeObjectURL(addPreview.value)
-    }
+    if (addPreview.value) URL.revokeObjectURL(addPreview.value)
 
     addImageFile.value = file
-
     addPreview.value = URL.createObjectURL(file)
   } else {
-    if (editPreview.value) {
-      URL.revokeObjectURL(editPreview.value)
-    }
+    if (editPreview.value) URL.revokeObjectURL(editPreview.value)
 
     editImageFile.value = file
-
     editPreview.value = URL.createObjectURL(file)
   }
 }
 
-/* =====================================================
-   RESET ADD FORM
-===================================================== */
-
+/* RESET ADD FORM */
 const resetForm = () => {
   Object.keys(form).forEach((key) => {
     form[key] = ''
   })
-
-  /*
-   * Manager:
-   * branch empty থাকবে
-   *
-   * Non-manager:
-   * নিজের assigned branch auto select
-   */
 
   if (!isManager.value) {
     const ownBranchId = getOwnBranchId()
@@ -1381,7 +1314,6 @@ const resetForm = () => {
 
   if (addPreview.value) {
     URL.revokeObjectURL(addPreview.value)
-
     addPreview.value = null
   }
 
@@ -1390,13 +1322,9 @@ const resetForm = () => {
   }
 }
 
-/* =====================================================
-   CLOSE MODAL
-===================================================== */
-
+/* CLOSE MODAL */
 const closeModal = async (modalId) => {
   const modalEl = document.getElementById(modalId)
-
   if (!modalEl) return
 
   const modalInstance =
@@ -1404,35 +1332,25 @@ const closeModal = async (modalId) => {
 
   modalInstance.hide()
 
-  await new Promise((resolve) => {
-    setTimeout(resolve, 400)
-  })
+  await new Promise((resolve) => setTimeout(resolve, 400))
 
   document.querySelectorAll('.modal-backdrop').forEach((backdrop) => {
     backdrop.remove()
   })
 
   document.body.classList.remove('modal-open')
-
   document.body.style.removeProperty('overflow')
-
   document.body.style.removeProperty('padding-right')
 
   modalEl.classList.remove('show')
-
   modalEl.style.removeProperty('display')
-
   modalEl.removeAttribute('aria-modal')
-
   modalEl.removeAttribute('role')
 
   await nextTick()
 }
 
-/* =====================================================
-   GET STUDENTS
-===================================================== */
-
+/* GET STUDENTS */
 const getStudent = async (page = 1) => {
   try {
     const params = {
@@ -1448,10 +1366,7 @@ const getStudent = async (page = 1) => {
       params.class_id = selectedClass.value
     }
 
-    const res = await api.get('/students', {
-      params,
-    })
-
+    const res = await api.get('/students', { params })
     const response = res.data
 
     students.value = response.students || response.data || []
@@ -1468,7 +1383,6 @@ const getStudent = async (page = 1) => {
 
     if (students.value.length === 0 && currentPage.value > 1 && filteredTotal.value > 0) {
       currentPage.value = Math.max(1, currentPage.value - 1)
-
       await getStudent(currentPage.value)
     }
   } catch (error) {
@@ -1478,28 +1392,14 @@ const getStudent = async (page = 1) => {
   }
 }
 
-/* =====================================================
-   CREATE STUDENT
-===================================================== */
-
+/* CREATE STUDENT */
 const student_create = async () => {
   try {
     loading.value = true
 
-    /*
-     * Manager:
-     * manually selected branch
-     *
-     * Non-manager:
-     * ALWAYS own assigned branch
-     */
-
     if (isManager.value) {
       if (!form.branch_id) {
         alert('Please select a branch.')
-
-        loading.value = false
-
         return
       }
     } else {
@@ -1507,13 +1407,24 @@ const student_create = async () => {
 
       if (!ownBranchId) {
         alert('Your assigned branch was not found.')
-
-        loading.value = false
-
         return
       }
 
       form.branch_id = Number(ownBranchId)
+    }
+
+    if (!form.academic_session_id) {
+      alert('Please select an academic session.')
+      return
+    }
+
+    const validSession = availableAcademicSessions.value.some(
+      (session) => Number(session.id) === Number(form.academic_session_id),
+    )
+
+    if (!validSession) {
+      alert('Please select a valid academic session for this branch.')
+      return
     }
 
     const formData = new FormData()
@@ -1537,16 +1448,20 @@ const student_create = async () => {
     alert(res.data.message || 'Student Created Successfully')
 
     await closeModal('addModal')
-
     resetForm()
 
     currentPage.value = 1
-
     await getStudent(1)
   } catch (error) {
     console.error('Create student error:', error.response?.data || error)
 
-    alert(error.response?.data?.message || 'Failed to create student')
+    const errors = error.response?.data?.errors
+
+    if (errors?.academic_session_id?.length) {
+      alert(errors.academic_session_id[0])
+    } else {
+      alert(error.response?.data?.message || 'Failed to create student')
+    }
   } finally {
     loading.value = false
 
@@ -1555,38 +1470,32 @@ const student_create = async () => {
     })
 
     document.body.classList.remove('modal-open')
-
     document.body.style.removeProperty('overflow')
-
     document.body.style.removeProperty('padding-right')
   }
 }
 
-/* =====================================================
-   OPEN VIEW
-===================================================== */
-
+/* OPEN VIEW */
 const openView = (student) => {
-  selectedStudent.value = {
-    ...student,
-  }
+  selectedStudent.value = { ...student }
 }
 
-/* =====================================================
-   OPEN EDIT
-===================================================== */
-
+/* OPEN EDIT */
 const openEdit = (student) => {
+  const latestEnrollment = getLatestStudentEnrollment(student)
+
+  const branchId = student.branch_id || student.branch?.id || ''
+
   selectedStudent.value = {
     ...student,
-
-    branch_id: student.branch_id || student.branch?.id || '',
+    branch_id: branchId,
+    academic_session_id: latestEnrollment ? String(latestEnrollment.academic_session_id) : '',
+    class_group_id: latestEnrollment?.class_group_id ?? student.class_group_id ?? '',
+    class_id: latestEnrollment?.class_id ?? student.class_id ?? '',
+    section_id: latestEnrollment?.section_id ?? student.section_id ?? '',
+    shift_id: latestEnrollment?.shift_id ?? student.shift_id ?? '',
+    monthly_fee: latestEnrollment?.monthly_fee ?? student.monthly_fee ?? '',
   }
-
-  /*
-   * Non-manager:
-   * force own assigned branch
-   */
 
   if (!isManager.value) {
     const ownBranchId = getOwnBranchId()
@@ -1604,28 +1513,19 @@ const openEdit = (student) => {
   }
 }
 
-/* =====================================================
-   UPDATE STUDENT
-===================================================== */
-
+/* UPDATE STUDENT */
 const updateStudent = async () => {
   try {
     loading.value = true
 
-    /*
-     * Manager:
-     * selected branch
-     *
-     * Non-manager:
-     * ALWAYS own assigned branch
-     */
+    if (!selectedStudent.value.id) {
+      alert('Student information is missing.')
+      return
+    }
 
     if (isManager.value) {
       if (!selectedStudent.value.branch_id) {
         alert('Please select a branch.')
-
-        loading.value = false
-
         return
       }
     } else {
@@ -1633,21 +1533,72 @@ const updateStudent = async () => {
 
       if (!ownBranchId) {
         alert('Your assigned branch was not found.')
-
-        loading.value = false
-
         return
       }
 
       selectedStudent.value.branch_id = Number(ownBranchId)
     }
 
+    if (!selectedStudent.value.academic_session_id) {
+      alert('Please select an academic session.')
+      return
+    }
+
+    const validSession = editAvailableAcademicSessions.value.some(
+      (session) => Number(session.id) === Number(selectedStudent.value.academic_session_id),
+    )
+
+    if (!validSession) {
+      alert('Please select a valid academic session for this branch.')
+      return
+    }
+
+    const enrollment = getStudentEnrollment(
+      selectedStudent.value,
+      selectedStudent.value.academic_session_id,
+    )
+
+    /*
+     * Do not submit class data for a session that has no enrollment.
+     * The backend can create an enrollment for a selected new session,
+     * but class information must be selected explicitly.
+     */
+    if (!enrollment) {
+      if (
+        !selectedStudent.value.class_id ||
+        !selectedStudent.value.class_group_id ||
+        !selectedStudent.value.shift_id
+      ) {
+        alert(
+          'This student has no enrollment in the selected session. Please select Class, Group and Shift before updating.',
+        )
+        return
+      }
+    }
+
     const formData = new FormData()
 
+    const excludedKeys = [
+      'class_info',
+      'class_group',
+      'section',
+      'shift',
+      'branch',
+      'student_sessions',
+      'payments',
+      'results',
+      'image_url',
+      'student',
+      'created_at',
+      'updated_at',
+    ]
+
     Object.keys(selectedStudent.value).forEach((key) => {
-      if (selectedStudent.value[key] !== null && selectedStudent.value[key] !== undefined) {
-        if (!['class_info', 'class_group', 'section', 'shift', 'branch'].includes(key)) {
-          formData.append(key, selectedStudent.value[key])
+      const value = selectedStudent.value[key]
+
+      if (value !== null && value !== undefined && !excludedKeys.includes(key)) {
+        if (typeof value !== 'object') {
+          formData.append(key, value)
         }
       }
     })
@@ -1667,21 +1618,23 @@ const updateStudent = async () => {
     alert(res.data.message || 'Student Updated Successfully')
 
     await closeModal('editModal')
-
     await getStudent(currentPage.value)
   } catch (error) {
     console.error('Update student error:', error.response?.data || error)
 
-    alert(error.response?.data?.message || 'Failed to update student')
+    const errors = error.response?.data?.errors
+
+    if (errors?.academic_session_id?.length) {
+      alert(errors.academic_session_id[0])
+    } else {
+      alert(error.response?.data?.message || 'Failed to update student')
+    }
   } finally {
     loading.value = false
   }
 }
 
-/* =====================================================
-   DELETE STUDENT
-===================================================== */
-
+/* DELETE STUDENT */
 const deleteStudent = async (id) => {
   if (!confirm('Are you sure you want to delete this student?')) {
     return
@@ -1691,7 +1644,6 @@ const deleteStudent = async (id) => {
     loading.value = true
 
     await api.delete(`/students/${id}`)
-
     await getStudent(currentPage.value)
   } catch (error) {
     console.error('Delete student error:', error.response?.data || error)
@@ -1702,15 +1654,9 @@ const deleteStudent = async (id) => {
   }
 }
 
-/* =====================================================
-   QR GENERATION
-===================================================== */
-
+/* QR GENERATION */
 const openQr = async (student) => {
-  qrStudent.value = {
-    ...student,
-  }
-
+  qrStudent.value = { ...student }
   qrImage.value = ''
   qrLoading.value = true
 
@@ -1722,27 +1668,20 @@ const openQr = async (student) => {
     })
   } catch (error) {
     console.error('QR generation error:', error)
-
     alert('Failed to generate QR code.')
   } finally {
     qrLoading.value = false
   }
 }
 
-/* =====================================================
-   PRINT QR
-===================================================== */
-
+/* PRINT QR */
 const printQr = () => {
-  if (!qrImage.value || !qrStudent.value) {
-    return
-  }
+  if (!qrImage.value || !qrStudent.value) return
 
   const printWindow = window.open('', '_blank', 'width=600,height=700')
 
   if (!printWindow) {
     alert('Please allow pop-ups to print the QR code.')
-
     return
   }
 
@@ -1751,7 +1690,6 @@ const printQr = () => {
     <html>
       <head>
         <title>Student QR - ${qrStudent.value.student_id}</title>
-
         <style>
           body {
             margin: 0;
@@ -1759,7 +1697,6 @@ const printQr = () => {
             font-family: Arial, sans-serif;
             text-align: center;
           }
-
           .card {
             width: 360px;
             margin: 0 auto;
@@ -1767,74 +1704,43 @@ const printQr = () => {
             border: 1px solid #ddd;
             border-radius: 16px;
           }
-
-          h2 {
-            margin-bottom: 8px;
-          }
-
-          p {
-            margin-top: 0;
-            color: #555;
-          }
-
+          h2 { margin-bottom: 8px; }
+          p { margin-top: 0; color: #555; }
           img {
             width: 280px;
             height: 280px;
             margin-top: 20px;
           }
-
           .student-id {
             margin-top: 15px;
             font-size: 18px;
             font-weight: bold;
           }
-
           @media print {
-            body {
-              padding: 0;
-            }
-
-            .card {
-              border: none;
-            }
+            body { padding: 0; }
+            .card { border: none; }
           }
         </style>
       </head>
-
       <body>
         <div class="card">
           <h2>${qrStudent.value.full_name}</h2>
-
           <p>Student QR Code</p>
-
-          <img
-            src="${qrImage.value}"
-            alt="Student QR Code"
-          />
-
-          <div class="student-id">
-            ${qrStudent.value.student_id}
-          </div>
+          <img src="${qrImage.value}" alt="Student QR Code" />
+          <div class="student-id">${qrStudent.value.student_id}</div>
         </div>
       </body>
     </html>
   `)
 
   printWindow.document.close()
-
-  printWindow.onload = () => {
-    printWindow.print()
-  }
+  printWindow.onload = () => printWindow.print()
 }
 
-/* =====================================================
-   PAGINATION
-===================================================== */
-
+/* PAGINATION */
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
     currentPage.value++
-
     getStudent(currentPage.value)
   }
 }
@@ -1842,15 +1748,11 @@ const nextPage = () => {
 const prevPage = () => {
   if (currentPage.value > 1) {
     currentPage.value--
-
     getStudent(currentPage.value)
   }
 }
 
-/* =====================================================
-   SEARCH
-===================================================== */
-
+/* SEARCH */
 let searchTimer = null
 
 watch(search, () => {
@@ -1858,46 +1760,28 @@ watch(search, () => {
 
   searchTimer = setTimeout(() => {
     currentPage.value = 1
-
     getStudent(1)
   }, 400)
 })
 
 watch(selectedClass, () => {
   currentPage.value = 1
-
   getStudent(1)
 })
 
-/* =====================================================
-   ON MOUNTED
-===================================================== */
-
+/* ON MOUNTED */
 onMounted(async () => {
   loading.value = true
 
   try {
     loadCurrentUser()
 
-    /*
-     * ==========================================
-     * NON-MANAGER ASSIGNED BRANCH
-     * ==========================================
-     */
-
     if (!isManager.value) {
       let ownBranchId = getOwnBranchId()
-
-      /*
-       * যদি localStorage/user object
-       * থেকে branch না পাওয়া যায়,
-       * staff dashboard থেকে আনবো
-       */
 
       if (!ownBranchId) {
         try {
           const userRes = await api.get('/staff/dashboard')
-
           const user = userRes.data?.user || {}
 
           if (user && Object.keys(user).length > 0) {
@@ -1918,22 +1802,13 @@ onMounted(async () => {
       }
     }
 
-    /*
-     * ==========================================
-     * LOAD DEPENDENT DATA
-     * ==========================================
-     */
-
-    const [secRes, clsRes, grpRes, shfRes, branchRes] = await Promise.all([
+    const [secRes, clsRes, grpRes, shfRes, branchRes, sessionRes] = await Promise.all([
       api.get('/sections'),
-
       api.get('/classes'),
-
       api.get('/class-groups'),
-
       api.get('/shifts'),
-
       api.get('/branches'),
+      api.get('/academic-sessions'),
     ])
 
     sections.value = secRes.data.sections || secRes.data.data || secRes.data || []
@@ -1947,11 +1822,19 @@ onMounted(async () => {
 
     branches.value = branchRes.data.branches || branchRes.data.data || branchRes.data || []
 
-    /*
-     * ==========================================
-     * ENSURE NON-MANAGER OWN BRANCH
-     * ==========================================
-     */
+    const sessionResponse = sessionRes.data
+
+    if (Array.isArray(sessionResponse)) {
+      academicSessions.value = sessionResponse
+    } else if (Array.isArray(sessionResponse.sessions)) {
+      academicSessions.value = sessionResponse.sessions
+    } else if (Array.isArray(sessionResponse.academic_sessions)) {
+      academicSessions.value = sessionResponse.academic_sessions
+    } else if (Array.isArray(sessionResponse.data)) {
+      academicSessions.value = sessionResponse.data
+    } else {
+      academicSessions.value = []
+    }
 
     if (!isManager.value) {
       const ownBranchId = getOwnBranchId()
@@ -1960,12 +1843,6 @@ onMounted(async () => {
         form.branch_id = Number(ownBranchId)
       }
     }
-
-    /*
-     * ==========================================
-     * CACHE
-     * ==========================================
-     */
 
     sessionStorage.setItem('cache_sections', JSON.stringify(sections.value))
 
@@ -1977,15 +1854,11 @@ onMounted(async () => {
 
     sessionStorage.setItem('cache_branches', JSON.stringify(branches.value))
 
-    /*
-     * ==========================================
-     * LOAD STUDENTS
-     * ==========================================
-     */
+    sessionStorage.setItem('cache_academic_sessions', JSON.stringify(academicSessions.value))
 
     await getStudent(1)
   } catch (error) {
-    console.error('Initialization error:', error)
+    console.error('Initialization error:', error.response?.data || error)
   } finally {
     loading.value = false
   }
@@ -1993,363 +1866,225 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* =====================================================
-   IMAGE
-===================================================== */
-
 .image-preview {
   width: 90px;
   height: 90px;
-
   object-fit: cover;
-
   border-radius: 50%;
-
   border: 3px solid #2563eb;
-
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* =====================================================
-   BASE
-===================================================== */
-
 .content {
   margin-left: 250px;
-
   padding: 25px;
-
   background: #f8fafc;
-
   min-height: 100vh;
 }
 
-/* =====================================================
-   HEADER
-===================================================== */
-
 .staff-header {
   background: linear-gradient(135deg, #2563eb, #4f46e5);
-
   padding: 28px 32px;
-
   border-radius: 20px;
-
   display: flex;
-
   justify-content: space-between;
-
   align-items: center;
-
   color: white;
-
   margin-bottom: 25px;
-
   box-shadow: 0 10px 30px rgba(37, 99, 235, 0.25);
 }
 
 .staff-header h2 {
   font-weight: 700;
-
   margin-bottom: 6px;
 }
 
 .staff-header p {
   margin: 0;
-
   color: #dbeafe;
 }
 
 .staff-header-right {
   display: flex;
-
   align-items: center;
-
   gap: 20px;
 }
 
-/* =====================================================
-   SUMMARY
-===================================================== */
-
 .staff-summary {
   background: white;
-
   color: #111827;
-
   padding: 12px 18px;
-
   border-radius: 15px;
-
   display: flex;
-
   align-items: center;
-
   gap: 15px;
 }
 
 .summary-icon {
   width: 45px;
   height: 45px;
-
   border-radius: 12px;
-
   display: flex;
-
   align-items: center;
-
   justify-content: center;
-
   background: #dbeafe;
-
   color: #2563eb;
-
   font-size: 22px;
 }
 
 .staff-summary h4 {
   margin: 0;
-
   font-weight: 700;
 }
 
 .staff-summary span {
   font-size: 13px;
-
   color: #6b7280;
 }
 
 .add-btn {
   color: #2563eb;
-
   font-weight: 600;
-
   border-radius: 12px;
-
   padding: 12px 20px;
 }
 
-/* =====================================================
-   CARD
-===================================================== */
-
 .staff-table-card {
   background: white;
-
   border-radius: 20px;
-
   padding: 25px;
-
   box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
 }
 
-/* =====================================================
-   TOOLBAR
-===================================================== */
-
 .staff-toolbar {
   display: flex;
-
   justify-content: space-between;
-
   gap: 15px;
-
   margin-bottom: 20px;
 }
 
 .search-box {
   position: relative;
-
   width: 350px;
 }
 
 .search-box i {
   position: absolute;
-
   left: 15px;
-
   top: 50%;
-
   transform: translateY(-50%);
-
   color: #9ca3af;
 }
 
 .search-box input {
   width: 100%;
-
   padding: 12px 15px 12px 45px;
-
   border-radius: 12px;
-
   border: 1px solid #e5e7eb;
-
   outline: none;
 }
 
 .search-box input:focus {
   border-color: #2563eb;
-
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
 .class-filter {
   width: 200px;
-
   border-radius: 12px;
-
   border: 1px solid #e5e7eb;
-
   padding: 10px;
 }
 
-/* =====================================================
-   TABLE
-===================================================== */
-
 .staff-table {
   border-collapse: separate;
-
   border-spacing: 0 10px;
 }
 
 .staff-table thead th {
   background: #f1f5f9;
-
   border: none;
-
   padding: 15px;
-
   color: #374151;
-
   font-size: 14px;
 }
 
 .staff-table tbody tr {
   background: white;
-
   box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
-
   transition: 0.3s;
 }
 
 .staff-table tbody tr:hover {
   transform: translateY(-3px);
-
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 }
 
 .staff-table td {
   padding: 15px;
-
   border: none;
 }
-
-/* =====================================================
-   AVATAR
-===================================================== */
 
 .staff-avatar {
   width: 45px;
   height: 45px;
-
   border-radius: 50%;
-
   object-fit: cover;
-
   border: 3px solid #dbeafe;
 }
 
-/* =====================================================
-   NAME
-===================================================== */
-
 .staff-name {
   display: flex;
-
   flex-direction: column;
 }
 
 .staff-name small {
   color: #6b7280;
-
   font-size: 12px;
 }
 
-/* =====================================================
-   BADGES
-===================================================== */
-
 .version-badge {
   background: #fef3c7;
-
   color: #92400e;
-
   padding: 6px 12px;
-
   border-radius: 20px;
-
   font-size: 13px;
-
   font-weight: 600;
-
   white-space: nowrap;
 }
 
 .skill-badge {
   background: #eff6ff;
-
   color: #2563eb;
-
   padding: 6px 12px;
-
   border-radius: 20px;
-
   font-size: 13px;
-
   font-weight: 600;
 }
 
 .group-badge {
   background: #ecfdf5;
-
   color: #059669;
-
   padding: 6px 12px;
-
   border-radius: 20px;
-
   font-size: 13px;
-
   font-weight: 600;
 }
 
-/* =====================================================
-   ACTION
-===================================================== */
-
 .action-buttons {
   display: flex;
-
   gap: 8px;
 }
 
 .action-btn {
   width: 38px;
   height: 38px;
-
   border: none;
-
   border-radius: 10px;
-
   display: flex;
-
   align-items: center;
-
   justify-content: center;
-
   font-size: 16px;
-
   transition: 0.3s;
 }
 
@@ -2359,102 +2094,66 @@ onMounted(async () => {
 
 .action-btn.view {
   background: #dbeafe;
-
   color: #2563eb;
 }
 
 .action-btn.edit {
   background: #fef3c7;
-
   color: #d97706;
 }
 
-/* =====================================================
-   QR BUTTON
-===================================================== */
-
 .action-btn.qr {
   background: #e0f2fe;
-
   color: #0369a1;
 }
 
 .action-btn.delete {
   background: #fee2e2;
-
   color: #dc2626;
 }
 
-/* =====================================================
-   EMPTY
-===================================================== */
-
 .empty-state {
   text-align: center;
-
   padding: 50px;
-
   color: #6b7280;
 }
 
 .empty-state i {
   font-size: 45px;
-
   color: #9ca3af;
 }
 
-/* =====================================================
-   PAGINATION
-===================================================== */
-
 .pagination-box {
   display: flex;
-
   justify-content: space-between;
-
   align-items: center;
-
   margin-top: 20px;
-
   color: #6b7280;
 }
 
 .page-buttons {
   display: flex;
-
   align-items: center;
-
   gap: 10px;
 }
 
 .page-btn {
   border: none;
-
   background: #2563eb;
-
   color: white;
-
   width: 38px;
   height: 38px;
-
   border-radius: 10px;
 }
 
 .page-btn:disabled {
   opacity: 0.5;
-
   cursor: not-allowed;
 }
 
-/* =====================================================
-   MODAL
-===================================================== */
-
 .student-modal {
   border: none;
-
   border-radius: 20px;
-
   overflow: hidden;
 }
 
@@ -2473,67 +2172,45 @@ onMounted(async () => {
 .modal .form-control,
 .modal .form-select {
   border-radius: 12px;
-
   padding: 12px;
 }
 
 .student-modal-avatar {
   width: 100px;
   height: 100px;
-
   border-radius: 50%;
-
   border: 5px solid #dbeafe;
-
   object-fit: cover;
 }
 
-/* =====================================================
-   QR MODAL
-===================================================== */
-
 .qr-box {
   display: flex;
-
   justify-content: center;
-
   align-items: center;
-
   min-height: 290px;
 }
 
 .student-qr-image {
   width: 280px;
-
   height: 280px;
-
   max-width: 100%;
-
   object-fit: contain;
 }
-
-/* =====================================================
-   MOBILE
-===================================================== */
 
 @media (max-width: 768px) {
   .content {
     margin-left: 0;
-
     padding: 15px;
   }
 
   .staff-header {
     flex-direction: column;
-
     align-items: flex-start;
-
     gap: 20px;
   }
 
   .staff-header-right {
     width: 100%;
-
     justify-content: space-between;
   }
 
@@ -2556,7 +2233,6 @@ onMounted(async () => {
 
   .pagination-box {
     flex-direction: column;
-
     gap: 15px;
   }
 }

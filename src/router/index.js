@@ -27,6 +27,24 @@ const router = createRouter({
     },
 
     {
+      path: '/Institure-Session',
+      name: 'InstituteSession',
+      component: () => import('../views/SessionView.vue'),
+      meta: {
+        requiresAuth: true,
+        role: ['Accountant', 'Manager', 'Branch Manager'],
+      },
+    },
+    {
+      path: '/migration',
+      name: 'MigrationView',
+      component: () => import('../views/MigrationView.vue'),
+      meta: {
+        requiresAuth: true,
+        role: ['Accountant', 'Manager', 'Branch Manager'],
+      },
+    },
+    {
       path: '/branch',
       name: 'BranchesdView',
       component: () => import('../views/BranchesView.vue'),
@@ -228,6 +246,15 @@ const router = createRouter({
       path: '/paymentPDF/:id',
       name: 'paymentPDF',
       component: () => import('@/views/account/PaymentPdfView.vue'),
+      meta: {
+        requiresAuth: true,
+        role: ['Accountant', 'Manager', 'Branch Manager'],
+      },
+    },
+    {
+      path: '/registerKhata',
+      name: 'Registerkhata',
+      component: () => import('@/views/account/RegisterkhataView.vue'),
       meta: {
         requiresAuth: true,
         role: ['Accountant', 'Manager', 'Branch Manager'],

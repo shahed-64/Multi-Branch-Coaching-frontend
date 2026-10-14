@@ -1,14 +1,10 @@
 <template>
   <RouterView />
-
-  <!-- Sidebar -->
   <AccountMenuView />
 
-  <!-- MAIN LAYOUT -->
   <div class="layout bgc">
-    <!-- CONTENT AREA -->
     <div class="content">
-      <!-- WELCOME BANNER HEADER -->
+      <!-- WELCOME BANNER -->
       <div
         class="mb-4 text-white d-flex justify-content-between align-items-center position-relative overflow-hidden"
         style="
@@ -18,7 +14,6 @@
           box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.3);
         "
       >
-        <!-- Content Left -->
         <div class="d-flex align-items-center gap-3" style="z-index: 1">
           <div
             class="d-flex align-items-center justify-content-center"
@@ -35,17 +30,15 @@
           </div>
 
           <div>
-            <h3 class="fw-bold mb-1" style="font-size: 22px; color: #ffffff">
+            <h3 class="fw-bold mb-1" style="font-size: 22px; color: #fff">
               Welcome Back, Administrator 👋
             </h3>
-
             <p class="mb-0" style="font-size: 13px; color: rgba(255, 255, 255, 0.85)">
               Manage your students, payments and coaching activities from one place.
             </p>
           </div>
         </div>
 
-        <!-- Badge Right -->
         <div
           class="d-flex align-items-center gap-2"
           style="
@@ -57,15 +50,12 @@
           "
         >
           <i class="fa-regular fa-calendar-days" style="font-size: 20px"></i>
-
           <div style="line-height: 1.2">
-            <small style="font-size: 10px; display: block; opacity: 0.8"> Today </small>
-
-            <span style="font-size: 13px; font-weight: 700"> Dashboard </span>
+            <small style="font-size: 10px; display: block; opacity: 0.8">Today</small>
+            <span style="font-size: 13px; font-weight: 700">Dashboard</span>
           </div>
         </div>
 
-        <!-- Background Decorative Circle -->
         <div
           style="
             position: absolute;
@@ -80,28 +70,23 @@
         ></div>
       </div>
 
-      <!-- MAIN CARD -->
+      <!-- STUDENT CARD -->
       <div class="card-box">
-        <!-- TOP FILTER AREA -->
         <div class="student-topbar">
-          <div class="topbar-left">
+          <div>
             <p class="section-subtitle">Search and collect monthly payments.</p>
           </div>
 
-          <!-- RIGHT FILTER AREA -->
           <div class="student-filters">
-            <!-- CLASS FILTER -->
             <div class="filter-item">
               <select v-model="selectedClass" class="form-select custom-select">
                 <option value="">All Classes</option>
-
                 <option v-for="cls in uniqueClasses" :key="cls" :value="cls">
                   {{ cls }}
                 </option>
               </select>
             </div>
 
-            <!-- SEARCH BOX -->
             <div class="filter-item">
               <input
                 v-model="search"
@@ -113,7 +98,6 @@
           </div>
         </div>
 
-        <!-- STUDENT TABLE SECTION -->
         <div class="student-table-wrapper mt-3">
           <div class="table-responsive">
             <table class="table student-table align-middle">
@@ -132,59 +116,38 @@
 
               <tbody>
                 <tr v-for="(s, index) in paginatedStudents" :key="s.id">
-                  <!-- NUMBER -->
                   <td>
                     <span class="row-index">
                       {{ (currentPage - 1) * perPage + index + 1 }}
                     </span>
                   </td>
 
-                  <!-- STUDENT ID -->
                   <td>
-                    <span class="id-badge">
-                      {{ s.student_id }}
-                    </span>
+                    <span class="id-badge">{{ s.student_id }}</span>
                   </td>
 
-                  <!-- STUDENT NAME WITH AVATAR IMAGE -->
                   <td>
                     <div class="student-info-inline">
                       <img :src="getImageUrl(s)" alt="Student Avatar" class="student-table-img" />
-
-                      <span class="student-name">
-                        {{ s.full_name }}
-                      </span>
+                      <span class="student-name">{{ s.full_name }}</span>
                     </div>
                   </td>
 
-                  <!-- CLASS -->
                   <td>
-                    <span class="class-text">
-                      {{ s.batch_name }}
+                    <span class="class-text">{{ s.batch_name }}</span>
+                  </td>
+
+                  <td>
+                    <div class="email-text">{{ s.email || 'No Email' }}</div>
+                  </td>
+
+                  <td>
+                    <span v-if="s.due_months?.length" class="due-badge">
+                      {{ s.due_months.join(', ') }}
                     </span>
+                    <span v-else class="paid-badge">Paid</span>
                   </td>
 
-                  <!-- EMAIL -->
-                  <td>
-                    <div class="email-text">
-                      {{ s.email || 'No Email' }}
-                    </div>
-                  </td>
-
-                  <!-- DUE MONTH -->
-                  <td>
-                    <div v-if="s.due_months?.length">
-                      <span class="due-badge">
-                        {{ s.due_months.join(', ') }}
-                      </span>
-                    </div>
-
-                    <div v-else>
-                      <span class="paid-badge"> Paid </span>
-                    </div>
-                  </td>
-
-                  <!-- STATUS -->
                   <td>
                     <span
                       class="status-badge"
@@ -194,10 +157,8 @@
                     </span>
                   </td>
 
-                  <!-- ACTION BUTTON -->
                   <td class="text-center">
                     <div class="action-buttons-group">
-                      <!-- Payment Button -->
                       <button
                         class="btn-action btn-payment"
                         data-bs-toggle="modal"
@@ -219,7 +180,6 @@
                           <rect width="20" height="14" x="2" y="5" rx="2" />
                           <line x1="2" x2="22" y1="10" y2="10" />
                         </svg>
-
                         Payment
                       </button>
                     </div>
@@ -230,35 +190,20 @@
           </div>
         </div>
 
-        <!-- EMPTY STATE -->
         <div v-if="students.length === 0" class="empty-state">
           <div class="empty-icon">
             <i class="fa-solid fa-user-slash"></i>
           </div>
-
           <h5>No Student Found</h5>
-
           <p>Try searching with another student ID or name</p>
         </div>
 
-        <!-- PAGINATION SECTION -->
         <div v-if="students.length > 0" class="pagination-container">
-          <!-- LEFT INFO -->
           <div class="pagination-info">
-            Showing
-
-            <strong> {{ showingFrom }} - {{ showingTo }} </strong>
-
-            of
-
-            <strong>
-              {{ totalStudents }}
-            </strong>
-
-            Students
+            Showing <strong>{{ showingFrom }} - {{ showingTo }}</strong> of
+            <strong>{{ totalStudents }}</strong> Students
           </div>
 
-          <!-- RIGHT BUTTONS -->
           <div class="pagination-control">
             <button class="pagination-btn" @click="prevPage" :disabled="currentPage === 1">
               Previous
@@ -275,74 +220,88 @@
     </div>
   </div>
 
-  <!-- ========================================================= -->
   <!-- PAYMENT MODAL -->
-  <!-- ========================================================= -->
-
   <div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content payment-modal">
-        <!-- HEADER -->
         <div class="modal-header payment-header">
           <div class="d-flex align-items-center gap-3">
             <div class="modal-icon">
               <i class="fa-solid fa-money-bill-transfer"></i>
             </div>
-
             <div>
               <h5 class="modal-title text-white">Student Payment</h5>
-
-              <p class="mb-0 text-white-50">Record monthly payment</p>
+              <p class="mb-0 text-white-50">Record session-wise monthly payment</p>
             </div>
           </div>
 
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
 
-        <!-- BODY -->
         <div class="modal-body p-4">
-          <!-- STUDENT INFO CARD -->
+          <!-- STUDENT INFORMATION -->
           <div class="student-payment-card mb-4">
             <img
               :src="getImageUrl(selectedStudent)"
               alt="Student Avatar"
               class="student-avatar-large-img"
             />
-
             <div>
               <h6 class="mb-1 text-dark fw-bold">
                 {{ selectedStudent.full_name }}
               </h6>
-
               <span class="badge bg-primary-subtle text-primary fw-medium">
                 {{ selectedStudent.student_id }}
               </span>
             </div>
           </div>
 
+          <!-- ACADEMIC SESSION -->
+          <div class="form-group mb-3">
+            <label class="form-label fw-semibold text-secondary">
+              Academic Session <span class="text-danger">*</span>
+            </label>
+
+            <select v-model="form.student_session_id" class="form-select custom-select" required>
+              <option value="">Select Academic Session</option>
+
+              <option
+                v-for="session in studentSessions"
+                :key="session.id"
+                :value="String(session.id)"
+              >
+                {{ getSessionName(session) }}
+              </option>
+            </select>
+
+            <small v-if="studentSessions.length === 0" class="text-danger">
+              No academic session enrollment found for this student.
+            </small>
+          </div>
+
           <!-- MONTHLY FEE -->
           <div class="form-group mb-3">
-            <label class="form-label fw-semibold text-secondary"> Monthly Fee </label>
+            <label class="form-label fw-semibold text-secondary">Monthly Fee</label>
 
-            <!-- If monthly fee is not assigned -->
-            <div v-if="!selectedStudent.monthly_fee">
-              <input
-                v-model="form.amount"
-                type="number"
-                min="0"
-                class="form-control custom-input"
-                placeholder="Enter monthly fee"
-              />
-            </div>
-
-            <!-- If monthly fee exists -->
-            <div v-else>
-              <input
-                :value="selectedStudent.monthly_fee"
-                class="form-control custom-input bg-light"
-                readonly
-              />
-            </div>
+            <input
+              v-model="form.amount"
+              type="number"
+              min="0"
+              step="0.01"
+              class="form-control custom-input"
+              :readonly="
+                !!selectedSession &&
+                selectedSession.monthly_fee !== null &&
+                selectedSession.monthly_fee !== undefined
+              "
+              :class="{
+                'bg-light':
+                  !!selectedSession &&
+                  selectedSession.monthly_fee !== null &&
+                  selectedSession.monthly_fee !== undefined,
+              }"
+              placeholder="Enter monthly fee"
+            />
           </div>
 
           <!-- PAID AMOUNT -->
@@ -350,7 +309,6 @@
             <div class="d-flex justify-content-between align-items-center mb-1">
               <label class="form-label fw-semibold text-secondary mb-0"> Paid Amount </label>
 
-              <!-- FULL PAYMENT CHECKBOX -->
               <div class="form-check mb-0">
                 <input
                   id="fullPaymentCheck"
@@ -358,7 +316,6 @@
                   class="form-check-input"
                   type="checkbox"
                 />
-
                 <label class="form-check-label fw-semibold text-success" for="fullPaymentCheck">
                   Full Payment
                 </label>
@@ -369,6 +326,7 @@
               v-model="form.paid_amount"
               type="number"
               min="0"
+              step="0.01"
               class="form-control custom-input"
               :readonly="fullPayment"
               :class="{ 'bg-light': fullPayment }"
@@ -376,49 +334,61 @@
             />
           </div>
 
-          <!-- MONTH -->
+          <!-- PAYMENT MONTH -->
           <div class="form-group mb-3">
-            <label class="form-label fw-semibold text-secondary"> Payment Month </label>
+            <label class="form-label fw-semibold text-secondary">
+              Payment Month <span class="text-danger">*</span>
+            </label>
 
-            <select v-model="form.month" class="form-select custom-select">
+            <select
+              v-model="form.month"
+              class="form-select custom-select"
+              required
+              :disabled="!form.student_session_id || availableMonths.length === 0"
+            >
               <option disabled value="">Select Month</option>
-
               <option v-for="month in availableMonths" :key="month" :value="month">
                 {{ month }}
               </option>
             </select>
+
+            <small
+              v-if="form.student_session_id && availableMonths.length === 0"
+              class="text-danger"
+            >
+              No unpaid months are available for this session, or the backend has not returned
+              session-wise available months.
+            </small>
           </div>
+
           <!-- PAYMENT DATE -->
           <div class="form-group mb-3">
-            <label class="form-label fw-semibold text-secondary"> Payment Date </label>
-
+            <label class="form-label fw-semibold text-secondary">Payment Date</label>
             <input v-model="form.payment_date" type="date" class="form-control custom-input" />
           </div>
 
           <!-- EXTRA FEES -->
           <div class="row g-3 mb-3">
-            <!-- ADMISSION FEE -->
             <div class="col-md-6">
-              <label class="form-label fw-semibold text-secondary"> Admission Fee </label>
-
+              <label class="form-label fw-semibold text-secondary">Admission Fee</label>
               <input
+                v-model="form.admission_fee"
                 type="number"
                 min="0"
+                step="0.01"
                 class="form-control custom-input"
-                v-model="form.admission_fee"
                 placeholder="Admission fee"
               />
             </div>
 
-            <!-- EXAM FEE -->
             <div class="col-md-6">
-              <label class="form-label fw-semibold text-secondary"> Exam Fee </label>
-
+              <label class="form-label fw-semibold text-secondary">Exam Fee</label>
               <input
+                v-model="form.exam_fee"
                 type="number"
                 min="0"
+                step="0.01"
                 class="form-control custom-input"
-                v-model="form.exam_fee"
                 placeholder="Exam fee"
               />
             </div>
@@ -426,28 +396,32 @@
 
           <!-- PAYMENT METHOD -->
           <div class="form-group mb-2">
-            <label class="form-label fw-semibold text-secondary"> Payment Method </label>
-
+            <label class="form-label fw-semibold text-secondary">Payment Method</label>
             <select v-model="form.payment_method" class="form-select custom-select">
               <option disabled value="">Select Method</option>
-
               <option>Cash</option>
               <option>Bkash</option>
               <option>Nogod</option>
             </select>
           </div>
+
+          <div v-if="formError" class="alert alert-danger mt-3 mb-0">
+            {{ formError }}
+          </div>
         </div>
 
-        <!-- FOOTER -->
         <div class="modal-footer payment-footer">
           <button type="button" class="btn btn-light rounded-3 px-4" data-bs-dismiss="modal">
             Close
           </button>
 
-          <button class="btn save-btn" @click="savePayment">
+          <button
+            class="btn save-btn"
+            :disabled="saving || !form.student_session_id || !form.month"
+            @click="savePayment"
+          >
             <i class="fa-solid fa-check me-1"></i>
-
-            Save Payment
+            {{ saving ? 'Saving...' : 'Save Payment' }}
           </button>
         </div>
       </div>
@@ -456,162 +430,76 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onBeforeUnmount, computed, watch } from 'vue'
+import { ref, reactive, computed, watch, onMounted, onBeforeUnmount } from 'vue'
+import { useRouter } from 'vue-router'
+import * as bootstrap from 'bootstrap'
 
 import AccountMenuView from './AccountMenuView.vue'
-
-import { useRouter } from 'vue-router'
-
 import api from '@/services/api'
-
 import { getImageUrl } from '@/utils/img'
-
-import * as bootstrap from 'bootstrap'
 
 const router = useRouter()
 
-/*
-|--------------------------------------------------------------------------
-| Available Months
-|--------------------------------------------------------------------------
-*/
-
-const availableMonths = ref([])
-
-/*
-|--------------------------------------------------------------------------
-| Students
-|--------------------------------------------------------------------------
-*/
-
 const students = ref([])
-
-/*
-|--------------------------------------------------------------------------
-| Search
-|--------------------------------------------------------------------------
-*/
-
 const search = ref('')
-
-/*
-|--------------------------------------------------------------------------
-| Selected Class
-|--------------------------------------------------------------------------
-*/
-
 const selectedClass = ref('')
 
-/*
-|--------------------------------------------------------------------------
-| Server Pagination
-|--------------------------------------------------------------------------
-*/
-
 const currentPage = ref(1)
-
 const perPage = 10
-
 const totalPages = ref(1)
-
 const totalStudents = ref(0)
-
 const showingFrom = ref(0)
-
 const showingTo = ref(0)
 
-/*
-|--------------------------------------------------------------------------
-| Selected Student
-|--------------------------------------------------------------------------
-*/
+const studentSessions = ref([])
+const availableMonths = ref([])
+const fullPayment = ref(true)
+const saving = ref(false)
+const formError = ref('')
 
 const selectedStudent = reactive({
+  id: null,
   student_id: '',
-
   full_name: '',
-
   monthly_fee: null,
-
   image: null,
 })
 
-/*
-|--------------------------------------------------------------------------
-| Full Payment
-|--------------------------------------------------------------------------
-|
-| Default:
-| ON
-|
-| Full Payment means:
-| Monthly Fee only.
-|
-| Admission Fee and Exam Fee remain separate.
-|--------------------------------------------------------------------------
-*/
-
-const fullPayment = ref(true)
-
-/*
-|--------------------------------------------------------------------------
-| Payment Form
-|--------------------------------------------------------------------------
-*/
-
 const form = reactive({
   student_id: '',
-
+  student_session_id: '',
   amount: '',
-
   paid_amount: '',
-
-  payment_method: '',
-
-  payment_date: new Date().toISOString().slice(0, 10),
-
+  payment_method: 'Cash',
+  payment_date: new Date().toLocaleDateString('en-CA'),
   month: '',
-
   admission_fee: null,
-
   exam_fee: null,
 })
 
-/*
-|--------------------------------------------------------------------------
-| Students received from backend
-|--------------------------------------------------------------------------
-|
-| Backend already handles:
-| - search
-| - pagination
-|
-| So frontend no longer slices the array.
-|--------------------------------------------------------------------------
-*/
+const paginatedStudents = computed(() => students.value)
 
-const filteredStudents = computed(() => {
-  return students.value
+const selectedSession = computed(() => {
+  return (
+    studentSessions.value.find(
+      (session) => String(session.id) === String(form.student_session_id),
+    ) || null
+  )
 })
 
-/*
-|--------------------------------------------------------------------------
-| Paginated Students
-|--------------------------------------------------------------------------
-|
-| Backend already sends only the current page.
-|--------------------------------------------------------------------------
-*/
-
-const paginatedStudents = computed(() => {
-  return students.value
+const uniqueClasses = computed(() => {
+  const classes = students.value.map((student) => student.batch_name).filter(Boolean)
+  return [...new Set(classes)]
 })
 
-/*
-|--------------------------------------------------------------------------
-| Next Page
-|--------------------------------------------------------------------------
-*/
+const getSessionName = (session) => {
+  return (
+    session.academic_session?.name ||
+    session.academicSession?.name ||
+    session.name ||
+    `Session ${session.academic_session_id ?? session.id}`
+  )
+}
 
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
@@ -619,146 +507,71 @@ const nextPage = () => {
   }
 }
 
-/*
-|--------------------------------------------------------------------------
-| Previous Page
-|--------------------------------------------------------------------------
-*/
-
 const prevPage = () => {
   if (currentPage.value > 1) {
     getStudents(currentPage.value - 1)
   }
 }
 
-/*
-|--------------------------------------------------------------------------
-| Open Payment Modal
-|--------------------------------------------------------------------------
-|
-| When payment modal opens:
-|
-| 1. Student information is loaded
-| 2. Monthly fee is loaded
-| 3. Full Payment becomes ON
-| 4. Paid Amount becomes Monthly Fee
-| 5. First unpaid month is selected
-| 6. Cash becomes default payment method
-| 7. Admission / Exam Fee remain empty
-|--------------------------------------------------------------------------
-*/
-
 const openPaymentModal = (student) => {
+  formError.value = ''
+
+  selectedStudent.id = student.id
   selectedStudent.student_id = student.student_id
-
   selectedStudent.full_name = student.full_name
-
   selectedStudent.monthly_fee = student.monthly_fee
-
   selectedStudent.image = student.image
 
-  /*
-  |--------------------------------------------------------------------------
-  | Available unpaid months
-  |--------------------------------------------------------------------------
-  */
+  form.student_id = String(student.id)
 
-  availableMonths.value = student.available_months || []
+  studentSessions.value = Array.isArray(student.student_sessions) ? student.student_sessions : []
 
-  /*
-  |--------------------------------------------------------------------------
-  | Student ID
-  |--------------------------------------------------------------------------
-  */
+  // Automatically select a session only when exactly one exists.
+  form.student_session_id =
+    studentSessions.value.length === 1 ? String(studentSessions.value[0].id) : ''
 
-  form.student_id = student.id
-
-  /*
-  |--------------------------------------------------------------------------
-  | Monthly Fee
-  |--------------------------------------------------------------------------
-  */
-
-  form.amount = student.monthly_fee ?? ''
-
-  /*
-  |--------------------------------------------------------------------------
-  | Full Payment ON by default
-  |--------------------------------------------------------------------------
-  */
-
+  form.amount = ''
+  form.paid_amount = ''
+  form.month = ''
+  form.payment_method = 'Cash'
+  form.payment_date = new Date().toLocaleDateString('en-CA')
+  form.admission_fee = null
+  form.exam_fee = null
   fullPayment.value = true
 
-  /*
-  |--------------------------------------------------------------------------
-  | Paid Amount = Monthly Fee
-  |--------------------------------------------------------------------------
-  */
+  updateSelectedSession()
+}
+const updateSelectedSession = () => {
+  const session = selectedSession.value
 
-  form.paid_amount = student.monthly_fee ?? ''
+  const months = Array.isArray(session?.available_months) ? session.available_months : []
 
-  /*
-  |--------------------------------------------------------------------------
-  | First unpaid month
-  |--------------------------------------------------------------------------
-  */
+  availableMonths.value = months
 
-  form.month = availableMonths.value[0] ?? ''
+  form.amount =
+    session?.monthly_fee !== null && session?.monthly_fee !== undefined ? session.monthly_fee : ''
 
-  /*
-  |--------------------------------------------------------------------------
-  | Cash default
-  |--------------------------------------------------------------------------
-  */
+  form.paid_amount = fullPayment.value ? form.amount : ''
 
-  form.payment_method = 'Cash'
-
-  /*
-  |--------------------------------------------------------------------------
-  | Payment Date
-  |--------------------------------------------------------------------------
-  */
-
-  form.payment_date = new Date().toISOString().slice(0, 10)
-
-  /*
-  |--------------------------------------------------------------------------
-  | Extra Fees
-  |--------------------------------------------------------------------------
-  */
-
-  form.admission_fee = null
-
-  form.exam_fee = null
+  // Keep the selected month only if it is still available.
+  if (!months.includes(form.month)) {
+    form.month = months[0] || ''
+  }
 }
 
-/*
-|--------------------------------------------------------------------------
-| Full Payment Watcher
-|--------------------------------------------------------------------------
-|
-| When checkbox is checked again:
-| Paid Amount automatically returns to Monthly Fee.
-|--------------------------------------------------------------------------
-*/
+watch(
+  () => form.student_session_id,
+  () => {
+    updateSelectedSession()
+    formError.value = ''
+  },
+)
 
 watch(fullPayment, (isFullPayment) => {
   if (isFullPayment) {
-    form.paid_amount = form.amount || selectedStudent.monthly_fee || ''
+    form.paid_amount = form.amount || ''
   }
 })
-
-/*
-|--------------------------------------------------------------------------
-| Monthly Fee Watcher
-|--------------------------------------------------------------------------
-|
-| This matters when a student does not have a predefined monthly fee.
-|
-| If staff enters Monthly Fee while Full Payment is ON,
-| Paid Amount will automatically follow it.
-|--------------------------------------------------------------------------
-*/
 
 watch(
   () => form.amount,
@@ -769,191 +582,105 @@ watch(
   },
 )
 
-/*
-|--------------------------------------------------------------------------
-| API Calls
-|--------------------------------------------------------------------------
-*/
-
-/*
-|--------------------------------------------------------------------------
-| Get Students List
-|--------------------------------------------------------------------------
-|
-| Backend:
-|
-| /students?page=1&per_page=10
-|
-| returns:
-| students
-| pagination
-|--------------------------------------------------------------------------
-*/
-
 const getStudents = async (page = 1) => {
   try {
-    const res = await api.get('/students', {
+    const response = await api.get('/students', {
       params: {
         page,
-
         per_page: perPage,
-
         search: search.value.trim(),
       },
     })
 
-    if (res.data?.status) {
-      students.value = res.data.students || []
+    if (response.data?.status) {
+      students.value = response.data.students || []
 
-      const pagination = res.data.pagination || {}
-
+      const pagination = response.data.pagination || {}
       currentPage.value = pagination.current_page || 1
-
       totalPages.value = pagination.last_page || 1
-
       totalStudents.value = pagination.total || 0
-
       showingFrom.value = pagination.from || 0
-
       showingTo.value = pagination.to || 0
     } else {
-      students.value = []
-
-      currentPage.value = 1
-
-      totalPages.value = 1
-
-      totalStudents.value = 0
-
-      showingFrom.value = 0
-
-      showingTo.value = 0
+      resetPagination()
     }
-  } catch (err) {
-    console.error('Error fetching students:', err)
-
-    students.value = []
-
-    currentPage.value = 1
-
-    totalPages.value = 1
-
-    totalStudents.value = 0
-
-    showingFrom.value = 0
-
-    showingTo.value = 0
+  } catch (error) {
+    console.error('Error fetching students:', error)
+    resetPagination()
   }
 }
 
-/*
-|--------------------------------------------------------------------------
-| Search Watch
-|--------------------------------------------------------------------------
-|
-| Whenever search changes:
-| - go back to page 1
-| - ask backend for filtered students
-|--------------------------------------------------------------------------
-*/
+const resetPagination = () => {
+  students.value = []
+  currentPage.value = 1
+  totalPages.value = 1
+  totalStudents.value = 0
+  showingFrom.value = 0
+  showingTo.value = 0
+}
 
 watch(search, () => {
   getStudents(1)
 })
 
-/*
-|--------------------------------------------------------------------------
-| Class Filter Watch
-|--------------------------------------------------------------------------
-|
-| IMPORTANT:
-| Your current StudentController expects class_id,
-| while this page currently stores batch_name in selectedClass.
-|
-| Therefore we keep the existing class filter behaviour
-| without changing the existing API contract.
-|--------------------------------------------------------------------------
-*/
-
 watch(selectedClass, () => {
   currentPage.value = 1
 })
 
-/*
-|--------------------------------------------------------------------------
-| Modal Cleanup
-|--------------------------------------------------------------------------
-*/
+const savePayment = async () => {
+  formError.value = ''
 
-const cleanupModals = () => {
-  document.querySelectorAll('.modal').forEach((modalEl) => {
-    try {
-      const instance = bootstrap.Modal.getInstance(modalEl)
+  if (!form.student_id) {
+    formError.value = 'Student information is missing.'
+    return
+  }
 
-      if (instance) {
-        instance.dispose()
-      }
-    } catch (error) {
-      console.warn('Modal cleanup warning:', error)
+  if (!form.student_session_id) {
+    formError.value = 'Please select an academic session.'
+    return
+  }
+
+  if (!form.month) {
+    formError.value = 'Please select a payment month.'
+    return
+  }
+
+  if (form.amount === '' || Number(form.amount) < 0) {
+    formError.value = 'Please enter a valid monthly fee.'
+    return
+  }
+
+  if (form.paid_amount === '' || Number(form.paid_amount) < 0) {
+    formError.value = 'Please enter a valid paid amount.'
+    return
+  }
+
+  saving.value = true
+
+  try {
+    const payload = {
+      student_id: Number(form.student_id),
+      student_session_id: Number(form.student_session_id),
+      paid_amount: Number(form.paid_amount),
+      payment_method: form.payment_method || null,
+      payment_date: form.payment_date || null,
+      month: form.month,
+      admission_fee: Number(form.admission_fee || 0),
+      exam_fee: Number(form.exam_fee || 0),
     }
 
-    modalEl.classList.remove('show')
+    const response = await api.post('/payments', payload)
 
-    modalEl.style.removeProperty('display')
+    const paymentId = response.data?.payment?.id || response.data?.id
 
-    modalEl.style.removeProperty('padding-right')
+    const modalElement = document.getElementById('paymentModal')
 
-    modalEl.removeAttribute('aria-modal')
+    if (modalElement) {
+      const instance =
+        bootstrap.Modal.getInstance(modalElement) ||
+        bootstrap.Modal.getOrCreateInstance(modalElement)
 
-    modalEl.setAttribute('aria-hidden', 'true')
-
-    modalEl.removeAttribute('role')
-  })
-
-  document.querySelectorAll('.modal-backdrop').forEach((backdrop) => {
-    backdrop.remove()
-  })
-
-  document.body.classList.remove('modal-open')
-
-  document.body.style.removeProperty('overflow')
-
-  document.body.style.removeProperty('padding-right')
-
-  document.documentElement.style.removeProperty('overflow')
-
-  document.documentElement.style.removeProperty('padding-right')
-}
-
-/*
-|--------------------------------------------------------------------------
-| Browser Back
-|--------------------------------------------------------------------------
-*/
-
-const handleBrowserBack = () => {
-  cleanupModals()
-}
-
-/*
-|--------------------------------------------------------------------------
-| Save Payment API
-|--------------------------------------------------------------------------
-*/
-
-const savePayment = async () => {
-  try {
-    const res = await api.post('/payments', form)
-
-    const paymentId = res.data?.payment?.id || res.data?.id
-
-    const modalEl = document.getElementById('paymentModal')
-
-    if (modalEl) {
-      const modalInstance =
-        bootstrap.Modal.getInstance(modalEl) || bootstrap.Modal.getOrCreateInstance(modalEl)
-
-      modalInstance.hide()
+      instance.hide()
     }
 
     cleanupModals()
@@ -963,69 +690,66 @@ const savePayment = async () => {
     } else {
       await getStudents(currentPage.value)
     }
-  } catch (err) {
-    console.error('Payment error:', err)
+  } catch (error) {
+    console.error('Payment error:', error)
 
-    if (err.response?.data?.message) {
-      alert(err.response.data.message)
-    } else {
-      alert('Payment save failed')
-    }
+    formError.value =
+      error.response?.data?.message ||
+      Object.values(error.response?.data?.errors || {}).flat()[0] ||
+      'Payment save failed. Please try again.'
+  } finally {
+    saving.value = false
   }
 }
 
-/*
-|--------------------------------------------------------------------------
-| Unique Classes
-|--------------------------------------------------------------------------
-|
-| Kept from your existing logic.
-|--------------------------------------------------------------------------
-*/
+const cleanupModals = () => {
+  document.querySelectorAll('.modal').forEach((modalElement) => {
+    const instance = bootstrap.Modal.getInstance(modalElement)
 
-const uniqueClasses = computed(() => {
-  const classes = students.value.map((s) => s.batch_name).filter(Boolean)
+    if (instance) {
+      instance.dispose()
+    }
 
-  return [...new Set(classes)]
-})
+    modalElement.classList.remove('show')
+    modalElement.style.removeProperty('display')
+    modalElement.style.removeProperty('padding-right')
+    modalElement.removeAttribute('aria-modal')
+    modalElement.setAttribute('aria-hidden', 'true')
+    modalElement.removeAttribute('role')
+  })
 
-/*
-|--------------------------------------------------------------------------
-| Mounted
-|--------------------------------------------------------------------------
-*/
+  document.querySelectorAll('.modal-backdrop').forEach((backdrop) => {
+    backdrop.remove()
+  })
+
+  document.body.classList.remove('modal-open')
+  document.body.style.removeProperty('overflow')
+  document.body.style.removeProperty('padding-right')
+  document.documentElement.style.removeProperty('overflow')
+  document.documentElement.style.removeProperty('padding-right')
+}
+
+const handleBrowserBack = () => {
+  cleanupModals()
+}
 
 onMounted(() => {
   getStudents(1)
-
   window.addEventListener('popstate', handleBrowserBack)
-
   window.addEventListener('pageshow', handleBrowserBack)
 })
 
-/*
-|--------------------------------------------------------------------------
-| Before Unmount
-|--------------------------------------------------------------------------
-*/
-
 onBeforeUnmount(() => {
   window.removeEventListener('popstate', handleBrowserBack)
-
   window.removeEventListener('pageshow', handleBrowserBack)
-
   cleanupModals()
 })
 </script>
-<style scoped>
-/* =========================
-   MAIN LAYOUT & FONTS
-========================= */
 
+<style scoped>
 .bgc {
   background: #f8fafc;
   min-height: 100vh;
-
   font-family:
     'Inter',
     -apple-system,
@@ -1046,12 +770,8 @@ onBeforeUnmount(() => {
   padding: 30px;
 }
 
-/* =========================
-   CARD & TOPBAR
-========================= */
-
 .card-box {
-  background: #ffffff;
+  background: #fff;
   border-radius: 16px;
   padding: 24px;
   border: 1px solid #f1f5f9;
@@ -1081,7 +801,7 @@ onBeforeUnmount(() => {
 .custom-select,
 .custom-input {
   border: 1px solid #e2e8f0;
-  background-color: #ffffff;
+  background-color: #fff;
   border-radius: 8px;
   padding: 8px 14px;
   font-size: 14px;
@@ -1101,10 +821,6 @@ onBeforeUnmount(() => {
   outline: none;
 }
 
-/* =========================
-   TABLE DESIGN
-========================= */
-
 .student-table-wrapper {
   border-radius: 12px;
   overflow: hidden;
@@ -1117,7 +833,7 @@ onBeforeUnmount(() => {
 
 .student-table thead th {
   background: #2563eb;
-  color: #ffffff;
+  color: #fff;
   padding: 14px 16px;
   font-size: 13px;
   font-weight: 600;
@@ -1142,8 +858,6 @@ onBeforeUnmount(() => {
   font-size: 14px;
 }
 
-/* TABLE ELEMENTS */
-
 .row-index {
   color: #64748b;
   font-weight: 500;
@@ -1157,11 +871,6 @@ onBeforeUnmount(() => {
   font-weight: 600;
   font-size: 13px;
   display: inline-block;
-  transition: all 0.2s ease;
-}
-
-.student-table tbody tr:hover .id-badge {
-  background-color: #dbeafe;
 }
 
 .student-info-inline {
@@ -1169,8 +878,6 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: 10px;
 }
-
-/* Student Profile Image */
 
 .student-table-img {
   width: 36px;
@@ -1194,13 +901,9 @@ onBeforeUnmount(() => {
   color: #64748b;
 }
 
-/* =========================
-   BADGES
-========================= */
-
 .paid-badge {
   background: #16a34a;
-  color: white;
+  color: #fff;
   padding: 4px 12px;
   border-radius: 6px;
   font-size: 12px;
@@ -1209,7 +912,7 @@ onBeforeUnmount(() => {
 
 .due-badge {
   background: #ef4444;
-  color: white;
+  color: #fff;
   padding: 4px 12px;
   border-radius: 6px;
   font-size: 12px;
@@ -1225,17 +928,13 @@ onBeforeUnmount(() => {
 
 .status-active {
   background: #16a34a;
-  color: white;
+  color: #fff;
 }
 
 .status-inactive {
   background: #94a3b8;
-  color: white;
+  color: #fff;
 }
-
-/* =========================
-   ACTION BUTTONS
-========================= */
 
 .action-buttons-group {
   display: flex;
@@ -1253,7 +952,7 @@ onBeforeUnmount(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
   cursor: pointer;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
@@ -1263,22 +962,14 @@ onBeforeUnmount(() => {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
 }
 
-.btn-action:active {
-  transform: translateY(0);
-}
-
 .btn-payment {
   background: #16a34a;
-  color: white;
+  color: #fff;
 }
 
 .btn-payment:hover {
   background: #15803d;
 }
-
-/* =========================
-   PAGINATION
-========================= */
 
 .pagination-container {
   margin-top: 20px;
@@ -1330,10 +1021,6 @@ onBeforeUnmount(() => {
   font-size: 13px;
 }
 
-/* =========================
-   EMPTY STATE
-========================= */
-
 .empty-state {
   text-align: center;
   padding: 40px 20px;
@@ -1362,10 +1049,6 @@ onBeforeUnmount(() => {
   font-size: 14px;
 }
 
-/* =========================
-   PAYMENT MODAL
-========================= */
-
 .payment-modal {
   border-radius: 16px;
   border: none;
@@ -1384,7 +1067,7 @@ onBeforeUnmount(() => {
   height: 40px;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.2);
-  color: white;
+  color: #fff;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1417,7 +1100,7 @@ onBeforeUnmount(() => {
 
 .save-btn {
   background: #16a34a;
-  color: white;
+  color: #fff;
   padding: 8px 20px;
   border-radius: 8px;
   font-weight: 500;
@@ -1431,9 +1114,10 @@ onBeforeUnmount(() => {
   box-shadow: 0 4px 10px rgba(22, 163, 74, 0.2);
 }
 
-/* =========================
-   RESPONSIVE DESIGN
-========================= */
+.save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
 @media (max-width: 768px) {
   .content {

@@ -20,8 +20,7 @@
           <div class="col-md-6">
             <div class="info-box">
               <h6 class="fw-bold mb-3">Student Information</h6>
-
-              <p class="mb-2"><strong>Name:</strong>{{ s.full_name }}</p>
+              <p class="mb-2"><strong>Name:</strong> {{ s.full_name }}</p>
               <p class="mb-2"><strong>Student ID:</strong> ST-{{ s.student_id }}</p>
               <p class="mb-0"><strong>Phone:</strong> {{ s.phone }}</p>
             </div>
@@ -34,14 +33,15 @@
               <p class="mb-2">
                 <strong>Month:</strong>
                 <span v-for="(payment, index) in s.payments" :key="payment.id">
-                  {{ payment.month }}
-
-                  <span v-if="index !== s.payments.length - 1"> , </span>
+                  {{ payment.month }}<span v-if="index !== s.payments.length - 1">, </span>
                 </span>
               </p>
+
               <p class="mb-2">
-                <strong>Payment Method:</strong> {{ s.payments[0]?.payment_method }}
+                <strong>Payment Method:</strong>
+                {{ s.payments?.[0]?.payment_method || 'N/A' }}
               </p>
+
               <p class="mb-0">
                 <strong>Status:</strong>
                 <span class="badge bg-success">Paid</span>
@@ -65,13 +65,19 @@
               <tr>
                 <td>1</td>
                 <td>Monthly Coaching Fee</td>
-                <td>৳ {{ s.payments[0]?.paid_amount }}</td>
+                <td>৳ {{ s.payments?.[0]?.paid_amount ?? 0 }}</td>
               </tr>
 
               <tr>
                 <td>2</td>
                 <td>Exam Fee</td>
-                <td>৳ -</td>
+                <td>৳ {{ s.payments?.[0]?.exam_fee ?? 0 }}</td>
+              </tr>
+
+              <tr>
+                <td>3</td>
+                <td>Admission Fee</td>
+                <td>৳ {{ s.payments?.[0]?.admission_fee ?? 0 }}</td>
               </tr>
             </tbody>
           </table>
@@ -81,7 +87,17 @@
         <div class="amount-box d-flex justify-content-between align-items-center">
           <h4 class="mb-0">Total Paid</h4>
           <h3 class="mb-0 fw-bold text-primary">
-            ৳ {{ s.payments.reduce((total, payment) => total + Number(payment.paid_amount), 0) }}
+            ৳
+            {{
+              s.payments?.reduce(
+                (total, payment) =>
+                  total +
+                  Number(payment.paid_amount || 0) +
+                  Number(payment.exam_fee || 0) +
+                  Number(payment.admission_fee || 0),
+                0,
+              ) ?? 0
+            }}
           </h3>
         </div>
 
@@ -92,24 +108,27 @@
 
         <!-- Button -->
         <div class="text-center mt-5 no-print">
-          <button onclick="window.print()" class="btn btn-primary print-btn">Print Receipt</button>
+          <button type="button" @click="window.print()" class="btn btn-primary print-btn">
+            Print Receipt
+          </button>
         </div>
       </div>
     </div>
   </div>
 </template>
+
 <script setup>
 import { ref, onMounted } from 'vue'
 import api from '@/services/api'
+
 const students = ref([])
 
 const getStudents = async () => {
   try {
     const res = await api.get('/students')
-
-    students.value = res.data.students || [] // 🔥 FIX
+    students.value = res.data.students || []
   } catch (err) {
-    console.log(err)
+    console.error('Failed to load students:', err)
   }
 }
 

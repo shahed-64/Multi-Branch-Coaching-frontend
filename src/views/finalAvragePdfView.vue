@@ -1,6 +1,6 @@
 <template>
   <div class="result-landscape-page py-4">
-    <!-- ================= ACTION BUTTONS ================= -->
+    <!-- ACTION BUTTONS -->
     <div
       v-if="resultData"
       class="container-fluid px-4 mb-3 action-buttons-wrapper"
@@ -31,7 +31,7 @@
       </div>
     </div>
 
-    <!-- ================= PDF / PRINT AREA ================= -->
+    <!-- PDF / PRINT AREA -->
     <div ref="resultPdf" class="container-fluid width-fix px-4" style="max-width: 1400px">
       <!-- Loading -->
       <div v-if="loading" class="d-flex justify-content-center align-items-center py-5">
@@ -49,14 +49,12 @@
 
       <!-- Result Card -->
       <div v-else-if="resultData" class="card result-card border position-relative overflow-hidden">
-        <!-- ================= WATERMARK ================= -->
+        <!-- WATERMARK -->
         <div class="watermark-container">
           <img src="/icon.jpg" alt="Watermark" class="watermark-img" />
         </div>
 
-        <!-- ===================================================== -->
         <!-- SCHOOL HEADER -->
-        <!-- ===================================================== -->
         <div
           class="card-header school-header text-center py-3 bg-transparent border-bottom position-relative z-1"
         >
@@ -95,13 +93,9 @@
           </div>
         </div>
 
-        <!-- ===================================================== -->
         <!-- CARD BODY -->
-        <!-- ===================================================== -->
         <div class="card-body p-4 bg-transparent position-relative z-1">
-          <!-- =================================================== -->
-          <!-- STUDENT INFO BAR -->
-          <!-- =================================================== -->
+          <!-- STUDENT INFORMATION -->
           <div class="student-info-bar p-3 mb-4 border shadow-sm">
             <div class="row align-items-center g-3">
               <!-- Student Photo -->
@@ -123,7 +117,7 @@
                 </div>
               </div>
 
-              <!-- Student Information Details -->
+              <!-- Student Details -->
               <div class="col">
                 <div class="row row-cols-2 row-cols-lg-4 g-2 text-dark small">
                   <div>
@@ -136,7 +130,7 @@
                   <div>
                     <span class="text-muted">Student ID:</span>
                     <span class="ms-1 font-monospace">
-                      {{ student.studentId || '-' }}
+                      {{ student.studentId || student.student_id || '-' }}
                     </span>
                   </div>
 
@@ -148,9 +142,10 @@
                   </div>
 
                   <div>
-                    <span class="text-muted"></span>
-
-                    {{ student.class || '-' }}
+                    <span class="text-muted">Class:</span>
+                    <span class="ms-1">
+                      {{ student.class || '-' }}
+                    </span>
                   </div>
 
                   <div>
@@ -185,14 +180,11 @@
             </div>
           </div>
 
-          <!-- =================================================== -->
           <!-- MARKS TABLE -->
-          <!-- =================================================== -->
           <div v-if="processedSubjects.length" class="table-responsive mb-4">
             <table
               class="table table-bordered custom-result-table align-middle text-center mb-0 shadow-sm"
             >
-              <!-- HEADER -->
               <thead>
                 <tr class="table-light">
                   <th class="align-middle text-start ps-3 py-2 text-dark" style="width: 25%">
@@ -222,7 +214,6 @@
                 </tr>
               </thead>
 
-              <!-- BODY -->
               <tbody>
                 <tr v-for="(subject, index) in processedSubjects" :key="subject.id || index">
                   <td class="text-start ps-3 fw-semibold text-dark py-2">
@@ -257,14 +248,13 @@
                 </tr>
               </tbody>
 
-              <!-- FOOTER / SUMMARY -->
               <tfoot>
                 <tr class="table-light fw-bold">
-                  <td :colspan="2 + exams.length" class="text-end ps-3 text-dark py-2.5">
+                  <td :colspan="2 + exams.length" class="text-end ps-3 text-dark py-2">
                     Total Weighted Score:
                   </td>
 
-                  <td colspan="3" class="text-start ps-3 text-dark fs-6 py-2.5">
+                  <td colspan="3" class="text-start ps-3 text-dark fs-6 py-2">
                     <span class="font-monospace">
                       {{ totalObtainedMarks }}
                     </span>
@@ -279,15 +269,13 @@
             </table>
           </div>
 
-          <!-- No Subjects -->
+          <!-- NO SUBJECTS -->
           <div v-else class="alert alert-light border text-center text-muted">
             <i class="bi bi-info-circle me-2"></i>
             No result subjects were found for this student.
           </div>
 
-          <!-- =================================================== -->
           <!-- SIGNATURES -->
-          <!-- =================================================== -->
           <div class="row text-center g-4 mt-4 pt-3 border-top">
             <div class="col-4">
               <div class="signature-area px-3">
@@ -331,17 +319,13 @@
           </div>
         </div>
 
-        <!-- ===================================================== -->
         <!-- CARD FOOTER -->
-        <!-- ===================================================== -->
         <div
           class="card-footer bg-transparent text-muted d-flex justify-content-between align-items-center py-2 px-4 tiny border-top position-relative z-1"
         >
-          <span> System: {{ softwareDeveloper }} </span>
-
-          <span> Prepared by: {{ preparedBy }} </span>
-
-          <span> Printed: {{ printDate }} </span>
+          <span>System: {{ softwareDeveloper }}</span>
+          <span>Prepared by: {{ preparedBy }}</span>
+          <span>Printed: {{ printDate }}</span>
         </div>
       </div>
     </div>
@@ -375,6 +359,10 @@ const selectedStudentId = computed(() => {
   return route.query.student_id || ''
 })
 
+const selectedStudentSessionId = computed(() => {
+  return route.query.student_session_id || ''
+})
+
 const instituteName = ref('Institute Name')
 const instituteAddress = ref('')
 const instituteContact = ref('')
@@ -392,27 +380,18 @@ const formatDate = (date) => {
   return `${day}-${month}-${year}`
 }
 
-const publicationDate = computed(() => {
-  return formatDate(currentDate)
-})
-
-const printDate = computed(() => {
-  return formatDate(currentDate)
-})
+const publicationDate = computed(() => formatDate(currentDate))
+const printDate = computed(() => formatDate(currentDate))
 
 const loadInstituteInfo = async () => {
   try {
     const response = await api.get('/institute-info')
 
-    if (!response.data?.success) {
-      return
-    }
+    if (!response.data?.success) return
 
     const data = response.data?.data
 
-    if (!data) {
-      return
-    }
+    if (!data) return
 
     instituteName.value = data.institute_name || 'Institute Name'
     instituteAddress.value = data.location || ''
@@ -446,9 +425,16 @@ const loadFinalResult = async () => {
       throw new Error('Student ID is missing.')
     }
 
+    if (!selectedStudentSessionId.value) {
+      throw new Error(
+        'Academic Session is missing. Please open the result from the correct student session.',
+      )
+    }
+
     const response = await api.get(`/final-results/student/${selectedStudentId.value}`, {
       params: {
         year: selectedYear.value,
+        student_session_id: selectedStudentSessionId.value,
       },
     })
 
@@ -457,7 +443,6 @@ const loadFinalResult = async () => {
     }
 
     resultData.value = response.data
-
     student.value = response.data.student || {}
 
     if (!student.value.studentId && student.value.student_id) {
@@ -479,16 +464,12 @@ const loadFinalResult = async () => {
 const processedSubjects = computed(() => {
   return subjects.value.map((subject) => {
     const obtainedTotal = Number(subject.obtained_total ?? 0)
-
     const gradeInfo = calculateGradeAndPoint(obtainedTotal)
 
     return {
       ...subject,
-
       obtainedTotal: obtainedTotal.toFixed(2),
-
       letterGrade: subject.letter_grade || gradeInfo.grade,
-
       gradePoint:
         subject.grade_point !== undefined
           ? Number(subject.grade_point).toFixed(2)
@@ -506,21 +487,16 @@ const overallGPA = computed(() => {
     (subject) => subject.gradePoint !== '-' && subject.letterGrade !== 'F',
   )
 
-  if (!validSubjects.length) {
-    return '0.00'
-  }
+  if (!validSubjects.length) return '0.00'
 
   const totalPoint = validSubjects.reduce((sum, subject) => sum + Number(subject.gradePoint), 0)
 
-  const gpa = totalPoint / validSubjects.length
-
-  return Math.min(5, gpa).toFixed(2)
+  return Math.min(5, totalPoint / validSubjects.length).toFixed(2)
 })
 
 const totalObtainedMarks = computed(() => {
   const total = processedSubjects.value.reduce((sum, subject) => {
     const value = Number(subject.obtainedTotal)
-
     return sum + (Number.isFinite(value) ? value : 0)
   }, 0)
 
@@ -533,15 +509,11 @@ const displayFullMark = (subject) => {
   }
 
   const marks = exams.value
-    .map((exam) => {
-      return subject.exams?.[exam.id]?.full_mark
-    })
+    .map((exam) => subject.exams?.[exam.id]?.full_mark)
     .filter((value) => value !== null && value !== undefined)
     .map(Number)
 
-  if (!marks.length) {
-    return '-'
-  }
+  if (!marks.length) return '-'
 
   return Math.max(...marks)
 }
@@ -559,9 +531,7 @@ const getExamMarks = (subject, examId) => {
 const formatPercentage = (percentage) => {
   const value = Number(percentage)
 
-  if (!Number.isFinite(value)) {
-    return '0%'
-  }
+  if (!Number.isFinite(value)) return '0%'
 
   return `${value}%`
 }
@@ -569,29 +539,12 @@ const formatPercentage = (percentage) => {
 const calculateGradeAndPoint = (marks) => {
   const percentage = Number(marks)
 
-  if (percentage >= 80) {
-    return { grade: 'A+', point: 5.0 }
-  }
-
-  if (percentage >= 70) {
-    return { grade: 'A', point: 4.0 }
-  }
-
-  if (percentage >= 60) {
-    return { grade: 'A-', point: 3.5 }
-  }
-
-  if (percentage >= 50) {
-    return { grade: 'B', point: 3.0 }
-  }
-
-  if (percentage >= 40) {
-    return { grade: 'C', point: 2.0 }
-  }
-
-  if (percentage >= 33) {
-    return { grade: 'D', point: 1.0 }
-  }
+  if (percentage >= 80) return { grade: 'A+', point: 5.0 }
+  if (percentage >= 70) return { grade: 'A', point: 4.0 }
+  if (percentage >= 60) return { grade: 'A-', point: 3.5 }
+  if (percentage >= 50) return { grade: 'B', point: 3.0 }
+  if (percentage >= 40) return { grade: 'C', point: 2.0 }
+  if (percentage >= 33) return { grade: 'D', point: 1.0 }
 
   return { grade: 'F', point: 0.0 }
 }
@@ -601,36 +554,20 @@ const printResult = () => {
 }
 
 const downloadPdf = async () => {
-  if (!resultPdf.value) {
-    return
-  }
+  if (!resultPdf.value) return
 
   downloading.value = true
 
   try {
-    await new Promise((resolve) => {
-      setTimeout(resolve, 300)
-    })
+    await new Promise((resolve) => setTimeout(resolve, 300))
 
     const element = resultPdf.value
-
-    // =========================
-    // WAIT FOR ALL IMAGES
-    // =========================
-
     const images = element.querySelectorAll('img')
 
     await Promise.all(
       Array.from(images).map((img) => {
         return new Promise((resolve) => {
-          // Image already loaded successfully
-          if (img.complete && img.naturalWidth > 0) {
-            resolve()
-            return
-          }
-
-          // Image already failed / broken
-          if (img.complete && img.naturalWidth === 0) {
+          if (img.complete) {
             resolve()
             return
           }
@@ -645,88 +582,49 @@ const downloadPdf = async () => {
 
           img.onload = done
           img.onerror = done
-
-          // Safety timeout so PDF generation can never hang forever
           setTimeout(done, 5000)
         })
       }),
     )
 
-    // =========================
-    // HTML TO CANVAS
-    // =========================
-
     const canvas = await html2canvas(element, {
       scale: 2,
-
       useCORS: true,
       allowTaint: false,
-
       backgroundColor: '#ffffff',
       logging: false,
-
       windowWidth: element.scrollWidth,
 
       onclone: (clonedDoc) => {
-        // =========================
-        // RESULT TABLE
-        // =========================
-
         const resultTables = clonedDoc.querySelectorAll('.custom-result-table')
 
         resultTables.forEach((table) => {
           table.style.setProperty('width', '100%', 'important')
-
           table.style.setProperty('max-width', '100%', 'important')
-
-          // Content অনুযায়ী column width
           table.style.setProperty('table-layout', 'auto', 'important')
-
           table.style.setProperty('border-collapse', 'collapse', 'important')
-
           table.style.setProperty('border-spacing', '0', 'important')
         })
-
-        // =========================
-        // TABLE HEADER
-        // =========================
 
         const headers = clonedDoc.querySelectorAll('.custom-result-table thead th')
 
         headers.forEach((th) => {
           th.style.setProperty('background', 'transparent', 'important')
-
           th.style.setProperty('background-color', 'transparent', 'important')
-
           th.style.setProperty('color', '#000000', 'important')
-
           th.style.setProperty('border', '1.5px solid #000000', 'important')
-
           th.style.setProperty('padding', '7px 6px', 'important')
-
           th.style.setProperty('font-weight', '600', 'important')
-
-          // Comfortable PDF font
           th.style.setProperty('font-size', '16px', 'important')
-
           th.style.setProperty('white-space', 'normal', 'important')
         })
-
-        // =========================
-        // HEADER ROW
-        // =========================
 
         const headerRows = clonedDoc.querySelectorAll('.custom-result-table thead tr')
 
         headerRows.forEach((tr) => {
           tr.style.setProperty('background', 'transparent', 'important')
-
           tr.style.setProperty('background-color', 'transparent', 'important')
         })
-
-        // =========================
-        // TABLE CELLS
-        // =========================
 
         const resultCells = clonedDoc.querySelectorAll(
           '.custom-result-table th, .custom-result-table td',
@@ -734,26 +632,14 @@ const downloadPdf = async () => {
 
         resultCells.forEach((cell) => {
           cell.style.setProperty('font-size', '16px', 'important')
-
           cell.style.setProperty('border', '1.5px solid #000000', 'important')
-
           cell.style.setProperty('background-color', 'transparent', 'important')
-
           cell.style.setProperty('vertical-align', 'middle', 'important')
-
-          // Long subject/name can wrap naturally
           cell.style.setProperty('white-space', 'normal', 'important')
-
           cell.style.setProperty('word-break', 'normal', 'important')
-
           cell.style.setProperty('overflow-wrap', 'break-word', 'important')
-
           cell.style.setProperty('line-height', '1.25', 'important')
         })
-
-        // =========================
-        // FIRST COLUMN
-        // =========================
 
         const firstColumnCells = clonedDoc.querySelectorAll(
           '.custom-result-table th:first-child, .custom-result-table td:first-child',
@@ -761,15 +647,9 @@ const downloadPdf = async () => {
 
         firstColumnCells.forEach((cell) => {
           cell.style.setProperty('min-width', '180px', 'important')
-
           cell.style.setProperty('white-space', 'normal', 'important')
-
           cell.style.setProperty('word-break', 'normal', 'important')
         })
-
-        // =========================
-        // STUDENT IMAGE
-        // =========================
 
         const studentImages = clonedDoc.querySelectorAll('.student-photo-image')
 
@@ -779,10 +659,6 @@ const downloadPdf = async () => {
           img.style.opacity = '1'
         })
 
-        // =========================
-        // TABLES
-        // =========================
-
         const tables = clonedDoc.querySelectorAll('table')
 
         tables.forEach((table) => {
@@ -791,15 +667,7 @@ const downloadPdf = async () => {
       },
     })
 
-    // =========================
-    // CANVAS → IMAGE
-    // =========================
-
     const imageData = canvas.toDataURL('image/jpeg', 0.95)
-
-    // =========================
-    // A4 LANDSCAPE
-    // =========================
 
     const pdf = new jsPDF({
       orientation: 'landscape',
@@ -808,22 +676,10 @@ const downloadPdf = async () => {
     })
 
     const pageWidth = pdf.internal.pageSize.getWidth()
-
     const pageHeight = pdf.internal.pageSize.getHeight()
-
-    // =========================
-    // FULL A4 PAGE
-    // =========================
-
-    // No margin
-    // Full page width + height
     const sideCrop = 4
 
     pdf.addImage(imageData, 'JPEG', -sideCrop, 0, pageWidth + sideCrop * 2, pageHeight)
-
-    // =========================
-    // FILE NAME
-    // =========================
 
     const safeStudentId = String(
       student.value.studentId || student.value.student_id || selectedStudentId.value || 'student',
@@ -831,21 +687,15 @@ const downloadPdf = async () => {
 
     const safeYear = String(selectedYear.value || 'year').replace(/[^a-zA-Z0-9-_]/g, '-')
 
-    const fileName = `Result-${safeStudentId}-${safeYear}.pdf`
-
-    // =========================
-    // SAVE
-    // =========================
-
-    pdf.save(fileName)
+    pdf.save(`Result-${safeStudentId}-${safeYear}.pdf`)
   } catch (error) {
     console.error('PDF generation error:', error)
-
     alert('Unable to generate PDF. Please try again.')
   } finally {
     downloading.value = false
   }
 }
+
 onMounted(async () => {
   await Promise.all([loadInstituteInfo(), loadFinalResult()])
 })
@@ -863,16 +713,15 @@ onMounted(async () => {
   background-size: 100% 100%;
   background-repeat: no-repeat;
   background-position: center;
-  border-radius: 0px;
+  border-radius: 0;
   border: none !important;
   padding: 25px 35px;
   background-color: #ffffff;
 }
 
-/* কন্টেন্টটি সামান্য নিচে নামানোর জন্য margin-top বাড়িয়ে 110px করা হলো */
 .school-header {
   min-height: 120px;
-  margin-top: 120px; /* <--- এখানে মার্জিন বাড়িয়ে সমন্বয় করা হয়েছে */
+  margin-top: 120px;
 }
 
 .watermark-container {
@@ -926,6 +775,7 @@ onMounted(async () => {
   font-size: 1rem;
   border-color: #000000 !important;
 }
+
 .custom-result-table th,
 .custom-result-table td {
   padding: 8px 6px;
@@ -1001,15 +851,19 @@ onMounted(async () => {
 .width-fix[data-v-a4aa7a5c] {
   max-width: 100% !important;
 }
+
 .width-fix {
   max-width: 100% !important;
 }
+
 .font-size {
   font-size: 80px !important;
 }
+
 .font-size-institute {
   margin-top: -50px;
 }
+
 .font-size-institute p {
   font-size: 20px;
 }

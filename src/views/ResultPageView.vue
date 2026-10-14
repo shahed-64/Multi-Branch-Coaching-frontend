@@ -2,9 +2,7 @@
   <div class="marksheet-wrapper py-5" v-if="resultData">
     <div class="container">
       <div class="marksheet-container position-relative bg-white p-4 p-md-5 mx-auto">
-        <!-- ===================================================== -->
         <!-- LOGO WATERMARK -->
-        <!-- ===================================================== -->
         <div v-if="institute?.logo" class="logo-watermark">
           <img
             :src="getLogoUrl(institute.logo)"
@@ -12,9 +10,7 @@
           />
         </div>
 
-        <!-- ===================================================== -->
         <!-- TOP HEADER -->
-        <!-- ===================================================== -->
         <div class="text-center mb-4 position-relative z-1">
           <h3 class="header-title mb-1">
             {{ institute?.institute_name || 'Institute Name' }}
@@ -32,9 +28,7 @@
           <h5 class="text-secondary mt-1">ACADEMIC TRANSCRIPT</h5>
         </div>
 
-        <!-- ===================================================== -->
         <!-- STUDENT INFORMATION -->
-        <!-- ===================================================== -->
         <table class="info-table mb-4 position-relative z-1">
           <tr>
             <!-- LEFT SIDE -->
@@ -60,7 +54,6 @@
                   <td>: {{ className }}</td>
                 </tr>
 
-                <!-- VERSION -->
                 <tr>
                   <td class="fw-bold">Version</td>
                   <td>: {{ versionName }}</td>
@@ -95,7 +88,6 @@
 
                 <tr>
                   <td class="fw-bold">GPA</td>
-
                   <td>
                     :
                     <span class="badge bg-success fs-6">
@@ -108,31 +100,22 @@
           </tr>
         </table>
 
-        <!-- ===================================================== -->
         <!-- MARKS / GRADES TABLE -->
-        <!-- ===================================================== -->
         <div class="table-responsive position-relative z-1 mb-4">
           <table class="table table-bordered text-center align-middle">
             <thead class="table-success text-dark">
               <tr>
                 <th style="width: 7%">Sl. No.</th>
-
                 <th style="width: 38%; text-align: left; padding-left: 15px">Name of Subjects</th>
-
                 <th style="width: 13%">Marks</th>
-
                 <th style="width: 14%">Letter Grade</th>
-
                 <th style="width: 14%">Grade Point</th>
-
                 <th style="width: 14%">GPA (without additional)</th>
               </tr>
             </thead>
 
             <tbody>
-              <!-- ================================================= -->
               <!-- MAIN SUBJECTS -->
-              <!-- ================================================= -->
               <tr v-for="(subject, index) in mainSubjects" :key="subject.id || index">
                 <td>{{ index + 1 }}.</td>
 
@@ -140,22 +123,16 @@
                   {{ getSubjectName(subject) }}
                 </td>
 
-                <!-- Marks -->
-                <td>
-                  {{ subject.marks ?? '-' }}
-                </td>
+                <td>{{ subject.marks ?? '-' }}</td>
 
-                <!-- Grade -->
                 <td>
                   {{ calculateGrade(subject.marks, subject.full_mark).grade }}
                 </td>
 
-                <!-- Point -->
                 <td>
                   {{ calculateGrade(subject.marks, subject.full_mark).point }}
                 </td>
 
-                <!-- GPA Without Additional -->
                 <td
                   v-if="index === 0"
                   :rowspan="mainSubjects.length"
@@ -165,9 +142,7 @@
                 </td>
               </tr>
 
-              <!-- ================================================= -->
               <!-- ADDITIONAL SUBJECTS -->
-              <!-- ================================================= -->
               <template
                 v-for="(subject, index) in additionalSubjects"
                 :key="'additional-' + (subject.id || index)"
@@ -181,9 +156,7 @@
                     <span class="badge bg-warning text-dark ms-2"> Additional </span>
                   </td>
 
-                  <td>
-                    {{ subject.marks ?? '-' }}
-                  </td>
+                  <td>{{ subject.marks ?? '-' }}</td>
 
                   <td>
                     {{ calculateAdditionalGrade(subject.marks, subject.full_mark).grade }}
@@ -194,16 +167,14 @@
 
                     <br />
 
-                    <small class="text-muted"> (Additional) </small>
+                    <small class="text-muted">(Additional)</small>
                   </td>
 
                   <td>-</td>
                 </tr>
               </template>
 
-              <!-- ================================================= -->
               <!-- NO SUBJECT -->
-              <!-- ================================================= -->
               <tr v-if="mainSubjects.length === 0 && additionalSubjects.length === 0">
                 <td colspan="6" class="text-center text-muted py-4">No subject result found.</td>
               </tr>
@@ -211,44 +182,32 @@
           </table>
         </div>
 
-        <!-- ===================================================== -->
         <!-- GRADING SYSTEM -->
-        <!-- ===================================================== -->
         <div class="row position-relative z-1 mb-5">
-          <!-- Grading Table -->
+          <!-- GRADING TABLE -->
           <div class="col-7">
             <table class="table table-bordered grade-table text-center mb-0">
               <tr class="table-secondary">
                 <th>Interval (%)</th>
-
                 <th>Letter Grade</th>
-
                 <th>Grade Point</th>
               </tr>
 
-              <!-- Dynamic Grading System -->
+              <!-- DYNAMIC GRADING SYSTEM -->
               <tr v-for="grading in sortedGradingSystems" :key="grading.id">
-                <td>
-                  {{ getGradeRange(grading) }}
-                </td>
-
-                <td>
-                  {{ grading.grade }}
-                </td>
-
-                <td>
-                  {{ Number(grading.grade_point).toFixed(2) }}
-                </td>
+                <td>{{ getGradeRange(grading) }}</td>
+                <td>{{ grading.grade }}</td>
+                <td>{{ Number(grading.grade_point).toFixed(2) }}</td>
               </tr>
 
-              <!-- No Grading System -->
+              <!-- NO GRADING SYSTEM -->
               <tr v-if="sortedGradingSystems.length === 0">
                 <td colspan="3" class="text-muted py-3">No grading system found.</td>
               </tr>
             </table>
           </div>
 
-          <!-- Publication Date -->
+          <!-- PUBLICATION DATE -->
           <div class="col-5 d-flex flex-column justify-content-center">
             <div class="p-3 border bg-light rounded text-center">
               <p class="mb-1 text-muted small">Date of Publication of Results</p>
@@ -260,11 +219,9 @@
           </div>
         </div>
 
-        <!-- ===================================================== -->
         <!-- ADDITIONAL SUBJECT INFORMATION -->
-        <!-- ===================================================== -->
         <div v-if="additionalSubjects.length" class="alert alert-info position-relative z-1 mb-4">
-          <strong> Additional Subject: </strong>
+          <strong>Additional Subject:</strong>
 
           <span
             v-for="(subject, index) in additionalSubjects"
@@ -272,7 +229,7 @@
           >
             {{ getSubjectName(subject) }}
 
-            <span v-if="index < additionalSubjects.length - 1"> , </span>
+            <span v-if="index < additionalSubjects.length - 1">, </span>
           </span>
 
           <div class="small mt-1">
@@ -280,9 +237,7 @@
           </div>
         </div>
 
-        <!-- ===================================================== -->
         <!-- SIGNATURES -->
-        <!-- ===================================================== -->
         <div class="row text-center mt-5 position-relative z-1 pt-4">
           <div class="col-4">
             <div class="border-top border-dark pt-2 mx-auto" style="width: 80%">Prepared by</div>
@@ -300,24 +255,20 @@
         </div>
       </div>
 
-      <!-- ===================================================== -->
       <!-- BUTTONS -->
-      <!-- ===================================================== -->
       <div class="text-center mb-5 no-print mt-4">
         <button @click="printMarksheet" class="btn btn-success px-4 py-2 fw-bold shadow-sm">
           🖨️ Print / Save A4 Marksheet
         </button>
 
         <router-link to="/result" class="btn btn-info px-4 py-2 fw-bold shadow-sm ms-2">
-          <span> Back </span>
+          <span>Back</span>
         </router-link>
       </div>
     </div>
   </div>
 
-  <!-- ========================================================= -->
   <!-- LOADING -->
-  <!-- ========================================================= -->
   <div v-else class="text-center py-5">
     <p class="fs-5 text-muted">Loading Result...</p>
   </div>
@@ -328,24 +279,10 @@ import { useRoute } from 'vue-router'
 import { ref, computed, onMounted } from 'vue'
 import api from '@/services/api'
 
-// ============================================================
-// ROUTE
-// ============================================================
 const route = useRoute()
 
-// ============================================================
-// RESULT DATA
-// ============================================================
 const resultData = ref(null)
-
-// ============================================================
-// INSTITUTE DATA
-// ============================================================
 const institute = ref(null)
-
-// ============================================================
-// GRADING SYSTEM DATA
-// ============================================================
 const gradingSystems = ref([])
 
 // ============================================================
@@ -354,7 +291,6 @@ const gradingSystems = ref([])
 const fetchInstitute = async () => {
   try {
     const response = await api.get('/institute-info')
-
     institute.value = response.data?.data || null
   } catch (error) {
     console.error('Failed to fetch institute information:', error)
@@ -367,11 +303,9 @@ const fetchInstitute = async () => {
 const fetchGradingSystems = async () => {
   try {
     const response = await api.get('/grading-systems')
-
     gradingSystems.value = Array.isArray(response.data?.data) ? response.data.data : []
   } catch (error) {
     console.error('Failed to fetch grading systems:', error)
-
     gradingSystems.value = []
   }
 }
@@ -390,12 +324,9 @@ const sortedGradingSystems = computed(() => {
 // ============================================================
 const getGradeRange = (grading) => {
   const sorted = sortedGradingSystems.value
-
   const index = sorted.findIndex((item) => item.id === grading.id)
-
   const min = Number(grading.min_percentage)
 
-  // Highest grade
   if (index === 0) {
     return `${min}% - 100%`
   }
@@ -407,7 +338,6 @@ const getGradeRange = (grading) => {
   }
 
   const upperLimit = Number(previous.min_percentage) - 0.01
-
   return `${min}% - ${upperLimit.toFixed(2)}%`
 }
 
@@ -415,16 +345,12 @@ const getGradeRange = (grading) => {
 // LOGO URL
 // ============================================================
 const getLogoUrl = (logo) => {
-  if (!logo) {
-    return ''
-  }
+  if (!logo) return ''
 
-  // If backend already returns complete URL
   if (logo.startsWith('http://') || logo.startsWith('https://')) {
     return logo
   }
 
-  // Laravel storage path
   return `/storage/${logo}`
 }
 
@@ -441,15 +367,8 @@ const fetchSingleResult = async () => {
 
   try {
     const response = await api.get(`/results/${resultId}`)
-
     console.log('RESULT SHOW RESPONSE:', response.data)
 
-    // ========================================================
-    // SUPPORT BOTH:
-    // response.data.data
-    // response.data.result
-    // response.data
-    // ========================================================
     const data = response.data?.data || response.data?.result || response.data
 
     resultData.value = data
@@ -457,7 +376,6 @@ const fetchSingleResult = async () => {
     console.log('FINAL RESULT DATA:', resultData.value)
   } catch (error) {
     console.error('Error fetching result details:', error)
-
     resultData.value = null
   }
 }
@@ -517,17 +435,17 @@ const studentId = computed(() => {
 
 // ============================================================
 // CLASS NAME
+// Snapshot has priority over mutable StudentSession data.
 // ============================================================
 const className = computed(() => {
   return (
+    resultData.value?.class_name_snapshot ||
+    resultData.value?.student_session?.class_info?.class_name ||
+    resultData.value?.student_session?.class_info?.name ||
+    resultData.value?.student_session?.classInfo?.class_name ||
+    resultData.value?.student_session?.classInfo?.name ||
     resultData.value?.class_name ||
     resultData.value?.className ||
-    resultData.value?.student?.class_info?.class_name ||
-    resultData.value?.student?.class_info?.name ||
-    resultData.value?.student?.classInfo?.class_name ||
-    resultData.value?.student?.classInfo?.name ||
-    resultData.value?.student?.class?.class_name ||
-    resultData.value?.student?.class?.name ||
     'N/A'
   )
 })
@@ -550,13 +468,13 @@ const versionName = computed(() => {
 // ============================================================
 const groupName = computed(() => {
   return (
-    resultData.value?.group_name ||
-    resultData.value?.student?.class_group?.group_name ||
-    resultData.value?.student?.class_group?.name ||
-    resultData.value?.student?.classGroup?.group_name ||
-    resultData.value?.student?.classGroup?.name ||
-    resultData.value?.student?.group?.group_name ||
-    resultData.value?.student?.group?.name ||
+    resultData.value?.class_group_name_snapshot ||
+    resultData.value?.student_session?.class_group?.class_group_name ||
+    resultData.value?.student_session?.class_group?.group_name ||
+    resultData.value?.student_session?.class_group?.name ||
+    resultData.value?.student_session?.classGroup?.class_group_name ||
+    resultData.value?.student_session?.classGroup?.group_name ||
+    resultData.value?.student_session?.classGroup?.name ||
     'N/A'
   )
 })
@@ -566,9 +484,9 @@ const groupName = computed(() => {
 // ============================================================
 const sectionName = computed(() => {
   return (
-    resultData.value?.section_name ||
-    resultData.value?.student?.section?.section_name ||
-    resultData.value?.student?.section?.name ||
+    resultData.value?.section_name_snapshot ||
+    resultData.value?.student_session?.section?.section_name ||
+    resultData.value?.student_session?.section?.name ||
     'N/A'
   )
 })
@@ -602,8 +520,6 @@ const examYear = computed(() => {
 // ============================================================
 // SUBJECT NAME
 // ============================================================
-// Backend subject object-এ name আছে.
-// Fallback হিসেবে subject_name-ও রাখা হলো.
 const getSubjectName = (subject) => {
   return (
     subject?.name ||
@@ -629,7 +545,7 @@ const isAdditionalSubject = (subject) => {
 // MAIN SUBJECTS
 // ============================================================
 const mainSubjects = computed(() => {
-  if (!resultData.value || !Array.isArray(resultData.value.subjects)) {
+  if (!Array.isArray(resultData.value?.subjects)) {
     return []
   }
 
@@ -640,18 +556,14 @@ const mainSubjects = computed(() => {
 // ADDITIONAL SUBJECTS
 // ============================================================
 const additionalSubjects = computed(() => {
-  if (!resultData.value) {
-    return []
-  }
+  if (!resultData.value) return []
 
-  // Backend থেকে সরাসরি additional_subject
   if (Array.isArray(resultData.value.additional_subject)) {
     return resultData.value.additional_subject
   }
 
-  // Fallback: subjects থেকে বের করা
   if (Array.isArray(resultData.value.subjects)) {
-    return resultData.value.subjects.filter((subject) => isAdditionalSubject(subject))
+    return resultData.value.subjects.filter(isAdditionalSubject)
   }
 
   return []
@@ -662,36 +574,24 @@ const additionalSubjects = computed(() => {
 // ============================================================
 const calculateGrade = (marks, fullMark = 100) => {
   if (marks === null || marks === undefined || marks === '') {
-    return {
-      grade: '-',
-      point: '-',
-    }
+    return { grade: '-', point: '-' }
   }
 
   const obtainedMarks = Number(marks)
-
   const maximumMarks = Number(fullMark) || 100
 
   if (isNaN(obtainedMarks) || maximumMarks <= 0) {
-    return {
-      grade: '-',
-      point: '-',
-    }
+    return { grade: '-', point: '-' }
   }
 
-  // Percentage calculation
   const percentage = (obtainedMarks / maximumMarks) * 100
 
-  // Dynamic grading system
   const grading = sortedGradingSystems.value.find(
     (item) => percentage >= Number(item.min_percentage),
   )
 
   if (!grading) {
-    return {
-      grade: '-',
-      point: '-',
-    }
+    return { grade: '-', point: '-' }
   }
 
   return {
@@ -713,9 +613,7 @@ const calculateAdditionalGrade = (marks, fullMark = 100) => {
 const gpaWithoutAdditional = computed(() => {
   const main = mainSubjects.value
 
-  if (!main.length) {
-    return '-'
-  }
+  if (!main.length) return '-'
 
   let totalPoint = 0
   let validSubjects = 0
@@ -729,49 +627,36 @@ const gpaWithoutAdditional = computed(() => {
     }
   })
 
-  if (validSubjects === 0) {
-    return '-'
-  }
+  if (!validSubjects) return '-'
 
-  const gpa = totalPoint / validSubjects
-
-  return Math.min(gpa, 5).toFixed(2)
+  return Math.min(totalPoint / validSubjects, 5).toFixed(2)
 })
 
 // ============================================================
 // GPA WITH ADDITIONAL SUBJECT
 // ============================================================
 const gpaWithAdditional = computed(() => {
-  if (!resultData.value) {
-    return '-'
-  }
+  if (!resultData.value) return '-'
 
   const main = mainSubjects.value
   const additional = additionalSubjects.value
 
-  if (!main.length) {
-    return '-'
-  }
+  if (!main.length) return '-'
 
   let mainPointTotal = 0
   let validMainSubjects = 0
 
-  // Main subjects GPA
   main.forEach((subject) => {
     const grade = calculateGrade(subject.marks, subject.full_mark)
 
     if (grade.point !== '-') {
       mainPointTotal += Number(grade.point)
-
       validMainSubjects++
     }
   })
 
-  if (validMainSubjects === 0) {
-    return '-'
-  }
+  if (!validMainSubjects) return '-'
 
-  // Additional subject bonus
   let additionalBonus = 0
 
   additional.forEach((subject) => {
@@ -780,17 +665,14 @@ const gpaWithAdditional = computed(() => {
     if (grade.point !== '-') {
       const point = Number(grade.point)
 
-      // Additional GP থেকে 2 বাদ দিয়ে bonus
       if (point > 2) {
         additionalBonus += point - 2
       }
     }
   })
 
-  // Final GPA
   const finalGpa = (mainPointTotal + additionalBonus) / validMainSubjects
 
-  // Maximum GPA 5.00
   return Math.min(finalGpa, 5).toFixed(2)
 })
 
@@ -798,11 +680,10 @@ const gpaWithAdditional = computed(() => {
 // JUNIOR CLASS CHECK
 // ============================================================
 const isJuniorClass = (classNameValue) => {
-  if (!classNameValue) {
-    return false
-  }
+  if (!classNameValue) return false
 
-  const numericClass = parseInt(classNameValue.toString().replace(/\D/g, ''), 10)
+  const value = classNameValue.toString().toLowerCase().trim()
+  const numericClass = parseInt(value.replace(/\D/g, ''), 10)
 
   if (!isNaN(numericClass)) {
     return numericClass >= 1 && numericClass <= 8
@@ -827,7 +708,7 @@ const isJuniorClass = (classNameValue) => {
     'class 8',
   ]
 
-  return juniorClasses.some((c) => classNameValue.toString().toLowerCase().includes(c))
+  return juniorClasses.some((c) => value.includes(c))
 }
 
 // ============================================================
@@ -846,7 +727,6 @@ onMounted(() => {
   fetchSingleResult()
 })
 </script>
-
 <style scoped>
 /* =========================================================
    MARKSHEET WRAPPER

@@ -1,12 +1,9 @@
 <template>
   <RouterView />
-
   <AccountMenuView />
 
   <div class="box">
-    <!-- =========================
-        Page Header
-    ========================= -->
+    <!-- Page Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
         <h3 class="fw-bold mb-1 text-dark">
@@ -27,21 +24,17 @@
       </button>
     </div>
 
-    <!-- =========================
-        Summary Cards
-    ========================= -->
+    <!-- Summary Cards -->
     <div class="row g-3 mb-4">
       <div class="col-lg-3 col-md-6">
         <div class="card custom-card border-top-green border-0 shadow-sm rounded-4 h-100">
           <div class="card-body p-4 d-flex align-items-center justify-content-between">
             <div>
-              <span class="card-title-text text-muted"> Total Other Payment </span>
-
+              <span class="card-title-text text-muted">Total Other Payment</span>
               <h3 class="fw-bold mb-0 text-success mt-2">
                 ৳ {{ totalOtherPayment.toLocaleString() }}
               </h3>
             </div>
-
             <div class="card-icon-box bg-green-light text-success">
               <i class="bi bi-receipt fs-4"></i>
             </div>
@@ -53,13 +46,11 @@
         <div class="card custom-card border-top-red border-0 shadow-sm rounded-4 h-100">
           <div class="card-body p-4 d-flex align-items-center justify-content-between">
             <div>
-              <span class="card-title-text text-muted"> This Month Collection </span>
-
+              <span class="card-title-text text-muted">This Month Collection</span>
               <h3 class="fw-bold mb-0 text-danger mt-2">
                 ৳ {{ thisMonthOtherCollection.toLocaleString() }}
               </h3>
             </div>
-
             <div class="card-icon-box bg-red-light text-danger">
               <i class="bi bi-calendar-month fs-4"></i>
             </div>
@@ -71,13 +62,9 @@
         <div class="card custom-card border-top-yellow border-0 shadow-sm rounded-4 h-100">
           <div class="card-body p-4 d-flex align-items-center justify-content-between">
             <div>
-              <span class="card-title-text text-muted"> Total Items Sold </span>
-
-              <h3 class="fw-bold mb-0 text-warning mt-2">
-                {{ totalItems }}
-              </h3>
+              <span class="card-title-text text-muted">Total Items Sold</span>
+              <h3 class="fw-bold mb-0 text-warning mt-2">{{ totalItems }}</h3>
             </div>
-
             <div class="card-icon-box bg-yellow-light text-warning">
               <i class="bi bi-bag-check-fill fs-4"></i>
             </div>
@@ -89,13 +76,9 @@
         <div class="card custom-card border-top-blue border-0 shadow-sm rounded-4 h-100">
           <div class="card-body p-4 d-flex align-items-center justify-content-between">
             <div>
-              <span class="card-title-text text-muted"> Last Purchase Date </span>
-
-              <h5 class="fw-bold mb-0 text-primary mt-2">
-                {{ lastPurchase }}
-              </h5>
+              <span class="card-title-text text-muted">Last Purchase Date</span>
+              <h5 class="fw-bold mb-0 text-primary mt-2">{{ lastPurchase }}</h5>
             </div>
-
             <div class="card-icon-box bg-blue-light text-primary">
               <i class="bi bi-calendar-check-fill fs-4"></i>
             </div>
@@ -104,11 +87,8 @@
       </div>
     </div>
 
-    <!-- =========================
-        Main Table Card
-    ========================= -->
+    <!-- Main Table -->
     <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
-      <!-- Search Filter Bar -->
       <div class="card-header bg-white border-bottom py-3 px-4">
         <div class="row g-3 align-items-center justify-content-between">
           <div class="col-md-4">
@@ -116,12 +96,11 @@
               <span class="input-group-text bg-light border-end-0 text-muted">
                 <i class="bi bi-search"></i>
               </span>
-
               <input
+                v-model="tableSearch"
                 type="text"
                 class="form-control bg-light border-start-0 ps-0"
                 placeholder="Search Student ID or Name..."
-                v-model="tableSearch"
                 @input="currentPage = 1"
               />
             </div>
@@ -135,7 +114,6 @@
         </div>
       </div>
 
-      <!-- Table Content -->
       <div class="card-body p-0">
         <div class="table-responsive">
           <table class="my-custom-table w-100 align-middle">
@@ -144,6 +122,7 @@
                 <th class="ps-4">#</th>
                 <th>Student ID</th>
                 <th>Student Name</th>
+                <th>Academic Session</th>
                 <th>Item</th>
                 <th>Qty</th>
                 <th>Price</th>
@@ -164,7 +143,6 @@
                   {{ payment.student?.student_id || 'N/A' }}
                 </td>
 
-                <!-- Student Name with Avatar -->
                 <td class="fw-medium">
                   <div class="d-flex align-items-center gap-2">
                     <img
@@ -172,11 +150,18 @@
                       alt="Student Avatar"
                       class="student-table-img"
                     />
-
-                    <span>
-                      {{ payment.student?.full_name || 'N/A' }}
-                    </span>
+                    <span>{{ payment.student?.full_name || 'N/A' }}</span>
                   </div>
+                </td>
+
+                <td>
+                  <span
+                    v-if="getPaymentSession(payment)"
+                    class="badge bg-info-subtle text-info border border-info-subtle"
+                  >
+                    {{ getSessionName(getPaymentSession(payment)) }}
+                  </span>
+                  <span v-else class="badge bg-light text-secondary border"> Not assigned </span>
                 </td>
 
                 <td>
@@ -186,28 +171,28 @@
                 </td>
 
                 <td>{{ payment.quantity }}</td>
-
-                <td>৳ {{ Number(payment.price).toLocaleString() }}</td>
+                <td>৳ {{ Number(payment.price || 0).toLocaleString() }}</td>
 
                 <td class="fw-bold text-success">
-                  ৳ {{ Number(payment.total_amount).toLocaleString() }}
+                  ৳ {{ Number(payment.total_amount || 0).toLocaleString() }}
                 </td>
 
                 <td>
                   <span
                     class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1"
                   >
-                    {{ payment.payment_method }}
+                    {{ payment.payment_method || 'N/A' }}
                   </span>
                 </td>
 
                 <td class="text-muted small">
-                  {{ new Date(payment.payment_date).toLocaleDateString() }}
+                  {{ formatDate(payment.payment_date) }}
                 </td>
 
                 <td class="text-end pe-4">
                   <button
                     class="btn btn-sm btn-light text-primary me-2 action-btn"
+                    title="Edit"
                     @click="editPayment(payment)"
                   >
                     <i class="bi bi-pencil"></i>
@@ -215,6 +200,7 @@
 
                   <button
                     class="btn btn-sm btn-light text-danger action-btn"
+                    title="Delete"
                     @click="deletePayment(payment.id)"
                   >
                     <i class="bi bi-trash"></i>
@@ -223,43 +209,30 @@
               </tr>
 
               <tr v-if="paginatedPayments.length === 0">
-                <td colspan="10" class="text-center py-5 text-muted">No other payments found.</td>
+                <td colspan="11" class="text-center py-5 text-muted">No other payments found.</td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
 
-      <!-- =========================
-          PAGINATION FOOTER
-      ========================= -->
+      <!-- Pagination -->
       <div
-        class="card-footer bg-white border-top py-3 px-4 d-flex justify-content-between align-items-center"
+        class="card-footer bg-white border-top py-3 px-4 d-flex justify-content-between align-items-center flex-wrap gap-3"
       >
         <div class="text-muted small">
           Showing
-          <b>
-            {{ paginatedPayments.length ? (currentPage - 1) * itemsPerPage + 1 : 0 }}
-          </b>
-
+          <b>{{ paginatedPayments.length ? (currentPage - 1) * itemsPerPage + 1 : 0 }}</b>
           to
-
-          <b>
-            {{ Math.min(currentPage * itemsPerPage, filteredOtherPayments.length) }}
-          </b>
-
+          <b>{{ Math.min(currentPage * itemsPerPage, filteredOtherPayments.length) }}</b>
           of
-
           <b>{{ filteredOtherPayments.length }}</b>
-
           entries
         </div>
 
-        <!-- Pagination Controls -->
-        <div class="d-flex align-items-center gap-1">
+        <div class="d-flex align-items-center gap-1 flex-wrap">
           <button class="pg-btn" :disabled="currentPage === 1" @click="currentPage--">
-            <i class="bi bi-chevron-left"></i>
-            Previous
+            <i class="bi bi-chevron-left"></i> Previous
           </button>
 
           <button
@@ -277,16 +250,13 @@
             :disabled="currentPage === totalPages || totalPages === 0"
             @click="currentPage++"
           >
-            Next
-            <i class="bi bi-chevron-right"></i>
+            Next <i class="bi bi-chevron-right"></i>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- =========================
-        Add / Edit Modal
-    ========================= -->
+    <!-- Add / Edit Modal -->
     <div
       class="modal fade"
       id="otherPaymentModal"
@@ -302,7 +272,6 @@
               id="otherPaymentModalLabel"
             >
               <i class="bi" :class="isEdit ? 'bi-pencil-square' : 'bi-plus-circle-fill'"></i>
-
               {{ isEdit ? 'Edit Other Payment' : 'Add Other Payment' }}
             </h5>
 
@@ -317,19 +286,23 @@
 
           <div class="modal-body p-4">
             <div class="row g-3">
-              <!-- =========================
-                  Student Search
-              ========================= -->
+              <!-- Student Search -->
               <div class="col-md-6 position-relative">
-                <label class="form-label fw-semibold"> Student ID </label>
+                <label class="form-label fw-semibold">
+                  Student ID <span class="text-danger">*</span>
+                </label>
 
                 <input
+                  v-model="searchStudent"
                   type="text"
                   class="form-control"
                   placeholder="Search Student ID..."
-                  v-model="searchStudent"
                   autocomplete="off"
                 />
+
+                <div v-if="studentSearchLoading" class="small text-muted mt-1">
+                  Searching students...
+                </div>
 
                 <div
                   v-if="filteredStudents.length"
@@ -337,51 +310,102 @@
                   style="z-index: 1050; max-height: 180px; overflow-y: auto"
                 >
                   <button
-                    type="button"
-                    class="list-group-item list-group-item-action py-2 text-start"
                     v-for="student in filteredStudents"
                     :key="student.id"
+                    type="button"
+                    class="list-group-item list-group-item-action py-2 text-start"
                     @click="selectStudent(student)"
                   >
-                    <span class="fw-bold text-primary">
-                      {{ student.student_id }}
-                    </span>
-                    -
-                    {{ student.full_name }}
+                    <span class="fw-bold text-primary">{{ student.student_id }}</span>
+                    - {{ student.full_name }}
                   </button>
                 </div>
               </div>
 
+              <!-- Academic Session -->
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">
+                  Academic Session <span class="text-danger">*</span>
+                </label>
+
+                <select
+                  v-model="form.student_session_id"
+                  class="form-select"
+                  :disabled="!selectedStudent || studentSessionsLoading"
+                  required
+                >
+                  <option value="">Select Academic Session</option>
+
+                  <option
+                    v-for="session in studentSessions"
+                    :key="session.id"
+                    :value="String(session.id)"
+                  >
+                    {{ getSessionName(session) }}
+                    {{ isActiveSession(session) ? ' (Active)' : '' }}
+                  </option>
+                </select>
+
+                <small v-if="studentSessionsLoading" class="text-muted">
+                  Loading academic sessions...
+                </small>
+
+                <small
+                  v-else-if="selectedStudent && studentSessions.length === 0"
+                  class="text-danger"
+                >
+                  No academic session enrollment was returned for this student.
+                </small>
+
+                <small v-else-if="selectedStudent && !form.student_session_id" class="text-warning">
+                  No active session was found. Please select a session manually.
+                </small>
+
+                <small v-else-if="isEdit && !form.student_session_id" class="text-warning">
+                  This old payment has no assigned session. Select one before updating.
+                </small>
+              </div>
+
               <!-- Item Name -->
               <div class="col-md-6">
-                <label class="form-label fw-semibold"> Item Name </label>
-
+                <label class="form-label fw-semibold">
+                  Item Name <span class="text-danger">*</span>
+                </label>
                 <input
+                  v-model="form.item_name"
                   type="text"
                   class="form-control"
                   placeholder="Sheet / Card / Pen"
-                  v-model="form.item_name"
                 />
               </div>
 
               <!-- Quantity -->
-              <div class="col-md-4">
-                <label class="form-label fw-semibold"> Quantity </label>
-
-                <input type="number" min="1" class="form-control" v-model.number="form.quantity" />
+              <div class="col-md-3">
+                <label class="form-label fw-semibold">Quantity</label>
+                <input
+                  v-model.number="form.quantity"
+                  type="number"
+                  min="1"
+                  step="1"
+                  class="form-control"
+                />
               </div>
 
               <!-- Price -->
-              <div class="col-md-4">
-                <label class="form-label fw-semibold"> Price </label>
-
-                <input type="number" min="0" class="form-control" v-model.number="form.price" />
+              <div class="col-md-3">
+                <label class="form-label fw-semibold">Price</label>
+                <input
+                  v-model.number="form.price"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  class="form-control"
+                />
               </div>
 
-              <!-- Total Amount -->
-              <div class="col-md-4">
-                <label class="form-label fw-semibold"> Total Amount </label>
-
+              <!-- Total -->
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Total Amount</label>
                 <input
                   type="text"
                   class="form-control bg-light fw-bold text-success"
@@ -392,9 +416,8 @@
 
               <!-- Payment Method -->
               <div class="col-md-6">
-                <label class="form-label fw-semibold"> Payment Method </label>
-
-                <select class="form-select" v-model="form.payment_method">
+                <label class="form-label fw-semibold">Payment Method</label>
+                <select v-model="form.payment_method" class="form-select">
                   <option value="Cash">Cash</option>
                   <option value="Bkash">Bkash</option>
                   <option value="Nagad">Nagad</option>
@@ -404,22 +427,24 @@
 
               <!-- Payment Date -->
               <div class="col-md-6">
-                <label class="form-label fw-semibold"> Payment Date </label>
-
-                <input type="date" class="form-control" v-model="form.payment_date" />
+                <label class="form-label fw-semibold">Payment Date</label>
+                <input v-model="form.payment_date" type="date" class="form-control" />
               </div>
 
               <!-- Remarks -->
               <div class="col-12">
-                <label class="form-label fw-semibold"> Remarks </label>
-
+                <label class="form-label fw-semibold">Remarks</label>
                 <textarea
+                  v-model="form.remarks"
                   rows="2"
                   class="form-control"
                   placeholder="Optional remarks..."
-                  v-model="form.remarks"
                 ></textarea>
               </div>
+            </div>
+
+            <div v-if="formError" class="alert alert-danger mt-3 mb-0">
+              {{ formError }}
             </div>
           </div>
 
@@ -428,6 +453,7 @@
               type="button"
               class="btn btn-light text-secondary border"
               data-bs-dismiss="modal"
+              :disabled="saving"
               @click="resetForm"
             >
               Cancel
@@ -436,12 +462,13 @@
             <button
               type="button"
               class="btn btn-primary px-4 d-inline-flex align-items-center gap-2"
+              :disabled="saving || !form.student_id || !form.student_session_id"
               @click="isEdit ? updatePayment() : savePayment()"
             >
-              <i class="bi" :class="isEdit ? 'bi-check-circle-fill' : 'bi-save-fill'"></i>
-
+              <span v-if="saving" class="spinner-border spinner-border-sm" role="status"></span>
+              <i v-else class="bi" :class="isEdit ? 'bi-check-circle-fill' : 'bi-save-fill'"></i>
               <span>
-                {{ isEdit ? 'Update Payment' : 'Save Payment' }}
+                {{ saving ? 'Saving...' : isEdit ? 'Update Payment' : 'Save Payment' }}
               </span>
             </button>
           </div>
@@ -458,14 +485,11 @@ import api from '@/services/api'
 import * as bootstrap from 'bootstrap'
 import { getImageUrl } from '@/utils/img'
 
-/* =========================
-   State
-========================= */
+/* State */
 const otherPayments = ref([])
 const students = ref([])
 const tableSearch = ref('')
 
-// Pagination Settings
 const currentPage = ref(1)
 const itemsPerPage = ref(10)
 
@@ -474,57 +498,107 @@ const selectedStudent = ref(null)
 const isEdit = ref(false)
 const editId = ref(null)
 
-// Student search loading state
 const studentSearchLoading = ref(false)
+const studentSessionsLoading = ref(false)
+const studentSessions = ref([])
+const saving = ref(false)
+const formError = ref('')
 
-/* =========================
-   Form
-========================= */
-const form = ref({
+let studentSearchTimer = null
+let studentSearchRequest = 0
+
+/* Form */
+const emptyForm = () => ({
   student_id: '',
+  student_session_id: '',
   item_name: '',
   quantity: 1,
   price: '',
   total_amount: 0,
   payment_method: 'Cash',
-  payment_date: new Date().toISOString().slice(0, 10),
+  payment_date: new Date().toLocaleDateString('en-CA'),
   remarks: '',
 })
 
-/* =========================
-   Computed Properties
-========================= */
-const filteredOtherPayments = computed(() => {
-  if (!tableSearch.value) {
-    return otherPayments.value
-  }
+const form = ref(emptyForm())
 
-  const query = tableSearch.value.toLowerCase()
+/* Session helpers */
+const getSessionName = (session) => {
+  if (!session) return 'Unknown Session'
+
+  const academicSession =
+    session.academic_session || session.academicSession || session.academic_session_info || null
+
+  const sessionName =
+    academicSession?.name || academicSession?.session_name || session.session_name || session.name
+
+  const className = session.class_info?.name || session.classInfo?.name || session.class_name || ''
+
+  const sectionName = session.section?.name || session.section_name || ''
+
+  const details = [className, sectionName].filter(Boolean).join(' - ')
+
+  if (sessionName && details) return `${sessionName} (${details})`
+  if (sessionName) return sessionName
+
+  return `Session ${session.academic_session_id ?? session.academicSession?.id ?? session.id}`
+}
+
+/* Detect active session */
+const isActiveSession = (session) => {
+  if (!session) return false
+
+  const academicSession =
+    session.academic_session || session.academicSession || session.academic_session_info || null
+
+  return (
+    academicSession?.is_active === true ||
+    academicSession?.is_active === 1 ||
+    academicSession?.is_active === '1'
+  )
+}
+
+const getPaymentSession = (payment) => {
+  return payment.student_session || payment.studentSession || null
+}
+
+const formatDate = (date) => {
+  if (!date) return 'N/A'
+
+  const parsedDate = new Date(`${String(date).slice(0, 10)}T00:00:00`)
+
+  return Number.isNaN(parsedDate.getTime()) ? String(date) : parsedDate.toLocaleDateString()
+}
+
+/* Computed */
+const filteredOtherPayments = computed(() => {
+  const query = tableSearch.value.trim().toLowerCase()
+
+  if (!query) return otherPayments.value
 
   return otherPayments.value.filter((payment) => {
     const studentId = payment.student?.student_id?.toLowerCase() || ''
-
     const studentName = payment.student?.full_name?.toLowerCase() || ''
-
     const itemName = payment.item_name?.toLowerCase() || ''
+    const session = getPaymentSession(payment)
+    const sessionName = session ? getSessionName(session).toLowerCase() : ''
 
-    return studentId.includes(query) || studentName.includes(query) || itemName.includes(query)
+    return (
+      studentId.includes(query) ||
+      studentName.includes(query) ||
+      itemName.includes(query) ||
+      sessionName.includes(query)
+    )
   })
 })
 
-/* =========================
-   Pagination Computations
-========================= */
 const totalPages = computed(() => {
   return Math.ceil(filteredOtherPayments.value.length / itemsPerPage.value) || 1
 })
 
 const paginatedPayments = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage.value
-
-  const end = start + itemsPerPage.value
-
-  return filteredOtherPayments.value.slice(start, end)
+  return filteredOtherPayments.value.slice(start, start + itemsPerPage.value)
 })
 
 const totalPrice = computed(() => {
@@ -540,75 +614,57 @@ const totalItems = computed(() => {
 })
 
 const lastPurchase = computed(() => {
-  if (otherPayments.value.length === 0) {
-    return '-'
-  }
+  if (!otherPayments.value.length) return '-'
 
-  return otherPayments.value[0].payment_date
+  const latestPayment = [...otherPayments.value].sort((a, b) => {
+    return String(b.payment_date || '').localeCompare(String(a.payment_date || ''))
+  })[0]
+
+  return formatDate(latestPayment.payment_date)
 })
 
-/* =========================
-   Student Search Results
-========================= */
-const filteredStudents = computed(() => {
-  if (!searchStudent.value.trim()) {
-    return []
-  }
-
-  if (selectedStudent.value && selectedStudent.value.student_id === searchStudent.value) {
-    return []
-  }
-
-  return students.value
-})
-
-/* =========================
-   This Month Collection
-========================= */
 const thisMonthOtherCollection = computed(() => {
-  const currentMonth = new Date().getMonth()
-
-  const currentYear = new Date().getFullYear()
+  const now = new Date()
+  const currentMonth = now.getMonth()
+  const currentYear = now.getFullYear()
 
   return otherPayments.value
     .filter((payment) => {
-      const date = new Date(payment.payment_date)
+      if (!payment.payment_date) return false
+
+      const date = new Date(`${String(payment.payment_date).slice(0, 10)}T00:00:00`)
 
       return date.getMonth() === currentMonth && date.getFullYear() === currentYear
     })
-    .reduce((total, payment) => total + Number(payment.total_amount || 0), 0)
+    .reduce((sum, payment) => sum + Number(payment.total_amount || 0), 0)
 })
 
-/* =========================
-   API Requests
-========================= */
+const filteredStudents = computed(() => {
+  if (!searchStudent.value.trim() || selectedStudent.value) return []
+  return students.value
+})
 
+/* API: Other Payments */
 const getOtherPayments = async () => {
   try {
     const response = await api.get('/other-payments')
+    const data = response.data
 
-    otherPayments.value = response.data.data || response.data
+    otherPayments.value = Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : []
 
-    // Keep pagination valid after reload
     if (currentPage.value > totalPages.value) {
       currentPage.value = totalPages.value
     }
   } catch (error) {
-    console.error('Error fetching payments:', error)
+    console.error('Error fetching other payments:', error)
+    formError.value = error.response?.data?.message || 'Unable to load other payments.'
   }
 }
 
-/*
-|--------------------------------------------------------------------------
-| Search Students From Backend
-|--------------------------------------------------------------------------
-| StudentController supports:
-| /students?search=...&per_page=20
-|
-| This avoids loading all students into browser.
-*/
+/* API: Search students */
 const searchStudents = async (search = '') => {
   const query = search.trim()
+  const requestId = ++studentSearchRequest
 
   if (!query) {
     students.value = []
@@ -627,149 +683,251 @@ const searchStudents = async (search = '') => {
       },
     })
 
-    students.value = response.data?.students || response.data?.data || response.data || []
-  } catch (error) {
-    console.error('Error searching students:', error)
+    if (requestId !== studentSearchRequest) return
 
+    const data = response.data
+    const result = data?.students || data?.data || data
+
+    students.value = Array.isArray(result) ? result : []
+  } catch (error) {
+    if (requestId !== studentSearchRequest) return
+
+    console.error('Error searching students:', error)
     students.value = []
   } finally {
-    studentSearchLoading.value = false
+    if (requestId === studentSearchRequest) {
+      studentSearchLoading.value = false
+    }
   }
 }
 
-/* =========================
-   Debounced Student Search
-========================= */
-let studentSearchTimer = null
-
+/* Student search debounce */
 watch(searchStudent, (newValue) => {
   clearTimeout(studentSearchTimer)
 
-  // If selected student is cleared
   if (selectedStudent.value && newValue !== selectedStudent.value.student_id) {
     selectedStudent.value = null
     form.value.student_id = ''
+    form.value.student_session_id = ''
+    studentSessions.value = []
   }
 
   if (!newValue.trim()) {
     students.value = []
+    studentSearchLoading.value = false
     return
   }
+
+  if (selectedStudent.value) return
 
   studentSearchTimer = setTimeout(() => {
     searchStudents(newValue)
   }, 300)
 })
 
-/* =========================
-   Modal Cleanup
-========================= */
-const cleanupModals = () => {
-  document.querySelectorAll('.modal').forEach((modalElement) => {
-    try {
-      const modalInstance = bootstrap.Modal.getInstance(modalElement)
+/* Load sessions and auto-select active session */
+const loadStudentSessions = (student, preferredSessionId = null, paymentSession = null) => {
+  const sessions = Array.isArray(student?.student_sessions)
+    ? [...student.student_sessions]
+    : Array.isArray(student?.studentSessions)
+      ? [...student.studentSessions]
+      : []
 
-      if (modalInstance) {
-        modalInstance.dispose()
-      }
-    } catch (error) {
-      console.warn('Modal cleanup warning:', error)
+  // Preserve the saved session while editing an existing payment.
+  if (paymentSession?.id) {
+    const exists = sessions.some((session) => Number(session.id) === Number(paymentSession.id))
+
+    if (!exists) sessions.push(paymentSession)
+  }
+
+  studentSessions.value = sessions
+
+  // Editing: retain the exact session previously saved on this payment.
+  if (preferredSessionId !== null && preferredSessionId !== undefined) {
+    const preferredSession = sessions.find(
+      (session) => Number(session.id) === Number(preferredSessionId),
+    )
+
+    if (preferredSession) {
+      form.value.student_session_id = String(preferredSession.id)
+      return
     }
+  }
 
-    modalElement.classList.remove('show')
+  // New payment: automatically select an active session.
+  const activeSession = sessions.find(isActiveSession)
 
-    modalElement.style.removeProperty('display')
+  form.value.student_session_id = activeSession ? String(activeSession.id) : ''
+}
 
-    modalElement.style.removeProperty('padding-right')
+/* Select student */
+const selectStudent = (student) => {
+  selectedStudent.value = student
+  form.value.student_id = String(student.id)
+  form.value.student_session_id = ''
+  studentSessions.value = []
 
-    modalElement.removeAttribute('aria-modal')
+  loadStudentSessions(student)
 
-    modalElement.setAttribute('aria-hidden', 'true')
+  searchStudent.value = student.student_id || ''
+  students.value = []
+  formError.value = ''
 
-    modalElement.removeAttribute('role')
-  })
+  if (!Array.isArray(student.student_sessions) && !Array.isArray(student.studentSessions)) {
+    formError.value =
+      'Student sessions were not included in the students API response. Please check StudentController.'
+  } else if (studentSessions.value.length === 0) {
+    formError.value = 'This student has no academic session enrollment.'
+  } else if (!form.value.student_session_id) {
+    formError.value = 'No active academic session found. Please select a session manually.'
+  }
+}
+
+/* Modal cleanup: do not remove backdrop while any modal is open */
+const cleanupModals = () => {
+  if (document.querySelector('.modal.show')) return
 
   document.querySelectorAll('.modal-backdrop').forEach((backdrop) => {
     backdrop.remove()
   })
 
   document.body.classList.remove('modal-open')
-
   document.body.style.removeProperty('overflow')
-
   document.body.style.removeProperty('padding-right')
 
   document.documentElement.style.removeProperty('overflow')
-
   document.documentElement.style.removeProperty('padding-right')
+
+  const modalElement = document.getElementById('otherPaymentModal')
+
+  if (modalElement) {
+    modalElement.style.removeProperty('display')
+    modalElement.style.removeProperty('padding-right')
+    modalElement.removeAttribute('aria-modal')
+    modalElement.removeAttribute('role')
+    modalElement.setAttribute('aria-hidden', 'true')
+  }
 }
 
-/* =========================
-   Browser Back Fix
-========================= */
 const handleBrowserBack = () => {
   cleanupModals()
 }
 
-/* =========================
-   Actions & Methods
-========================= */
+/* Close modal and wait for Bootstrap transition */
+const closeModal = () => {
+  return new Promise((resolve) => {
+    const modalElement = document.getElementById('otherPaymentModal')
 
-const selectStudent = (student) => {
-  selectedStudent.value = student
+    if (!modalElement) {
+      resolve()
+      return
+    }
 
-  form.value.student_id = student.id
+    const instance = bootstrap.Modal.getInstance(modalElement)
 
-  searchStudent.value = student.student_id
+    if (!instance || !modalElement.classList.contains('show')) {
+      resolve()
+      return
+    }
 
-  // Hide dropdown after selection
-  students.value = []
+    modalElement.addEventListener('hidden.bs.modal', () => resolve(), { once: true })
+
+    instance.hide()
+  })
 }
 
-const closeModal = () => {
-  const modalElement = document.getElementById('otherPaymentModal')
-
-  if (modalElement) {
-    const modalInstance =
-      bootstrap.Modal.getInstance(modalElement) || bootstrap.Modal.getOrCreateInstance(modalElement)
-
-    modalInstance.hide()
+/* Validation */
+const validateForm = () => {
+  if (!form.value.student_id) {
+    formError.value = 'Please select a student.'
+    return false
   }
 
-  setTimeout(() => {
-    cleanupModals()
-  }, 300)
+  if (!form.value.student_session_id) {
+    formError.value = 'Please select an academic session.'
+    return false
+  }
+
+  if (!form.value.item_name?.trim()) {
+    formError.value = 'Please enter the item name.'
+    return false
+  }
+
+  if (!Number.isFinite(Number(form.value.quantity)) || Number(form.value.quantity) < 1) {
+    formError.value = 'Quantity must be at least 1.'
+    return false
+  }
+
+  if (
+    form.value.price === '' ||
+    !Number.isFinite(Number(form.value.price)) ||
+    Number(form.value.price) < 0
+  ) {
+    formError.value = 'Please enter a valid price.'
+    return false
+  }
+
+  if (!form.value.payment_date) {
+    formError.value = 'Please select the payment date.'
+    return false
+  }
+
+  return true
 }
 
-const savePayment = async () => {
-  try {
-    form.value.total_amount = totalPrice.value
+/* Request payload */
+const buildPayload = () => ({
+  student_id: Number(form.value.student_id),
+  student_session_id: Number(form.value.student_session_id),
+  item_name: form.value.item_name.trim(),
+  quantity: Number(form.value.quantity),
+  price: Number(form.value.price),
+  total_amount: totalPrice.value,
+  payment_method: form.value.payment_method || 'Cash',
+  payment_date: form.value.payment_date,
+  remarks: form.value.remarks || null,
+})
 
-    await api.post('/other-payments', form.value)
+/* Save */
+const savePayment = async () => {
+  if (saving.value) return
+
+  formError.value = ''
+
+  if (!validateForm()) return
+
+  saving.value = true
+
+  try {
+    await api.post('/other-payments', buildPayload())
 
     await getOtherPayments()
-
+    await closeModal()
     resetForm()
-    closeModal()
+    cleanupModals()
   } catch (error) {
     console.error('Save failed:', error.response?.data || error)
+
+    formError.value =
+      error.response?.data?.message ||
+      Object.values(error.response?.data?.errors || {}).flat()[0] ||
+      'Unable to save payment. Please try again.'
+  } finally {
+    saving.value = false
   }
 }
 
+/* Edit */
 const editPayment = async (payment) => {
+  formError.value = ''
   isEdit.value = true
   editId.value = payment.id
 
-  /*
-   * First try to use student data already
-   * attached to the payment.
-   */
-  let matchedStudent = students.value.find((s) => s.id === payment.student_id) || payment.student
+  let matchedStudent =
+    students.value.find((student) => Number(student.id) === Number(payment.student_id)) ||
+    payment.student ||
+    null
 
-  /*
-   * If the student is not currently available,
-   * search the backend using student ID.
-   */
   if (!matchedStudent && payment.student_id) {
     try {
       const response = await api.get('/students', {
@@ -780,99 +938,124 @@ const editPayment = async (payment) => {
         },
       })
 
-      const result = response.data?.students || response.data?.data || response.data || []
+      const data = response.data
+      const result = data?.students || data?.data || data
+      const studentList = Array.isArray(result) ? result : []
 
       matchedStudent =
-        result.find((student) => Number(student.id) === Number(payment.student_id)) || result[0]
-
-      if (matchedStudent) {
-        students.value = [matchedStudent]
-      }
+        studentList.find((student) => Number(student.id) === Number(payment.student_id)) || null
     } catch (error) {
       console.error('Error loading payment student:', error)
     }
   }
 
-  if (matchedStudent) {
-    selectedStudent.value = matchedStudent
+  selectedStudent.value = matchedStudent
+  searchStudent.value = matchedStudent?.student_id || payment.student?.student_id || ''
 
-    searchStudent.value = matchedStudent.student_id
-  }
+  const paymentSession = getPaymentSession(payment)
 
   form.value = {
-    student_id: payment.student_id,
-    item_name: payment.item_name,
-    quantity: payment.quantity,
-    price: payment.price,
-    total_amount: payment.total_amount,
-    payment_method: payment.payment_method,
-    payment_date: payment.payment_date,
+    student_id: String(payment.student_id || matchedStudent?.id || ''),
+    student_session_id: '',
+    item_name: payment.item_name || '',
+    quantity: Number(payment.quantity || 1),
+    price: payment.price ?? '',
+    total_amount: Number(payment.total_amount || 0),
+    payment_method: payment.payment_method || 'Cash',
+    payment_date: payment.payment_date
+      ? String(payment.payment_date).slice(0, 10)
+      : new Date().toLocaleDateString('en-CA'),
     remarks: payment.remarks || '',
   }
 
-  const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('otherPaymentModal'))
+  // Do not silently assign an active session to an old payment
+  // whose historical session was not saved.
+  loadStudentSessions(
+    matchedStudent,
+    payment.student_session_id ?? paymentSession?.id ?? null,
+    paymentSession,
+  )
 
-  modal.show()
+  if (!matchedStudent) {
+    formError.value = 'Unable to load the student information. Please close and try again.'
+  } else if (!form.value.student_session_id) {
+    formError.value =
+      'This payment has no saved academic session. Select a session before updating it.'
+  }
+
+  const modalElement = document.getElementById('otherPaymentModal')
+
+  if (modalElement) {
+    bootstrap.Modal.getOrCreateInstance(modalElement).show()
+  }
 }
 
+/* Update */
 const updatePayment = async () => {
-  try {
-    form.value.total_amount = totalPrice.value
+  if (saving.value) return
 
-    await api.put(`/other-payments/${editId.value}`, form.value)
+  formError.value = ''
+
+  if (!validateForm()) return
+
+  saving.value = true
+
+  try {
+    await api.put(`/other-payments/${editId.value}`, buildPayload())
 
     await getOtherPayments()
-
+    await closeModal()
     resetForm()
-    closeModal()
+    cleanupModals()
   } catch (error) {
     console.error('Update failed:', error.response?.data || error)
+
+    formError.value =
+      error.response?.data?.message ||
+      Object.values(error.response?.data?.errors || {}).flat()[0] ||
+      'Unable to update payment. Please try again.'
+  } finally {
+    saving.value = false
   }
 }
 
+/* Delete */
 const deletePayment = async (id) => {
-  if (!confirm('Are you sure you want to delete this payment?')) {
-    return
-  }
+  if (!confirm('Are you sure you want to delete this payment?')) return
 
   try {
     await api.delete(`/other-payments/${id}`)
-
     await getOtherPayments()
   } catch (error) {
     console.error('Delete failed:', error)
+
+    alert(error.response?.data?.message || 'Unable to delete this payment. Please try again.')
   }
 }
 
+/* Reset */
 const resetForm = () => {
   isEdit.value = false
   editId.value = null
+
   searchStudent.value = ''
   selectedStudent.value = null
   students.value = []
+  studentSessions.value = []
 
-  form.value = {
-    student_id: '',
-    item_name: '',
-    quantity: 1,
-    price: '',
-    total_amount: 0,
-    payment_method: 'Cash',
-    payment_date: new Date().toISOString().slice(0, 10),
-    remarks: '',
-  }
+  studentSessionsLoading.value = false
+  studentSearchLoading.value = false
+  formError.value = ''
+
+  studentSearchRequest++
+  form.value = emptyForm()
 }
 
-/* =========================
-   Lifecycle Hooks
-========================= */
+/* Lifecycle */
 onMounted(() => {
   getOtherPayments()
 
-  // Mobile / browser Back button
-  // modal backdrop cleanup
   window.addEventListener('popstate', handleBrowserBack)
-
   window.addEventListener('pageshow', handleBrowserBack)
 })
 
@@ -880,20 +1063,18 @@ onBeforeUnmount(() => {
   clearTimeout(studentSearchTimer)
 
   window.removeEventListener('popstate', handleBrowserBack)
-
   window.removeEventListener('pageshow', handleBrowserBack)
 
   cleanupModals()
 })
 </script>
+
 <style scoped>
 .box {
   width: 85%;
   margin: auto;
   margin-left: 264px;
 }
-
-/* Top Cards Styling */
 
 .custom-card {
   background-color: #ffffff;
@@ -954,10 +1135,6 @@ onBeforeUnmount(() => {
   font-weight: 500;
 }
 
-/* ===================================================
-   TABLE & HOVER STYLING
-=================================================== */
-
 .my-custom-table {
   border-collapse: collapse;
 }
@@ -975,8 +1152,6 @@ onBeforeUnmount(() => {
   padding: 14px 16px;
 }
 
-/* Row Styling */
-
 .my-custom-table tbody tr.data-row {
   border-bottom: 1px solid #f1f5f9;
   background-color: #ffffff;
@@ -991,8 +1166,6 @@ onBeforeUnmount(() => {
   box-shadow: inset 4px 0 0 #10b981;
 }
 
-/* Student Profile Image in Table */
-
 .student-table-img {
   width: 36px;
   height: 36px;
@@ -1001,10 +1174,6 @@ onBeforeUnmount(() => {
   border: 1px solid #e2e8f0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
-
-/* ===================================================
-   PAGINATION BUTTONS STYLING
-=================================================== */
 
 .pg-btn {
   background: #ffffff;
@@ -1053,6 +1222,14 @@ onBeforeUnmount(() => {
   background-color: #0d6efd;
   border-color: #0d6efd;
   color: #ffffff;
+}
+
+.action-btn {
+  transition: transform 0.2s ease;
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
 }
 
 @media (max-width: 768px) {

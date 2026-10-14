@@ -89,7 +89,14 @@
       <i class="fa-solid fa-building"></i>
       <span>Institute Information</span>
     </router-link>
-
+    <router-link to="/Institure-Session" active-class="active-menu" @click="closeSidebar">
+      <i class="fa-solid fa-building"></i>
+      <span>Institute Session</span>
+    </router-link>
+    <router-link to="/migration" active-class="active-menu" @click="closeSidebar">
+      <i class="fa-solid fa-building"></i>
+      <span>Migration</span>
+    </router-link>
     <!-- ================= STUDENTS ================= -->
     <div class="dropdown sidebar-dropdown">
       <button class="student-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
