@@ -2,18 +2,14 @@
   <dashPageView />
 
   <div class="dashboard-layout bg-light min-vh-100 d-flex">
-    <!-- Left Sidebar -->
     <aside class="sidebar-wrapper"></aside>
 
-    <!-- Main Content -->
     <div class="main-wrapper flex-grow-1 min-vh-100 d-flex flex-column">
       <RouterView />
 
       <main class="attendance-summary-section py-3 py-md-4 px-2 px-md-3">
         <div class="container-fluid p-0">
-          <!-- =========================
-                       PAGE HEADER
-                  ========================== -->
+          <!-- Header -->
           <div class="row mb-4">
             <div class="col-12">
               <div
@@ -21,16 +17,37 @@
               >
                 <div>
                   <h2 class="h4 fw-bold text-dark mb-1">Student Attendance Yearly Summary</h2>
-
                   <p class="text-muted small mb-0">Overview of students' yearly attendance</p>
                 </div>
 
-                <!-- Year Filter -->
-                <div>
+                <div class="d-flex flex-column flex-sm-row gap-2">
+                  <!-- Academic Session -->
+                  <select
+                    v-model="selectedSessionId"
+                    class="form-select form-select-sm"
+                    :disabled="sessionsLoading || availableSessions.length === 0"
+                    @change="fetchAllData"
+                  >
+                    <option value="">Select Academic Session</option>
+                    <option
+                      v-for="session in availableSessions"
+                      :key="session.id"
+                      :value="String(session.id)"
+                    >
+                      {{
+                        session.name ||
+                        session.session_name ||
+                        session.year ||
+                        `Session ${session.id}`
+                      }}
+                    </option>
+                  </select>
+
+                  <!-- Year -->
                   <select
                     v-model="selectedYear"
-                    @change="fetchAllData"
                     class="form-select form-select-sm"
+                    @change="fetchAllData"
                   >
                     <option v-for="year in availableYears" :key="year" :value="year">
                       {{ year }}
@@ -38,21 +55,25 @@
                   </select>
                 </div>
               </div>
+
+              <div v-if="sessionsLoading" class="small text-muted mt-2">
+                Loading academic sessions...
+              </div>
+
+              <div v-if="pageError" class="alert alert-danger mt-3 mb-0">
+                {{ pageError }}
+              </div>
             </div>
           </div>
 
-          <!-- =========================
-                    SEARCH / FILTER
-               ========================== -->
+          <!-- Search / Filter -->
           <div class="card border-0 shadow-sm rounded-3 mb-3">
             <div class="card-body">
               <div class="row g-3 align-items-end">
-                <!-- Search Student -->
                 <div class="col-12 col-md-7">
                   <label class="form-label small fw-semibold text-secondary">
                     Search Student
                   </label>
-
                   <input
                     v-model="searchStudent"
                     type="text"
@@ -61,13 +82,10 @@
                   />
                 </div>
 
-                <!-- Class Filter -->
                 <div class="col-12 col-md-4">
                   <label class="form-label small fw-semibold text-secondary"> Class </label>
-
                   <select v-model="selectedClass" class="form-select form-select-sm">
                     <option value="">All Classes</option>
-
                     <option
                       v-for="className in availableClasses"
                       :key="className"
@@ -78,13 +96,11 @@
                   </select>
                 </div>
 
-                <!-- Reset -->
                 <div class="col-12 col-md-1">
                   <button
                     type="button"
                     class="btn btn-sm btn-outline-secondary w-100"
                     @click="resetFilters"
-                    title="Reset filters"
                   >
                     Reset
                   </button>
@@ -93,9 +109,7 @@
             </div>
           </div>
 
-          <!-- =========================
-                         MAIN TABLE
-                  ========================== -->
+          <!-- Attendance Table -->
           <div class="card border-0 shadow-sm rounded-3">
             <div class="card-body p-0">
               <div class="table-responsive">
@@ -103,46 +117,39 @@
                   <thead class="table-light">
                     <tr class="small text-secondary fw-semibold">
                       <th class="ps-4 py-3">STUDENT ID</th>
-
                       <th class="py-3">STUDENT NAME</th>
-
                       <th class="py-3">CLASS</th>
-
                       <th class="text-center py-3 text-success">PRESENT</th>
-
                       <th class="text-center py-3 text-warning">LATE</th>
-
                       <th class="text-center py-3 text-danger">ABSENT</th>
-
                       <th class="text-center py-3 text-secondary">LEAVE</th>
-
                       <th class="text-center py-3 text-info">TOTAL RECORDS</th>
-
                       <th class="text-end pe-4 py-3">ACTION</th>
                     </tr>
                   </thead>
 
                   <tbody>
-                    <!-- Loading -->
                     <tr v-if="loading">
                       <td colspan="9" class="text-center py-4 text-muted">
-                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
-
+                        <span class="spinner-border spinner-border-sm me-2"></span>
                         Loading yearly attendance...
                       </td>
                     </tr>
 
-                    <!-- Students -->
-                    <tr v-else v-for="student in paginatedStudents" :key="student.id">
+                    <tr
+                      v-else
+                      v-for="student in paginatedStudents"
+                      :key="student.student_session_id || student.id"
+                    >
                       <td class="ps-4">
                         <div class="fw-bold text-dark">
-                          {{ student.student_code }}
+                          {{ student.student_code || student.student_id || '-' }}
                         </div>
                       </td>
 
                       <td>
                         <div class="fw-bold text-dark">
-                          {{ student.name }}
+                          {{ student.name || '-' }}
                         </div>
                       </td>
 
@@ -153,26 +160,26 @@
                       </td>
 
                       <td class="text-center fw-bold text-success">
-                        {{ student.present }}
+                        {{ student.present ?? 0 }}
                       </td>
 
                       <td class="text-center fw-bold text-warning">
-                        {{ student.late }}
+                        {{ student.late ?? 0 }}
                       </td>
 
                       <td class="text-center fw-bold text-danger">
-                        {{ student.absent }}
+                        {{ student.absent ?? 0 }}
                       </td>
 
                       <td class="text-center fw-bold text-secondary">
-                        {{ student.leave }}
+                        {{ student.leave ?? 0 }}
                       </td>
 
                       <td class="text-center font-monospace">
                         <span
                           class="badge bg-info bg-opacity-10 text-info fw-semibold border border-info border-opacity-25 px-2 py-1"
                         >
-                          {{ student.total_records }}
+                          {{ student.total_records ?? 0 }}
                         </span>
                       </td>
 
@@ -187,93 +194,60 @@
                       </td>
                     </tr>
 
-                    <!-- No Data -->
                     <tr v-if="!loading && filteredStudents.length === 0">
                       <td colspan="9" class="text-center py-4 text-muted">
-                        No students found matching your search/filter.
+                        {{
+                          selectedSessionId
+                            ? 'No students found matching your search/filter.'
+                            : 'Please select an academic session.'
+                        }}
                       </td>
                     </tr>
                   </tbody>
                 </table>
               </div>
 
-              <!-- =========================
-                           PAGINATION
-                   ========================== -->
-
+              <!-- Pagination -->
               <div
                 v-if="!loading && filteredStudents.length > 0"
                 class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 px-3 px-md-4 py-3 border-top"
               >
-                <!-- Showing Information -->
                 <div class="small text-muted">
-                  Showing
-
-                  <strong>
-                    {{ paginationStart }}
-                  </strong>
-
-                  to
-
-                  <strong>
-                    {{ paginationEnd }}
-                  </strong>
-
-                  of
-
-                  <strong>
-                    {{ filteredStudents.length }}
-                  </strong>
-
-                  students
+                  Showing <strong>{{ paginationStart }}</strong> to
+                  <strong>{{ paginationEnd }}</strong> of
+                  <strong>{{ filteredStudents.length }}</strong> students
                 </div>
 
-                <!-- Pagination Buttons -->
                 <nav aria-label="Student attendance pagination">
                   <ul class="pagination pagination-sm mb-0">
-                    <!-- Previous -->
-                    <li
-                      class="page-item"
-                      :class="{
-                        disabled: currentPage === 1,
-                      }"
-                    >
+                    <li class="page-item" :class="{ disabled: currentPage === 1 }">
                       <button
                         class="page-link"
                         type="button"
-                        @click="previousPage"
                         :disabled="currentPage === 1"
+                        @click="previousPage"
                       >
                         Previous
                       </button>
                     </li>
 
-                    <!-- Page Numbers -->
                     <li
                       v-for="page in visiblePages"
                       :key="page"
                       class="page-item"
-                      :class="{
-                        active: currentPage === page,
-                      }"
+                      :class="{ active: currentPage === page }"
                     >
                       <button class="page-link" type="button" @click="goToPage(page)">
                         {{ page }}
                       </button>
                     </li>
 
-                    <!-- Next -->
-                    <li
-                      class="page-item"
-                      :class="{
-                        disabled: currentPage === totalPages,
-                      }"
-                    >
+                    <li class="page-item" :class="{ disabled: currentPage === totalPages }">
                       <button
                         class="page-link"
                         type="button"
-                        @click="nextPage"
                         :disabled="currentPage === totalPages"
+                        @click="nextPage"
                       >
                         Next
                       </button>
@@ -287,19 +261,13 @@
       </main>
     </div>
 
-    <!-- ==================================================
-             STUDENT MONTHLY REPORT MODAL
-         =================================================== -->
-
-    <div class="modal fade" id="studentReportModal" tabindex="-1" aria-hidden="true">
+    <!-- Student Monthly Report Modal -->
+    <div id="studentReportModal" class="modal fade" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content border-0 shadow">
-          <!-- Modal Header -->
           <div class="modal-header bg-light">
             <h5 class="modal-title fw-bold">
-              {{ selectedStudent?.name }}
-
-              - Yearly Report ({{ selectedYear }})
+              {{ selectedStudent?.name }} - Yearly Report ({{ selectedYear }})
             </h5>
 
             <button
@@ -310,22 +278,16 @@
             ></button>
           </div>
 
-          <!-- Modal Body -->
           <div class="modal-body p-0">
             <div class="table-responsive">
               <table class="table table-bordered mb-0 align-middle">
                 <thead class="table-dark text-white small">
                   <tr>
                     <th class="ps-3">MONTH</th>
-
                     <th class="text-center">PRESENT</th>
-
                     <th class="text-center">LATE</th>
-
                     <th class="text-center">ABSENT</th>
-
                     <th class="text-center">LEAVE</th>
-
                     <th class="text-center">TOTAL RECORDS</th>
                   </tr>
                 </thead>
@@ -335,52 +297,39 @@
                     <td class="ps-3 fw-bold text-primary">
                       {{ month.monthName }}
                     </td>
-
                     <td class="text-center text-success fw-semibold">
                       {{ month.present }}
                     </td>
-
                     <td class="text-center text-warning fw-semibold">
                       {{ month.late }}
                     </td>
-
                     <td class="text-center text-danger fw-semibold">
                       {{ month.absent }}
                     </td>
-
                     <td class="text-center text-secondary fw-semibold">
                       {{ month.leave }}
                     </td>
-
                     <td class="text-center">
                       {{ month.totalRecords }}
                     </td>
                   </tr>
 
-                  <!-- Year Total -->
                   <tr class="table-light">
-                    <td class="ps-3">
-                      <strong>YEAR TOTAL</strong>
-                    </td>
-
+                    <td class="ps-3"><strong>YEAR TOTAL</strong></td>
                     <td class="text-center text-success fw-bold">
-                      {{ selectedStudent?.present || 0 }}
+                      {{ selectedStudent?.present ?? 0 }}
                     </td>
-
                     <td class="text-center text-warning fw-bold">
-                      {{ selectedStudent?.late || 0 }}
+                      {{ selectedStudent?.late ?? 0 }}
                     </td>
-
                     <td class="text-center text-danger fw-bold">
-                      {{ selectedStudent?.absent || 0 }}
+                      {{ selectedStudent?.absent ?? 0 }}
                     </td>
-
                     <td class="text-center text-secondary fw-bold">
-                      {{ selectedStudent?.leave || 0 }}
+                      {{ selectedStudent?.leave ?? 0 }}
                     </td>
-
                     <td class="text-center fw-bold">
-                      {{ selectedStudent?.total_records || 0 }}
+                      {{ selectedStudent?.total_records ?? 0 }}
                     </td>
                   </tr>
                 </tbody>
@@ -388,7 +337,6 @@
             </div>
           </div>
 
-          <!-- Modal Footer -->
           <div class="modal-footer bg-light">
             <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">
               Close
@@ -402,121 +350,77 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-
 import * as bootstrap from 'bootstrap'
-
 import dashPageView from './dashPageView.vue'
-
 import api from '@/services/api'
 
-/* ==================================================
-   STATE
-================================================== */
-
+/* State */
 const currentYear = new Date().getFullYear()
-
 const selectedYear = ref(String(currentYear))
-
 const availableYears = ref([])
 
-const studentsSummary = ref([])
+const availableSessions = ref([])
+const selectedSessionId = ref('')
+const sessionsLoading = ref(false)
 
+const studentsSummary = ref([])
 const loading = ref(false)
+const pageError = ref('')
 
 const selectedStudent = ref(null)
-
 const selectedStudentMonthlyReports = ref([])
 
-/* ==================================================
-   SEARCH / FILTER
-================================================== */
-
+/* Filters */
 const searchStudent = ref('')
-
 const selectedClass = ref('')
 
-/* ==================================================
-   AVAILABLE CLASSES
-================================================== */
-
+/* Classes */
 const availableClasses = computed(() => {
-  const classes = studentsSummary.value
-    .map((student) => student.class_name)
-    .filter((className) => className)
+  const classes = studentsSummary.value.map((student) => student.class_name).filter(Boolean)
 
   return [...new Set(classes)].sort((a, b) => String(a).localeCompare(String(b)))
 })
 
-/* ==================================================
-   FILTERED STUDENTS
-================================================== */
-
+/* Search and filter */
 const filteredStudents = computed(() => {
   const search = searchStudent.value.trim().toLowerCase()
-
   const classFilter = selectedClass.value.trim().toLowerCase()
 
   return studentsSummary.value.filter((student) => {
-    const studentId = String(student.student_code || '').toLowerCase()
+    const studentId = String(student.student_code || student.student_id || '').toLowerCase()
 
     const studentName = String(student.name || '').toLowerCase()
-
     const className = String(student.class_name || '').toLowerCase()
 
-    /*
-     * One search box:
-     * Student ID OR Student Name
-     */
     const matchesSearch = !search || studentId.includes(search) || studentName.includes(search)
 
-    /*
-     * Class filter
-     */
     const matchesClass = !classFilter || className === classFilter
 
     return matchesSearch && matchesClass
   })
 })
 
-/* ==================================================
-   PAGINATION
-================================================== */
-
+/* Pagination */
 const currentPage = ref(1)
-
 const perPage = 20
 
-const totalPages = computed(() => {
-  return Math.ceil(filteredStudents.value.length / perPage)
-})
+const totalPages = computed(() => Math.ceil(filteredStudents.value.length / perPage))
 
 const paginatedStudents = computed(() => {
   const start = (currentPage.value - 1) * perPage
-
-  const end = start + perPage
-
-  return filteredStudents.value.slice(start, end)
+  return filteredStudents.value.slice(start, start + perPage)
 })
 
-const paginationStart = computed(() => {
-  if (filteredStudents.value.length === 0) {
-    return 0
-  }
+const paginationStart = computed(() =>
+  filteredStudents.value.length ? (currentPage.value - 1) * perPage + 1 : 0,
+)
 
-  return (currentPage.value - 1) * perPage + 1
-})
-
-const paginationEnd = computed(() => {
-  return Math.min(currentPage.value * perPage, filteredStudents.value.length)
-})
-
-/* ==================================================
-   VISIBLE PAGE NUMBERS
-================================================== */
+const paginationEnd = computed(() =>
+  Math.min(currentPage.value * perPage, filteredStudents.value.length),
+)
 
 const visiblePages = computed(() => {
   const total = totalPages.value
-
   const current = currentPage.value
 
   if (total <= 7) {
@@ -535,53 +439,31 @@ const visiblePages = computed(() => {
 })
 
 const goToPage = (page) => {
-  if (page === '...') {
-    return
-  }
-
-  if (page < 1 || page > totalPages.value) {
-    return
-  }
-
+  if (page === '...') return
+  if (page < 1 || page > totalPages.value) return
   currentPage.value = page
 }
 
 const previousPage = () => {
-  if (currentPage.value > 1) {
-    currentPage.value--
-  }
+  if (currentPage.value > 1) currentPage.value--
 }
 
 const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++
-  }
+  if (currentPage.value < totalPages.value) currentPage.value++
 }
-
-/* ==================================================
-   RESET PAGE WHEN FILTER CHANGES
-================================================== */
 
 watch([searchStudent, selectedClass], () => {
   currentPage.value = 1
 })
 
-/* ==================================================
-   RESET FILTERS
-================================================== */
-
+/* Reset filters */
 const resetFilters = () => {
   searchStudent.value = ''
-
   selectedClass.value = ''
-
   currentPage.value = 1
 }
 
-/* ==================================================
-   MONTH NAMES
-================================================== */
-
+/* Months */
 const monthNames = [
   'January',
   'February',
@@ -597,116 +479,135 @@ const monthNames = [
   'December',
 ]
 
-/* ==================================================
-   YEAR OPTIONS
-================================================== */
-
+/* Year options */
 const buildYearOptions = () => {
-  const years = []
+  availableYears.value = []
 
   for (let year = currentYear; year >= currentYear - 5; year--) {
-    years.push(String(year))
+    availableYears.value.push(String(year))
   }
-
-  availableYears.value = years
 }
 
-/* ==================================================
-   FETCH YEARLY DATA
-================================================== */
+/*
+ * Load academic sessions.
+ * Assumed endpoint: GET /academic-sessions
+ *
+ * Supports common response formats:
+ * { data: [...] }, { sessions: [...] }, or [...]
+ */
+const fetchAcademicSessions = async () => {
+  sessionsLoading.value = true
+  pageError.value = ''
 
+  try {
+    const response = await api.get('/academic-sessions')
+    const payload = response.data
+
+    let sessions = []
+
+    if (Array.isArray(payload)) {
+      sessions = payload
+    } else if (Array.isArray(payload?.data)) {
+      sessions = payload.data
+    } else if (Array.isArray(payload?.sessions)) {
+      sessions = payload.sessions
+    } else if (Array.isArray(payload?.academic_sessions)) {
+      sessions = payload.academic_sessions
+    }
+
+    availableSessions.value = sessions
+
+    if (sessions.length > 0) {
+      const activeSession = sessions.find(
+        (session) =>
+          session.is_active === true || session.is_current === true || session.status === 'active',
+      )
+
+      selectedSessionId.value = String(activeSession?.id ?? sessions[0].id)
+
+      await fetchAllData()
+    } else {
+      selectedSessionId.value = ''
+      studentsSummary.value = []
+      pageError.value = 'No academic sessions were returned by the API.'
+    }
+  } catch (error) {
+    console.error('Error loading academic sessions:', error)
+    console.error('Response:', error.response?.data)
+
+    pageError.value =
+      'Academic sessions could not be loaded. Please verify the session API endpoint.'
+  } finally {
+    sessionsLoading.value = false
+  }
+}
+
+/* Fetch yearly attendance */
 const fetchAllData = async () => {
-  loading.value = true
+  if (!selectedSessionId.value) {
+    studentsSummary.value = []
+    return
+  }
 
+  loading.value = true
+  pageError.value = ''
   currentPage.value = 1
 
   try {
     const response = await api.get('/student-attendance/yearly-summary', {
       params: {
+        academic_session_id: selectedSessionId.value,
         year: selectedYear.value,
       },
     })
 
-    if (response.data?.status) {
-      studentsSummary.value = response.data.students || []
-    } else {
-      studentsSummary.value = []
-    }
+    studentsSummary.value = Array.isArray(response.data?.students) ? response.data.students : []
   } catch (error) {
-    console.error('Error fetching student yearly attendance:', error)
-
+    console.error('Error fetching yearly attendance:', error)
     console.error('Response:', error.response?.data)
 
     studentsSummary.value = []
+
+    pageError.value = error.response?.data?.message || 'Unable to load yearly attendance.'
   } finally {
     loading.value = false
   }
 }
 
-/* ==================================================
-   VIEW STUDENT MONTHLY REPORT
-================================================== */
-
+/* Student monthly report */
 const viewStudentDetails = (student) => {
   selectedStudent.value = student
 
-  /*
-   * Create all 12 months
-   */
+  const monthlyReports = monthNames.map((monthName, index) => ({
+    monthNumber: index + 1,
+    monthName,
+    present: 0,
+    late: 0,
+    absent: 0,
+    leave: 0,
+    totalRecords: 0,
+  }))
 
-  const monthlyReports = monthNames.map((monthName, index) => {
-    return {
-      monthNumber: index + 1,
+  if (Array.isArray(student.attendance_records)) {
+    student.attendance_records.forEach((attendance) => {
+      if (!attendance.date) return
 
-      monthName,
+      // Use the date's YYYY-MM-DD portion to avoid timezone month shifts.
+      const dateText = String(attendance.date).slice(0, 10)
+      const match = dateText.match(/^\d{4}-(\d{2})-\d{2}$/)
 
-      present: 0,
+      if (!match) return
 
-      late: 0,
-
-      absent: 0,
-
-      leave: 0,
-
-      totalRecords: 0,
-    }
-  })
-
-  /*
-   * Calculate monthly attendance
-   */
-
-  if (Array.isArray(student.attendances)) {
-    student.attendances.forEach((attendance) => {
-      if (!attendance.date) {
-        return
-      }
-
-      const date = new Date(attendance.date)
-
-      /*
-       * Laravel response is ISO UTC datetime.
-       */
-
-      const monthIndex = date.getUTCMonth()
-
-      if (monthIndex < 0 || monthIndex > 11) {
-        return
-      }
+      const monthIndex = Number(match[1]) - 1
+      if (monthIndex < 0 || monthIndex > 11) return
 
       const month = monthlyReports[monthIndex]
-
       const status = String(attendance.status || '').toLowerCase()
 
-      if (status === 'present') {
-        month.present++
-      } else if (status === 'late') {
-        month.late++
-      } else if (status === 'absent') {
-        month.absent++
-      } else if (status === 'leave') {
-        month.leave++
-      }
+      if (status === 'present') month.present++
+      else if (status === 'late') month.late++
+      else if (status === 'absent') month.absent++
+      else if (status === 'leave') month.leave++
 
       month.totalRecords++
     })
@@ -714,50 +615,31 @@ const viewStudentDetails = (student) => {
 
   selectedStudentMonthlyReports.value = monthlyReports
 
-  /*
-   * Open Modal
-   */
-
   const modalElement = document.getElementById('studentReportModal')
+  if (!modalElement) return
 
-  if (!modalElement) {
-    return
-  }
-
-  const modal = new bootstrap.Modal(modalElement)
-
-  modal.show()
+  bootstrap.Modal.getOrCreateInstance(modalElement).show()
 }
 
-/* ==================================================
-   MOUNT
-================================================== */
-
+/* Mount */
 onMounted(() => {
   buildYearOptions()
-
-  fetchAllData()
+  fetchAcademicSessions()
 })
 </script>
 
 <style scoped>
 .main-wrapper {
   margin-left: 260px;
-
   width: calc(100% - 260px);
 }
 
 @media (max-width: 768px) {
   .main-wrapper {
     margin-left: 0;
-
     width: 100%;
   }
 }
-
-/* ==================================================
-   PAGINATION
-================================================== */
 
 .pagination {
   margin-bottom: 0;
@@ -765,7 +647,6 @@ onMounted(() => {
 
 .pagination .page-link {
   min-width: 34px;
-
   text-align: center;
 }
 

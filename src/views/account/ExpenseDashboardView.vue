@@ -402,7 +402,17 @@
                     <label class="form-label fw-semibold">Payment Date</label>
                     <input type="date" class="form-control rounded-3" v-model="form.payment_date" />
                   </div>
-
+                  <!-- Remarks -->
+                  <div class="col-12">
+                    <label class="form-label fw-semibold">Remarks</label>
+                    <textarea
+                      class="form-control rounded-3"
+                      v-model="form.remarks"
+                      rows="3"
+                      maxlength="2000"
+                      placeholder="Enter expense remarks (optional)"
+                    ></textarea>
+                  </div>
                   <!-- Payment Method -->
                   <div class="col-md-6">
                     <label class="form-label fw-semibold">Payment Method</label>
@@ -500,6 +510,7 @@ const emptyForm = () => ({
   payment_month: getPreviousMonth(),
   payment_date: today(),
   payment_method: '',
+  remarks: '',
   branch_id: '',
   academic_session_id: '',
 })
@@ -950,6 +961,7 @@ const saveExpense = async () => {
       payment_date: form.value.payment_date || null,
       payment_method: form.value.payment_method,
       academic_session_id: Number(form.value.academic_session_id),
+      remarks: form.value.remarks || null,
     }
 
     // Only Manager supplies a branch.
@@ -998,6 +1010,7 @@ const editExpense = (expense) => {
     payment_method: expense.payment_method || '',
     branch_id: isManager.value ? String(expense.branch_id || '') : '',
     academic_session_id: expense.academic_session_id ? String(expense.academic_session_id) : '',
+    remarks: expense.remarks || '',
   }
 }
 

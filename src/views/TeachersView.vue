@@ -620,6 +620,7 @@ import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { onBeforeRouteLeave } from 'vue-router'
 
 import api from '@/services/api'
+import { getTeacherImageUrl } from '@/utils/img'
 import dashPageView from './dashPageView.vue'
 
 /* =====================================================
@@ -644,74 +645,20 @@ const defaultAvatar = 'https://via.placeholder.com/150'
    TEACHER IMAGE URL
 ===================================================== */
 
-const getTeacherImageUrl = (imagePath) => {
-  if (!imagePath) {
-    return defaultAvatar
-  }
-
-  let image = String(imagePath).trim()
-
-  if (!image) {
-    return defaultAvatar
-  }
-
-  /* ---------------------------------------------
-     Already full URL
-  --------------------------------------------- */
-  if (image.startsWith('http://') || image.startsWith('https://') || image.startsWith('blob:')) {
-    return image
-  }
-
-  /* ---------------------------------------------
-     API base URL
-  --------------------------------------------- */
-  const apiBaseUrl = api.defaults.baseURL
-    ? api.defaults.baseURL.replace(/\/api\/?$/, '')
-    : 'http://localhost:8000'
-
-  /* ---------------------------------------------
-     If backend returns:
-     /storage/teachers/file.jpg
-  --------------------------------------------- */
-  if (image.includes('/storage/')) {
-    const storageIndex = image.indexOf('/storage/')
-
-    const storagePath = image.substring(storageIndex + '/storage/'.length).replace(/^\/+/, '')
-
-    return `${apiBaseUrl}/storage/${storagePath}`
-  }
-
-  /* ---------------------------------------------
-     Remove common prefixes
-  --------------------------------------------- */
-
-  image = image
-    .replace(/^\/+/, '')
-    .replace(/^public\//, '')
-    .replace(/^storage\//, '')
-
-  /* ---------------------------------------------
-     If only filename is returned
-     teachers/photo.jpg -> storage/teachers/photo.jpg
-
-     photo.jpg -> storage/teachers/photo.jpg
-  --------------------------------------------- */
-
-  if (!image.startsWith('teachers/')) {
-    image = `teachers/${image}`
-  }
-
-  return `${apiBaseUrl}/storage/${image}`
-}
+/* =====================================================
+   TEACHER IMAGE URL
+===================================================== */
 
 /* =====================================================
    IMAGE ERROR FALLBACK
 ===================================================== */
 
 const handleImageError = (event) => {
-  if (!event?.target) {
-    return
-  }
+  if (!event?.target) return
+
+  console.log('Teacher image failed:', event.target.src)
+  console.log('API Base URL:', api.defaults.baseURL)
+  console.log('Storage URL:', import.meta.env.VITE_STORAGE_URL)
 
   if (event.target.src !== defaultAvatar) {
     event.target.src = defaultAvatar

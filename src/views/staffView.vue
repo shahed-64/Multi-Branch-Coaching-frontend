@@ -584,7 +584,7 @@ import dashPageView from './dashPageView.vue'
 import { ref, reactive, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 
 import api from '@/services/api'
-
+import { getImageUrl as getStoredImageUrl } from '@/utils/img'
 // =====================================================
 // STATES
 // =====================================================
@@ -642,31 +642,8 @@ const isManager = computed(() => {
 // =====================================================
 
 const getImageUrl = (imagePath) => {
-  if (!imagePath) {
-    return 'https://i.pravatar.cc/100?img=1'
-  }
-
-  let image = String(imagePath).trim()
-
-  if (image.startsWith('http://') || image.startsWith('https://')) {
-    const storageIndex = image.indexOf('/storage/')
-
-    if (storageIndex !== -1) {
-      image = image.substring(storageIndex + '/storage/'.length)
-    }
-  }
-
-  const cleanPath = image.replace(/^public\//, '').replace(/^storage\//, '')
-
-  const filename = cleanPath.split('/').pop()
-
-  const baseURL = api.defaults.baseURL
-    ? api.defaults.baseURL.replace(/\/api\/?$/, '')
-    : 'http://localhost:8000'
-
-  return `${baseURL}/api/staff-image/${filename}`
+  return getStoredImageUrl({ image: imagePath })
 }
-
 // =====================================================
 // ROLE CLASS
 // =====================================================

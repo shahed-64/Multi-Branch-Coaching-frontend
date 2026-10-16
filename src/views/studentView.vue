@@ -39,7 +39,11 @@
       <div class="staff-toolbar">
         <div class="search-box">
           <i class="bi bi-search"></i>
-          <input v-model="search" type="text" placeholder="Search student..." />
+          <input
+            v-model="search"
+            type="text"
+            placeholder="Search by name, student ID, roll or phone..."
+          />
         </div>
 
         <select v-model="selectedClass" class="class-filter">
@@ -58,8 +62,10 @@
               <th>#</th>
               <th>Photo</th>
               <th>Name</th>
+              <th>Roll</th>
               <th>Version</th>
               <th>Class</th>
+              <th>Section</th>
               <th>Group</th>
               <th>Email</th>
               <th width="180">Action</th>
@@ -68,7 +74,7 @@
 
           <tbody>
             <tr v-if="loading">
-              <td colspan="8" class="text-center py-5">
+              <td colspan="10" class="text-center py-5">
                 <div class="spinner-border text-primary" role="status"></div>
                 <div class="mt-2 text-muted">Loading students...</div>
               </td>
@@ -88,6 +94,13 @@
                 </div>
               </td>
 
+              <!-- STUDENT ROLL -->
+              <td>
+                <span class="version-badge">
+                  {{ item.student_roll || 'N/A' }}
+                </span>
+              </td>
+
               <td>
                 <span class="version-badge">
                   {{ item.version || 'N/A' }}
@@ -97,6 +110,12 @@
               <td>
                 <span class="skill-badge">
                   {{ getStudentClassName(item) }}
+                </span>
+              </td>
+
+              <td>
+                <span class="version-badge">
+                  {{ item.section?.section_name || 'N/A' }}
                 </span>
               </td>
 
@@ -149,7 +168,7 @@
             </tr>
 
             <tr v-if="!loading && students.length === 0">
-              <td colspan="8" class="text-center py-5">
+              <td colspan="10" class="text-center py-5">
                 <div class="empty-state">
                   <i class="bi bi-person-x"></i>
                   <h5>No Student Found</h5>
@@ -224,6 +243,17 @@
               />
             </div>
 
+            <!-- STUDENT ROLL -->
+            <div class="mb-3">
+              <label class="form-label">Student Roll</label>
+              <input
+                v-model="form.student_roll"
+                type="text"
+                class="form-control"
+                placeholder="Enter student roll"
+              />
+            </div>
+
             <!-- VERSION -->
             <div class="mb-3">
               <label class="form-label"> Version <span class="text-danger">*</span> </label>
@@ -267,6 +297,17 @@
                 type="text"
                 class="form-control"
                 placeholder="Enter phone number"
+              />
+            </div>
+
+            <!-- SECOND PHONE -->
+            <div class="mb-3">
+              <label class="form-label">Second Phone</label>
+              <input
+                v-model="form.second_phone"
+                type="text"
+                class="form-control"
+                placeholder="Enter second phone number"
               />
             </div>
 
@@ -460,6 +501,11 @@
               </p>
 
               <p>
+                <strong>Student Roll:</strong>
+                {{ selectedStudent.student_roll || 'N/A' }}
+              </p>
+
+              <p>
                 <strong>Version:</strong>
                 {{ selectedStudent.version || 'N/A' }}
               </p>
@@ -482,6 +528,11 @@
               <p>
                 <strong>Phone:</strong>
                 {{ selectedStudent.phone || 'N/A' }}
+              </p>
+
+              <p>
+                <strong>Second Phone:</strong>
+                {{ selectedStudent.second_phone || 'N/A' }}
               </p>
 
               <p>
@@ -559,6 +610,17 @@
               <input v-model="selectedStudent.full_name" class="form-control" placeholder="Name" />
             </div>
 
+            <!-- STUDENT ROLL -->
+            <div class="mb-3">
+              <label class="form-label">Student Roll</label>
+              <input
+                v-model="selectedStudent.student_roll"
+                type="text"
+                class="form-control"
+                placeholder="Enter student roll"
+              />
+            </div>
+
             <div class="mb-3">
               <label class="form-label"> Version <span class="text-danger">*</span> </label>
 
@@ -575,6 +637,17 @@
             <div class="mb-3">
               <label class="form-label">Phone</label>
               <input v-model="selectedStudent.phone" class="form-control" placeholder="Phone" />
+            </div>
+
+            <!-- SECOND PHONE -->
+            <div class="mb-3">
+              <label class="form-label">Second Phone</label>
+              <input
+                v-model="selectedStudent.second_phone"
+                type="text"
+                class="form-control"
+                placeholder="Enter second phone number"
+              />
             </div>
 
             <div class="mb-3">
@@ -888,10 +961,12 @@ loadCurrentUser()
 /* ADD FORM */
 const form = reactive({
   full_name: '',
+  student_roll: '',
   version: '',
   fathers_name: '',
   mothers_name: '',
   phone: '',
+  second_phone: '',
   email: '',
   course_name: '',
   branch_id: '',
@@ -908,11 +983,13 @@ const form = reactive({
 const selectedStudent = ref({
   id: null,
   full_name: '',
+  student_roll: '',
   version: '',
   fathers_name: '',
   mothers_name: '',
   student_id: '',
   phone: '',
+  second_phone: '',
   email: '',
   course_name: '',
   branch_id: '',
@@ -1042,11 +1119,6 @@ const getStudentEnrollment = (student, sessionId) => {
   )
 }
 
-/*
- * GET LATEST ENROLLMENT.
- * The backend currently orders student_sessions by academic_session_id DESC.
- * Use the highest academic_session_id to match that existing behavior.
- */
 /* GET ACTIVE ACADEMIC SESSION ENROLLMENT */
 const getLatestStudentEnrollment = (student) => {
   const enrollments = Array.isArray(student?.student_sessions) ? student.student_sessions : []
@@ -1358,6 +1430,10 @@ const getStudent = async (page = 1) => {
       per_page: perPage.value,
     }
 
+    /*
+     * Search text is sent to the backend.
+     * StudentController@index must include student_roll in its search query.
+     */
     if (search.value.trim()) {
       params.search = search.value.trim()
     }
@@ -1477,7 +1553,11 @@ const student_create = async () => {
 
 /* OPEN VIEW */
 const openView = (student) => {
-  selectedStudent.value = { ...student }
+  selectedStudent.value = {
+    ...student,
+    student_roll: student.student_roll ?? '',
+    second_phone: student.second_phone ?? '',
+  }
 }
 
 /* OPEN EDIT */
@@ -1488,6 +1568,9 @@ const openEdit = (student) => {
 
   selectedStudent.value = {
     ...student,
+    image: student.image ?? '',
+    student_roll: student.student_roll ?? '',
+    second_phone: student.second_phone ?? '',
     branch_id: branchId,
     academic_session_id: latestEnrollment ? String(latestEnrollment.academic_session_id) : '',
     class_group_id: latestEnrollment?.class_group_id ?? student.class_group_id ?? '',
@@ -1596,7 +1679,7 @@ const updateStudent = async () => {
     Object.keys(selectedStudent.value).forEach((key) => {
       const value = selectedStudent.value[key]
 
-      if (value !== null && value !== undefined && !excludedKeys.includes(key)) {
+      if (key !== 'image' && value !== null && value !== undefined && !excludedKeys.includes(key)) {
         if (typeof value !== 'object') {
           formData.append(key, value)
         }
@@ -1845,15 +1928,10 @@ onMounted(async () => {
     }
 
     sessionStorage.setItem('cache_sections', JSON.stringify(sections.value))
-
     sessionStorage.setItem('cache_classes', JSON.stringify(classes.value))
-
     sessionStorage.setItem('cache_groups', JSON.stringify(classGroups.value))
-
     sessionStorage.setItem('cache_shifts', JSON.stringify(shifts.value))
-
     sessionStorage.setItem('cache_branches', JSON.stringify(branches.value))
-
     sessionStorage.setItem('cache_academic_sessions', JSON.stringify(academicSessions.value))
 
     await getStudent(1)

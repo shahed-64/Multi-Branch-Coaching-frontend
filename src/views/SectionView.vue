@@ -59,7 +59,7 @@
               <!-- Sections -->
               <tr v-for="(section, index) in sections" :key="section.id">
                 <td class="ps-4 fw-semibold text-secondary">
-                  {{ section.id || index + 1 }}
+                  {{ index + 1 }}
                 </td>
 
                 <td class="fw-bold text-dark">

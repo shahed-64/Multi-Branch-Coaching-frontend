@@ -42,11 +42,6 @@
     <!-- ================================================= -->
     <!-- ================= MANAGER BRANCH SWITCH ========= -->
     <!-- ================================================= -->
-    <!-- শুধুমাত্র Manager দেখতে পারবে -->
-    <!-- Dashboard-এর আগে রাখা হয়েছে কারণ Dashboard -->
-    <!-- selected branch অনুযায়ী দেখানো হবে -->
-    <!-- ================================================= -->
-
     <div v-if="role === 'Manager'" class="manager-branch-switch">
       <div class="branch-switch-label">
         <i class="fa-solid fa-code-branch"></i>
@@ -84,19 +79,63 @@
       <span>Branches</span>
     </router-link>
 
-    <!-- ================= INSTITUTE ================= -->
-    <router-link to="/Institure-Info" active-class="active-menu" @click="closeSidebar">
-      <i class="fa-solid fa-building"></i>
-      <span>Institute Information</span>
-    </router-link>
-    <router-link to="/Institure-Session" active-class="active-menu" @click="closeSidebar">
-      <i class="fa-solid fa-building"></i>
-      <span>Institute Session</span>
-    </router-link>
-    <router-link to="/migration" active-class="active-menu" @click="closeSidebar">
-      <i class="fa-solid fa-building"></i>
-      <span>Migration</span>
-    </router-link>
+    <!-- ================= INSTITUTE SETUP DROPDOWN ================= -->
+    <div class="dropdown sidebar-dropdown">
+      <button class="student-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+        <span>
+          <i class="fa-solid fa-building-columns"></i>
+          Institute Setup
+        </span>
+      </button>
+
+      <ul class="dropdown-menu">
+        <li>
+          <router-link
+            class="dropdown-item"
+            to="/Institure-Info"
+            active-class="active-menu"
+            @click="closeSidebar"
+          >
+            <i class="fa-solid fa-circle-info"></i>
+            Institute Information
+          </router-link>
+        </li>
+        <li>
+          <router-link
+            class="dropdown-item"
+            to="/Institure-Session"
+            active-class="active-menu"
+            @click="closeSidebar"
+          >
+            <i class="fa-solid fa-calendar-days"></i>
+            Institute Session
+          </router-link>
+        </li>
+        <li>
+          <router-link
+            class="dropdown-item"
+            to="/migration"
+            active-class="active-menu"
+            @click="closeSidebar"
+          >
+            <i class="fa-solid fa-arrows-split-up-and-left"></i>
+            Migration
+          </router-link>
+        </li>
+        <li>
+          <router-link
+            class="dropdown-item"
+            to="/single_student_migration"
+            active-class="active-menu"
+            @click="closeSidebar"
+          >
+            <i class="fa-solid fa-user-gear"></i>
+            Single Student Migration
+          </router-link>
+        </li>
+      </ul>
+    </div>
+
     <!-- ================= STUDENTS ================= -->
     <div class="dropdown sidebar-dropdown">
       <button class="student-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
@@ -123,7 +162,7 @@
             active-class="active-menu"
             @click="closeSidebar"
           >
-            <i class="fa-solid fa-users"></i>
+            <i class="fa-solid fa-clipboard-user"></i>
             Student Attendance
           </router-link>
           <router-link
@@ -132,7 +171,7 @@
             active-class="active-menu"
             @click="closeSidebar"
           >
-            <i class="fa-solid fa-users"></i>
+            <i class="fa-solid fa-chart-pie"></i>
             Attendance Overview
           </router-link>
         </li>
@@ -168,7 +207,7 @@
             active-class="active-menu"
             @click="closeSidebar"
           >
-            <i class="fa-solid fa-users"></i>
+            <i class="fa-solid fa-id-badge"></i>
             All Teachers
           </router-link>
         </li>
@@ -228,7 +267,7 @@
             active-class="active-menu"
             @click="closeSidebar"
           >
-            <i class="fa-solid fa-users"></i>
+            <i class="fa-solid fa-address-book"></i>
             All Staff
           </router-link>
         </li>
@@ -277,23 +316,51 @@
 
     <div class="menu-section-title">Academic</div>
 
-    <!-- ================= CLASS ================= -->
-    <router-link to="/class" active-class="active-menu" @click="closeSidebar">
-      <i class="fa-solid fa-school"></i>
-      <span>Class</span>
-    </router-link>
+    <!-- ================= CLASS INFO DROPDOWN ================= -->
+    <div class="dropdown sidebar-dropdown">
+      <button class="student-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+        <span>
+          <i class="fa-solid fa-school-flag"></i>
+          Class Info
+        </span>
+      </button>
 
-    <!-- ================= CLASS GROUP ================= -->
-    <router-link to="/ClassGroup" active-class="active-menu" @click="closeSidebar">
-      <i class="fa-solid fa-layer-group"></i>
-      <span>Class Group</span>
-    </router-link>
-
-    <!-- ================= SECTION ================= -->
-    <router-link to="/section" active-class="active-menu" @click="closeSidebar">
-      <i class="fa-solid fa-table-columns"></i>
-      <span>Sections</span>
-    </router-link>
+      <ul class="dropdown-menu">
+        <li>
+          <router-link
+            class="dropdown-item"
+            to="/class"
+            active-class="active-menu"
+            @click="closeSidebar"
+          >
+            <i class="fa-solid fa-school"></i>
+            Class
+          </router-link>
+        </li>
+        <li>
+          <router-link
+            class="dropdown-item"
+            to="/ClassGroup"
+            active-class="active-menu"
+            @click="closeSidebar"
+          >
+            <i class="fa-solid fa-layer-group"></i>
+            Class Group
+          </router-link>
+        </li>
+        <li>
+          <router-link
+            class="dropdown-item"
+            to="/section"
+            active-class="active-menu"
+            @click="closeSidebar"
+          >
+            <i class="fa-solid fa-object-group"></i>
+            Sections
+          </router-link>
+        </li>
+      </ul>
+    </div>
 
     <!-- ================= SUBJECT ================= -->
     <router-link to="/subject" active-class="active-menu" @click="closeSidebar">
@@ -315,13 +382,13 @@
 
     <!-- ================= RESULT GRADING ================= -->
     <router-link to="/resultGrade" active-class="active-menu" @click="closeSidebar">
-      <i class="fa-solid fa-square-poll-vertical"></i>
+      <i class="fa-solid fa-award"></i>
       <span>Result Grading</span>
     </router-link>
 
     <!-- ================= FINAL AVERAGE RESULT ================= -->
     <router-link to="/finalAvrageResult" active-class="active-menu" @click="closeSidebar">
-      <i class="fa-solid fa-square-poll-vertical"></i>
+      <i class="fa-solid fa-chart-line"></i>
       <span>Final Avrage Result</span>
     </router-link>
 
@@ -493,11 +560,6 @@ const changeBranch = () => {
     localStorage.removeItem('selected_branch_id')
   }
 
-  /*
-   * পুরো application নতুন branch context নিয়ে
-   * কাজ করার জন্য reload করা হচ্ছে।
-   */
-
   window.location.reload()
 }
 
@@ -524,16 +586,10 @@ const runBackup = async () => {
       },
     )
 
-    // =========================
-    // CREATE DOWNLOAD FILE
-    // =========================
     const blob = new Blob([response.data], {
       type: 'application/sql',
     })
 
-    // =========================
-    // GET FILE NAME
-    // =========================
     let fileName = 'backup.sql'
 
     const contentDisposition = response.headers['content-disposition']
@@ -546,9 +602,6 @@ const runBackup = async () => {
       }
     }
 
-    // =========================
-    // DOWNLOAD
-    // =========================
     const url = window.URL.createObjectURL(blob)
 
     const link = document.createElement('a')
@@ -570,7 +623,6 @@ const runBackup = async () => {
 
     isError.value = true
 
-    // Blob response হলে Laravel error message পড়ার চেষ্টা
     if (error.response && error.response.data instanceof Blob) {
       try {
         const text = await error.response.data.text()
@@ -587,6 +639,7 @@ const runBackup = async () => {
     loading.value = false
   }
 }
+
 // =====================================================
 // LOGOUT
 // =====================================================
@@ -623,7 +676,7 @@ onMounted(() => {
 
 <style scoped>
 /* =========================================================
-   DESKTOP SIDEBAR
+    DESKTOP SIDEBAR
 ========================================================= */
 
 .sidebar {
@@ -644,7 +697,7 @@ onMounted(() => {
 }
 
 /* =========================================================
-   SIDEBAR LOGO
+    SIDEBAR LOGO
 ========================================================= */
 
 .sidebar-logo {
@@ -657,7 +710,7 @@ onMounted(() => {
 }
 
 /* =========================================================
-   LOGO ICON CONTAINER
+    LOGO ICON CONTAINER
 ========================================================= */
 
 .logo-icon {
@@ -675,7 +728,7 @@ onMounted(() => {
 }
 
 /* =========================================================
-   INSTITUTE LOGO
+    INSTITUTE LOGO
 ========================================================= */
 
 .institute-logo {
@@ -688,7 +741,7 @@ onMounted(() => {
 }
 
 /* =========================================================
-   LOGO CONTENT
+    LOGO CONTENT
 ========================================================= */
 
 .logo-content {
@@ -714,7 +767,7 @@ onMounted(() => {
 }
 
 /* =========================================================
-   MENU LINKS
+    MENU LINKS
 ========================================================= */
 
 .sidebar > a {
@@ -745,7 +798,7 @@ onMounted(() => {
 }
 
 /* =========================================================
-   ACTIVE MENU
+    ACTIVE MENU
 ========================================================= */
 
 .active-menu {
@@ -755,7 +808,7 @@ onMounted(() => {
 }
 
 /* =========================================================
-   MANAGER BRANCH SWITCH
+    MANAGER BRANCH SWITCH
 ========================================================= */
 
 .manager-branch-switch {
@@ -817,7 +870,7 @@ onMounted(() => {
 }
 
 /* =========================================================
-   SECTION TITLE
+    SECTION TITLE
 ========================================================= */
 
 .menu-section-title {
@@ -829,14 +882,12 @@ onMounted(() => {
   padding: 15px 14px 6px;
 }
 
-/* Account section একটু আলাদা spacing */
-
 .account-section-title {
   margin-top: 4px;
 }
 
 /* =========================================================
-   DROPDOWN
+    DROPDOWN
 ========================================================= */
 
 .sidebar-dropdown {
@@ -879,7 +930,7 @@ onMounted(() => {
 }
 
 /* =========================================================
-   DROPDOWN MENU
+    DROPDOWN MENU
 ========================================================= */
 
 .dropdown-menu {
@@ -915,7 +966,7 @@ onMounted(() => {
 }
 
 /* =========================================================
-   BACKUP
+    BACKUP
 ========================================================= */
 
 .backup-section {
@@ -953,7 +1004,7 @@ onMounted(() => {
 }
 
 /* =========================================================
-   LOGOUT
+    LOGOUT
 ========================================================= */
 
 .logout-btn {
@@ -980,7 +1031,7 @@ onMounted(() => {
 }
 
 /* =========================================================
-   MOBILE HEADER
+    MOBILE HEADER
 ========================================================= */
 
 .mobile-header {
@@ -1016,7 +1067,7 @@ onMounted(() => {
 }
 
 /* =========================================================
-   OVERLAY
+    OVERLAY
 ========================================================= */
 
 .sidebar-overlay {
@@ -1036,7 +1087,7 @@ onMounted(() => {
 }
 
 /* =========================================================
-   SCROLLBAR
+    SCROLLBAR
 ========================================================= */
 
 .sidebar::-webkit-scrollbar {
@@ -1053,7 +1104,7 @@ onMounted(() => {
 }
 
 /* =========================================================
-   MOBILE
+    MOBILE
 ========================================================= */
 
 @media (max-width: 768px) {
@@ -1069,7 +1120,7 @@ onMounted(() => {
 }
 
 /* =========================================================
-   DESKTOP
+    DESKTOP
 ========================================================= */
 
 @media (min-width: 769px) {
@@ -1079,7 +1130,7 @@ onMounted(() => {
 }
 
 /* =========================================================
-   SMALL MOBILE
+    SMALL MOBILE
 ========================================================= */
 
 @media (max-width: 400px) {

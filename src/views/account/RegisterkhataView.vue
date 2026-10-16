@@ -753,11 +753,13 @@ onMounted(async () => {
   display: flex;
   min-height: 100vh;
   width: 100%;
+  position: relative;
 }
 
 .sidebar-wrapper {
   width: 260px;
   flex-shrink: 0;
+  transition: all 0.3s ease;
 }
 
 .main-content {
@@ -808,9 +810,19 @@ onMounted(async () => {
   min-width: 170px;
 }
 
+/* Mobile Screen Responsive Fix */
 @media (max-width: 767.98px) {
+  .app-layout {
+    flex-direction: column; /* মোবাইল স্ক্রিনে লেআউট কলাম ওয়াইজ হবে */
+  }
+
   .sidebar-wrapper {
-    width: auto;
+    width: 100% !important; /* সম্পূর্ণ উইথ নিয়ে উপরে বা ফ্লোট হওয়া বন্ধ করবে */
+    flex-shrink: unset;
+  }
+
+  .main-content {
+    width: 100%;
   }
 
   .register-table th,

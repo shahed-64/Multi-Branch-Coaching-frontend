@@ -71,6 +71,18 @@
           <span>Student Payment</span>
         </router-link>
 
+        <!-- ================= STUDENT DUE PAYMENT ================= -->
+
+        <router-link
+          to="/student/due_payment"
+          class="menu-item"
+          active-class="active-menu"
+          @click="closeMenu"
+        >
+          <i class="fa-solid fa-money-bill-wave"></i>
+          <span>Student Due Payment</span>
+        </router-link>
+
         <!-- ================= OTHERS PAYMENT ================= -->
 
         <router-link
@@ -110,7 +122,7 @@
           <button class="student-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
             <span>
               <i class="fa-solid fa-user-graduate"></i>
-              Register
+              Register & Ledger
             </span>
           </button>
 
@@ -127,12 +139,12 @@
               </router-link>
               <router-link
                 class="dropdown-item"
-                to="/student-attendance"
+                to="/ledger"
                 active-class="active-menu"
                 @click="closeSidebar"
               >
                 <i class="fa-solid fa-users"></i>
-                Select a Class
+                All History Of Ledger
               </router-link>
             </li>
 

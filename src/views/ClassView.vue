@@ -73,7 +73,7 @@
                 <!-- ID -->
 
                 <td class="ps-4 fw-semibold text-secondary">
-                  {{ cls.id || index + 1 }}
+                  {{ index + 1 }}
                 </td>
 
                 <!-- CLASS NAME -->

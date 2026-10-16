@@ -360,7 +360,40 @@
               session-wise available months.
             </small>
           </div>
+          <!-- Due Month -->
+          <!-- Due Month -->
+          <div class="mb-3">
+            <label for="due_month" class="form-label">Due Month</label>
+            <select id="due_month" v-model="form.due_month" class="form-select">
+              <option value="">Select Due Month</option>
+              <option value="January">January</option>
+              <option value="February">February</option>
+              <option value="March">March</option>
+              <option value="April">April</option>
+              <option value="May">May</option>
+              <option value="June">June</option>
+              <option value="July">July</option>
+              <option value="August">August</option>
+              <option value="September">September</option>
+              <option value="October">October</option>
+              <option value="November">November</option>
+              <option value="December">December</option>
+            </select>
+          </div>
 
+          <!-- Due Payment Amount -->
+          <div class="mb-3">
+            <label for="due_payment_amount" class="form-label"> Due Payment Amount </label>
+            <input
+              id="due_payment_amount"
+              v-model.number="form.due_payment_amount"
+              type="number"
+              min="0"
+              step="0.01"
+              class="form-control"
+              placeholder="Enter due payment amount"
+            />
+          </div>
           <!-- PAYMENT DATE -->
           <div class="form-group mb-3">
             <label class="form-label fw-semibold text-secondary">Payment Date</label>
@@ -475,7 +508,27 @@ const form = reactive({
   month: '',
   admission_fee: null,
   exam_fee: null,
+
+  // Due payment fields
+  due_month: '',
+  due_payment_amount: 0,
 })
+
+// Static month list for due payment
+const dueMonths = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+]
 
 const paginatedStudents = computed(() => students.value)
 
@@ -537,10 +590,16 @@ const openPaymentModal = (student) => {
   form.payment_date = new Date().toLocaleDateString('en-CA')
   form.admission_fee = null
   form.exam_fee = null
+
+  // Reset due payment fields for each new payment
+  form.due_month = ''
+  form.due_payment_amount = 0
+
   fullPayment.value = true
 
   updateSelectedSession()
 }
+
 const updateSelectedSession = () => {
   const session = selectedSession.value
 
@@ -596,6 +655,7 @@ const getStudents = async (page = 1) => {
       students.value = response.data.students || []
 
       const pagination = response.data.pagination || {}
+
       currentPage.value = pagination.current_page || 1
       totalPages.value = pagination.last_page || 1
       totalStudents.value = pagination.total || 0
@@ -655,24 +715,86 @@ const savePayment = async () => {
     return
   }
 
+  if (Number(form.admission_fee || 0) < 0) {
+    formError.value = 'Admission Fee cannot be negative.'
+    return
+  }
+
+  if (Number(form.exam_fee || 0) < 0) {
+    formError.value = 'Exam Fee cannot be negative.'
+    return
+  }
+
+  if (Number(form.due_payment_amount || 0) < 0) {
+    formError.value = 'Due payment amount cannot be negative.'
+    return
+  }
+
   saving.value = true
 
   try {
+    const studentId = Number(form.student_id)
+    const sessionId = Number(form.student_session_id)
+    const paymentMethod = form.payment_method || 'Cash'
+    const paymentDate = form.payment_date || new Date().toLocaleDateString('en-CA')
+
+    // 1. Save monthly payment, including due payment information.
     const payload = {
-      student_id: Number(form.student_id),
-      student_session_id: Number(form.student_session_id),
+      student_id: studentId,
+      student_session_id: sessionId,
       paid_amount: Number(form.paid_amount),
-      payment_method: form.payment_method || null,
-      payment_date: form.payment_date || null,
+      payment_method: paymentMethod,
+      payment_date: paymentDate,
       month: form.month,
-      admission_fee: Number(form.admission_fee || 0),
-      exam_fee: Number(form.exam_fee || 0),
+      admission_fee: null,
+      exam_fee: null,
+
+      // New fields
+      due_month: form.due_month || null,
+      due_payment_amount: Number(form.due_payment_amount || 0),
     }
 
     const response = await api.post('/payments', payload)
 
     const paymentId = response.data?.payment?.id || response.data?.id
 
+    // 2. Save Admission Fee separately.
+    const admissionFee = Number(form.admission_fee || 0)
+
+    if (admissionFee > 0) {
+      await api.post('/other-payments', {
+        student_id: studentId,
+        student_session_id: sessionId,
+        payment_type: 'Admission Fee',
+        item_name: 'Admission Fee',
+        quantity: 1,
+        price: admissionFee,
+        total_amount: admissionFee,
+        payment_method: paymentMethod,
+        payment_date: paymentDate,
+        remarks: 'Admission fee collected through Student Payment.',
+      })
+    }
+
+    // 3. Save Exam Fee separately.
+    const examFee = Number(form.exam_fee || 0)
+
+    if (examFee > 0) {
+      await api.post('/other-payments', {
+        student_id: studentId,
+        student_session_id: sessionId,
+        payment_type: 'Exam Fee',
+        item_name: 'Exam Fee',
+        quantity: 1,
+        price: examFee,
+        total_amount: examFee,
+        payment_method: paymentMethod,
+        payment_date: paymentDate,
+        remarks: 'Exam fee collected through Student Payment.',
+      })
+    }
+
+    // 4. Close modal after all requests succeed.
     const modalElement = document.getElementById('paymentModal')
 
     if (modalElement) {
@@ -696,7 +818,7 @@ const savePayment = async () => {
     formError.value =
       error.response?.data?.message ||
       Object.values(error.response?.data?.errors || {}).flat()[0] ||
-      'Payment save failed. Please try again.'
+      'Payment save failed. Please check whether all payment requests were completed.'
   } finally {
     saving.value = false
   }
@@ -745,7 +867,6 @@ onBeforeUnmount(() => {
   cleanupModals()
 })
 </script>
-
 <style scoped>
 .bgc {
   background: #f8fafc;

@@ -45,6 +45,15 @@ const router = createRouter({
       },
     },
     {
+      path: '/single_student_migration',
+      name: 'SingleStudentMigrationView',
+      component: () => import('../views/SingleStudentMigrationView.vue'),
+      meta: {
+        requiresAuth: true,
+        role: ['Accountant', 'Manager', 'Branch Manager'],
+      },
+    },
+    {
       path: '/branch',
       name: 'BranchesdView',
       component: () => import('../views/BranchesView.vue'),
@@ -260,6 +269,15 @@ const router = createRouter({
         role: ['Accountant', 'Manager', 'Branch Manager'],
       },
     },
+    {
+      path: '/ledger',
+      name: 'LedgerView',
+      component: () => import('@/views/account/LedgerView.vue'),
+      meta: {
+        requiresAuth: true,
+        role: ['Accountant', 'Manager', 'Branch Manager'],
+      },
+    },
 
     {
       path: '/singlePayment/:id',
@@ -285,6 +303,15 @@ const router = createRouter({
       path: '/student/payment',
       name: 'StudentPayment',
       component: () => import('@/views/account/StudentPaymentView.vue'),
+      meta: {
+        requiresAuth: true,
+        role: ['Accountant', 'Manager', 'Branch Manager'],
+      },
+    },
+    {
+      path: '/student/due_payment',
+      name: 'StudentDuePayment',
+      component: () => import('@/views/account/StudentDuePaymentView.vue'),
       meta: {
         requiresAuth: true,
         role: ['Accountant', 'Manager', 'Branch Manager'],

@@ -11,13 +11,26 @@
       <div
         class="dashboard-header bg-white rounded-4 p-4 mb-4 shadow-sm d-flex justify-content-between align-items-center"
       >
-        <!-- Left Side -->
         <div>
           <h3 class="fw-bold mb-1 text-dark">Dashboard</h3>
           <p class="text-muted mb-0 small">Welcome back! Here's today's coaching overview.</p>
         </div>
+        <div class="d-flex align-items-center gap-2">
+          <label for="academicSession" class="form-label mb-0 fw-semibold text-dark">
+            Session:
+          </label>
 
-        <!-- Right Side -->
+          <select
+            id="academicSession"
+            v-model="selectedSessionId"
+            class="form-select"
+            style="min-width: 150px; max-width: 200px"
+          >
+            <option v-for="session in academicSessions" :key="session.id" :value="session.id">
+              {{ session.name }}{{ session.is_active ? ' (Active)' : '' }}
+            </option>
+          </select>
+        </div>
         <div class="d-flex align-items-center gap-3">
           <div class="text-end">
             <h6 class="fw-bold text-dark mb-0">
@@ -42,60 +55,48 @@
 
       <!-- ================= TOP STATISTICS ================= -->
       <div class="row g-4">
-        <!-- Paid -->
         <div class="col-xl-3 col-md-6">
           <div class="dashboard-card paid-card">
             <div class="card-content">
               <span>Paid Amount</span>
-
-              <h2 class="text-success">৳ {{ Number(totalCollection).toLocaleString() }}</h2>
+              <h2 class="text-success">৳ {{ money(totalCollection) }}</h2>
             </div>
-
             <div class="stat-icon success">
               <i class="bi bi-wallet2"></i>
             </div>
           </div>
         </div>
 
-        <!-- Expense -->
         <div class="col-xl-3 col-md-6">
           <div class="dashboard-card expense-card">
             <div class="card-content">
               <span>Total Expense</span>
-
-              <h2 class="text-danger">৳ {{ Number(totalExpense).toLocaleString() }}</h2>
+              <h2 class="text-danger">৳ {{ money(totalExpense) }}</h2>
             </div>
-
             <div class="stat-icon danger">
               <i class="bi bi-cash-stack"></i>
             </div>
           </div>
         </div>
 
-        <!-- Due -->
         <div class="col-xl-3 col-md-6">
           <div class="dashboard-card due-card">
             <div class="card-content">
               <span>Total Due</span>
-
-              <h2 class="text-warning">৳ {{ Number(totalDueAmount).toLocaleString() }}</h2>
+              <h2 class="text-warning">৳ {{ money(totalDueAmount) }}</h2>
             </div>
-
             <div class="stat-icon warning">
               <i class="bi bi-exclamation-circle"></i>
             </div>
           </div>
         </div>
 
-        <!-- Cash -->
         <div class="col-xl-3 col-md-6">
           <div class="dashboard-card cash-card">
             <div class="card-content">
               <span>Current Cash</span>
-
-              <h2 class="text-primary">৳ {{ Number(currentCash).toLocaleString() }}</h2>
+              <h2 class="text-primary">৳ {{ money(currentCash) }}</h2>
             </div>
-
             <div class="stat-icon primary">
               <i class="bi bi-bank"></i>
             </div>
@@ -105,7 +106,6 @@
 
       <!-- ================= CHART + QUICK OVERVIEW ================= -->
       <div class="row g-4 mt-4">
-        <!-- Chart -->
         <div class="col-lg-8">
           <div class="dashboard-box chart-box" style="height: 588px">
             <div class="box-header">
@@ -114,10 +114,8 @@
                   <i class="bi bi-bar-chart-line-fill text-primary"></i>
                   Monthly Payment Chart
                 </h5>
-
                 <p>Monthly collection performance</p>
               </div>
-
               <button class="btn btn-light btn-sm">This Year</button>
             </div>
 
@@ -127,67 +125,63 @@
           </div>
         </div>
 
-        <!-- Quick Overview -->
         <div class="col-lg-4">
           <div class="dashboard-box quick-box">
             <h5 class="mb-4">Quick Overview</h5>
 
-            <!-- This Month Collection -->
             <div class="quick-item">
               <i class="bi bi-currency-dollar text-success"></i>
-
               <div>
-                <h4>৳ {{ Number(thisMonthCollection).toLocaleString() }}</h4>
+                <h4>৳ {{ money(thisMonthCollection) }}</h4>
+                <small>This Month Fee Paid Amount</small>
+              </div>
+            </div>
 
+            <div class="quick-item">
+              <i class="bi bi-cash-stack text-success"></i>
+              <div>
+                <h4>৳ {{ money(thisMonthTotalCollection) }}</h4>
                 <small>This Month Collection</small>
               </div>
             </div>
 
-            <!-- Other Collection -->
             <div class="quick-item">
               <i class="bi bi-bag-check text-primary"></i>
-
               <div>
-                <h4>৳ {{ Number(totalOtherPayment).toLocaleString() }}</h4>
-
-                <small>Other Collection</small>
+                <h4>৳ {{ money(totalOtherPayment) }}</h4>
+                <small>Total Other Collection</small>
               </div>
             </div>
 
-            <!-- This Month Due -->
+            <div class="quick-item">
+              <i class="bi bi-calendar-check text-info"></i>
+              <div>
+                <h4>৳ {{ money(thisMonthOtherCollection) }}</h4>
+                <small>This Month Other Collection</small>
+              </div>
+            </div>
+
             <div class="quick-item">
               <i class="bi bi-calendar-x text-danger"></i>
-
               <div>
-                <h4>৳ {{ Number(thisMonthDue).toLocaleString() }}</h4>
-
+                <h4>৳ {{ money(thisMonthDue) }}</h4>
                 <small>This Month Due</small>
               </div>
             </div>
 
-            <!-- Total Students -->
             <div class="quick-item">
               <i class="bi bi-person-x text-warning"></i>
-
               <div>
-                <h4>
-                  {{ totalStudents }}
-                </h4>
-
+                <h4>{{ totalStudents }}</h4>
                 <small>Total Students</small>
               </div>
             </div>
 
-            <!-- Unpaid Students -->
             <div class="quick-item">
               <i class="bi bi-person-x text-warning"></i>
-
               <div>
-                <h4>
-                  {{ runningMonthUnpaidStudents }}
-                </h4>
-
-                <small>Unpaid Students</small>
+                <h4>{{ runningMonthUnpaidStudents }}</h4>
+                <small>This Month Unpaid Students</small>
               </div>
             </div>
           </div>
@@ -196,48 +190,34 @@
 
       <!-- ================= STUDENT STATISTICS ================= -->
       <div class="row g-4 mt-4">
-        <!-- Due Students -->
         <div class="col-md-3">
           <div class="dashboard-box small-stat">
             <i class="bi bi-exclamation-triangle text-danger"></i>
-
-            <h3>
-              {{ dueStudents }}
-            </h3>
-
+            <h3>{{ dueStudents }}</h3>
             <p>Due Students</p>
           </div>
         </div>
 
-        <!-- Today's Collection -->
         <div class="col-md-3">
           <div class="dashboard-box small-stat">
             <i class="bi bi-cash-coin text-success"></i>
-
-            <h3>৳ {{ Number(todayCollection).toLocaleString() }}</h3>
-
+            <h3>৳ {{ money(todayCollection) }}</h3>
             <p>Today's Collection</p>
           </div>
         </div>
 
-        <!-- Today's Expense -->
         <div class="col-md-3">
           <div class="dashboard-box small-stat">
             <i class="bi bi-mortarboard text-primary"></i>
-
-            <h3>৳ {{ Number(todayExpense).toLocaleString() }}</h3>
-
+            <h3>৳ {{ money(todayExpense) }}</h3>
             <p>Today's Expense</p>
           </div>
         </div>
 
-        <!-- Admission + Exam -->
         <div class="col-md-3">
           <div class="dashboard-box small-stat">
             <i class="bi bi-receipt text-warning"></i>
-
-            <h3>৳ {{ Number(admissionExamCollection).toLocaleString() }}</h3>
-
+            <h3>৳ {{ money(admissionExamCollection) }}</h3>
             <p>Admission + Exam Fee</p>
           </div>
         </div>
@@ -251,7 +231,6 @@
               <i class="bi bi-clock-history text-success"></i>
               Recent Payments
             </h5>
-
             <p>Latest student transactions</p>
           </div>
 
@@ -271,23 +250,14 @@
             </thead>
 
             <tbody>
-              <!-- Empty -->
               <tr v-if="recentPayments.length === 0">
                 <td colspan="5" class="text-center text-muted py-4">No recent payments found.</td>
               </tr>
 
-              <!-- Payments -->
               <tr v-for="(payment, index) in recentPayments.slice(0, 5)" :key="payment.id || index">
-                <td>
-                  {{ index + 1 }}
-                </td>
-
-                <td>
-                  {{ payment.student?.full_name || 'N/A' }}
-                </td>
-
-                <td>৳ {{ Number(payment.paid_amount || 0).toLocaleString() }}</td>
-
+                <td>{{ index + 1 }}</td>
+                <td>{{ payment.student?.full_name || 'N/A' }}</td>
+                <td>৳ {{ money(payment.paid_amount) }}</td>
                 <td>
                   <span
                     class="badge"
@@ -296,10 +266,7 @@
                     {{ payment.status || 'due' }}
                   </span>
                 </td>
-
-                <td>
-                  {{ payment.payment_date || 'N/A' }}
-                </td>
+                <td>{{ payment.payment_date || 'N/A' }}</td>
               </tr>
             </tbody>
           </table>
@@ -321,6 +288,8 @@ import api from '@/services/api'
 
 const defaultAvatar = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="%23cbd5e1"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.5-3.5-3.5S10.07 6 12 6zm0 14c-2.03 0-3.8-1.04-4.83-2.61.03-1.6 3.22-2.48 4.83-2.48s4.8 1.88 4.83 2.48C15.8 18.96 14.03 20 12 20z"/></svg>`
 
+const money = (value) => Number(value || 0).toLocaleString()
+
 /* =========================================================
    DASHBOARD STATES
 ========================================================= */
@@ -329,22 +298,24 @@ const totalPaidAmount = ref(0)
 const totalDueAmount = ref(0)
 const totalStudents = ref(0)
 const dueStudents = ref(0)
+
 const recentPayments = ref([])
 const monthlyPayments = ref([])
-const thisMonthDue = ref(0)
 const payments = ref([])
+
+const thisMonthDue = ref(0)
 const totalExpense = ref(0)
 const totalOtherPayment = ref(0)
 const runningMonthUnpaidStudents = ref(0)
-const rawOtherPayments = ref([])
+
 const thisMonthCollection = ref(0)
+const thisMonthOtherCollection = ref(0)
 const todayCollection = ref(0)
 const todayExpense = ref(0)
 const admissionExamCollection = ref(0)
-
-/* =========================================================
-   CURRENT USER
-========================================================= */
+const thisMonthTotalCollection = ref(0)
+const academicSessions = ref([])
+const selectedSessionId = ref('')
 
 const currentUser = ref({
   name: '',
@@ -354,14 +325,17 @@ const currentUser = ref({
 
 /* =========================================================
    TOTAL COLLECTION
+
+   PaymentController:
+   total_paid_amount = collection from payments table
+   total_other_payment = collection from other_payments table
+
+   Admission/Exam Fee is already included in total_other_payment.
+   So admissionExamCollection must NOT be added again.
 ========================================================= */
 
 const totalCollection = computed(() => {
-  return (
-    Number(totalPaidAmount.value) +
-    Number(admissionExamCollection.value) +
-    Number(totalOtherPayment.value)
-  )
+  return Number(totalPaidAmount.value || 0) + Number(totalOtherPayment.value || 0)
 })
 
 /* =========================================================
@@ -369,7 +343,7 @@ const totalCollection = computed(() => {
 ========================================================= */
 
 const currentCash = computed(() => {
-  return Number(totalCollection.value) - Number(totalExpense.value)
+  return Number(totalCollection.value || 0) - Number(totalExpense.value || 0)
 })
 
 /* =========================================================
@@ -377,9 +351,7 @@ const currentCash = computed(() => {
 ========================================================= */
 
 const getImageUrl = (path) => {
-  if (!path) {
-    return defaultAvatar
-  }
+  if (!path) return defaultAvatar
 
   if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:image')) {
     return path
@@ -394,142 +366,86 @@ const getImageUrl = (path) => {
   return `http://127.0.0.1:8000/storage/${cleanPath}`
 }
 
-/* =========================================================
-   IMAGE ERROR
-========================================================= */
+const onImageError = (event) => {
+  event.target.onerror = null
+  event.target.src = defaultAvatar
+}
 
-const onImageError = (e) => {
-  e.target.onerror = null
-  e.target.src = defaultAvatar
+const getAcademicSessions = async () => {
+  try {
+    const response = await api.get('/academic-sessions')
+
+    const responseData = response.data || {}
+
+    const sessions = Array.isArray(responseData)
+      ? responseData
+      : Array.isArray(responseData.data)
+        ? responseData.data
+        : []
+
+    academicSessions.value = sessions
+
+    const activeSession = sessions.find(
+      (session) => session.is_active === true || Number(session.is_active) === 1,
+    )
+
+    if (activeSession) {
+      selectedSessionId.value = activeSession.id
+    } else {
+      selectedSessionId.value = ''
+    }
+  } catch (error) {
+    console.error('Academic Session Fetch Error:', error.response?.data || error.message)
+  }
 }
 
 /* =========================================================
    GET DASHBOARD DATA
+
+   Use totals supplied by PaymentController.
+   Do NOT calculate totals from payments.data because it is
+   paginated and contains only part of the records.
 ========================================================= */
 
 const getDashboardData = async () => {
   try {
     const response = await api.get('/payments')
-
-    const data = response.data
-
-    console.log('FULL RESPONSE:', data)
-
-    /* =====================================================
-       BASIC DASHBOARD VALUES
-    ===================================================== */
+    const data = response.data || {}
 
     totalPaidAmount.value = Number(data.total_paid_amount || 0)
     totalDueAmount.value = Number(data.total_due_amount || 0)
+
     totalStudents.value = Number(data.total_students || 0)
     dueStudents.value = Number(data.due_students || 0)
 
-    /* =====================================================
-       BACKEND CALCULATED COLLECTIONS
-    ===================================================== */
+    todayCollection.value = Number(data.today_collection || 0)
+
+    // Monthly student-payment amount
+    thisMonthCollection.value = Number(data.this_month_paid_amount || 0)
+
+    // Monthly student payments + other payments
+    thisMonthTotalCollection.value = Number(data.this_month_collection || 0)
 
     thisMonthDue.value = Number(data.this_month_due || 0)
 
-    /* =====================================================
-       PAGINATED PAYMENTS
-    ===================================================== */
+    // All records from other_payments, as calculated by backend
+    totalOtherPayment.value = Number(data.total_other_payment || 0)
 
-    payments.value = data.payments?.data || []
+    thisMonthOtherCollection.value = Number(data.this_month_other_collection || 0)
 
-    /* =====================================================
-       TODAY'S COLLECTION
-
-       Backend today_collection
-       +
-       today's admission fee
-       +
-       today's exam fee
-
-       NOTHING CHANGED HERE
-    ===================================================== */
-
-    const today = new Date().toISOString().slice(0, 10)
-
-    const todayAdmissionExam = payments.value.reduce((total, payment) => {
-      if (payment.payment_date?.slice(0, 10) === today) {
-        return total + Number(payment.admission_fee || 0) + Number(payment.exam_fee || 0)
-      }
-
-      return total
-    }, 0)
-
-    todayCollection.value = Number(data.today_collection || 0)
-
-    /* =====================================================
-       THIS MONTH STUDENT COLLECTION
-
-       ONLY student payment part here.
-       Other Payment is combined later.
-    ===================================================== */
-
-    const currentDate = new Date()
-    const currentYear = currentDate.getFullYear()
-    const currentMonth = currentDate.getMonth()
-
-    const thisMonthStudentCollection = payments.value.reduce((total, payment) => {
-      const paymentDate = payment.payment_date ? new Date(payment.payment_date) : null
-
-      if (
-        paymentDate &&
-        paymentDate.getFullYear() === currentYear &&
-        paymentDate.getMonth() === currentMonth
-      ) {
-        return (
-          total +
-          Number(payment.paid_amount || 0) +
-          Number(payment.admission_fee || 0) +
-          Number(payment.exam_fee || 0)
-        )
-      }
-
-      return total
-    }, 0)
-
-    /* =====================================================
-       STORE STUDENT COLLECTION TEMPORARILY
-    ===================================================== */
-
-    thisMonthCollection.value = thisMonthStudentCollection
-
-    /* =====================================================
-       OTHER DASHBOARD DATA
-    ===================================================== */
-
-    recentPayments.value = data.recent_payments || []
-    monthlyPayments.value = data.monthly_payments || []
+    // Admission Fee + Exam Fee subset of other_payments
+    // Do not add this value to totalCollection again.
+    admissionExamCollection.value = Number(data.admission_exam_collection || 0)
 
     runningMonthUnpaidStudents.value = Number(data.running_month_unpaid_students || 0)
 
-    /* =====================================================
-       ADMISSION + EXAM FEE
-    ===================================================== */
+    // These lists may be paginated or limited.
+    // Use them only for displaying records, not totals.
+    payments.value = Array.isArray(data.payments?.data) ? data.payments.data : []
 
-    admissionExamCollection.value = payments.value.reduce((total, payment) => {
-      return total + Number(payment.admission_fee || 0) + Number(payment.exam_fee || 0)
-    }, 0)
+    recentPayments.value = Array.isArray(data.recent_payments) ? data.recent_payments : []
 
-    /* =====================================================
-       LOGGED-IN USER
-    ===================================================== */
-
-    const loggedUser = data.user || data.manager || data.logged_in_user || data.accountant
-
-    if (loggedUser) {
-      currentUser.value = {
-        name: loggedUser.name || loggedUser.full_name || loggedUser.username || 'Administrator',
-
-        role: loggedUser.role || loggedUser.user_type || loggedUser.designation || 'System Admin',
-
-        image: getImageUrl(
-          loggedUser.image || loggedUser.profile_photo || loggedUser.avatar || loggedUser.photo,
-        ),
-      }
-    }
+    monthlyPayments.value = Array.isArray(data.monthly_payments) ? data.monthly_payments : []
   } catch (error) {
     console.error('Dashboard Data Fetch Error:', error.response?.data || error.message)
   }
@@ -538,49 +454,44 @@ const getDashboardData = async () => {
 /* =========================================================
    TOTAL EXPENSE + TODAY'S EXPENSE
 
-   IMPORTANT BRANCH LOGIC:
-
-   Manager
-   -> /expenses returns ALL branches' expenses.
-
-   Branch Manager / Branch Accountant
-   -> /expenses returns ONLY their own branch's expenses.
-
-   Therefore no branch_id is sent from frontend.
-   Backend controls the branch isolation.
-
+   Important:
+   This calculation is correct only if /expenses returns
+   all expense records. If it returns paginated data,
+   the backend must provide total_expense and today_expense.
 ========================================================= */
 
 const getTotalExpense = async () => {
   try {
     const response = await api.get('/expenses')
+    const responseData = response.data || {}
 
-    const expenses = response.data.expenses || []
+    // Handle common response formats.
+    let expenses = []
 
-    /* =====================================================
-       TOTAL EXPENSE
-
-       Manager:
-       -> All branch expenses
-
-       Branch Manager / Branch Accountant:
-       -> Own branch expenses only
-    ===================================================== */
+    if (Array.isArray(responseData)) {
+      expenses = responseData
+    } else if (Array.isArray(responseData.expenses)) {
+      expenses = responseData.expenses
+    } else if (Array.isArray(responseData.data)) {
+      expenses = responseData.data
+    }
 
     totalExpense.value = expenses.reduce((total, expense) => {
       return total + Number(expense.paid_amount || 0)
     }, 0)
 
-    /* =====================================================
-       TODAY'S EXPENSE
+    const now = new Date()
 
-       Same branch filtering comes from backend.
-    ===================================================== */
-
-    const today = new Date().toISOString().slice(0, 10)
+    const today = [
+      now.getFullYear(),
+      String(now.getMonth() + 1).padStart(2, '0'),
+      String(now.getDate()).padStart(2, '0'),
+    ].join('-')
 
     todayExpense.value = expenses.reduce((total, expense) => {
-      if (expense.payment_date?.slice(0, 10) === today) {
+      const expenseDate = expense.payment_date || expense.expense_date || expense.date
+
+      if (expenseDate && String(expenseDate).slice(0, 10) === today) {
         return total + Number(expense.paid_amount || 0)
       }
 
@@ -595,116 +506,50 @@ const getTotalExpense = async () => {
 }
 
 /* =========================================================
-   STAFF DASHBOARD + USER
+   STAFF DASHBOARD + USER PROFILE
 ========================================================= */
 
 const getDashboardimages = async () => {
   try {
-    /* =====================================================
-       LOCAL STORAGE USER
-    ===================================================== */
-
     const storedUser =
       localStorage.getItem('user') ||
       localStorage.getItem('userInfo') ||
       localStorage.getItem('auth_user')
 
     if (storedUser) {
-      const parsedUser = JSON.parse(storedUser)
+      try {
+        const parsedUser = JSON.parse(storedUser)
 
-      currentUser.value = {
-        name: parsedUser.name || parsedUser.full_name || parsedUser.username || 'Administrator',
+        currentUser.value = {
+          name: parsedUser.name || parsedUser.full_name || parsedUser.username || 'Administrator',
 
-        role: parsedUser.role || parsedUser.user_type || parsedUser.designation || 'System Admin',
+          role: parsedUser.role || parsedUser.user_type || parsedUser.designation || 'System Admin',
 
-        image: getImageUrl(
-          parsedUser.image || parsedUser.profile_photo || parsedUser.avatar || parsedUser.photo,
-        ),
+          image: getImageUrl(
+            parsedUser.image || parsedUser.profile_photo || parsedUser.avatar || parsedUser.photo,
+          ),
+        }
+      } catch (parseError) {
+        console.error('Stored user data is invalid:', parseError)
       }
     }
-
-    /* =====================================================
-       STAFF DASHBOARD API
-    ===================================================== */
 
     const response = await api.get('/staff/dashboard')
+    const data = response.data || {}
 
-    const resData = response.data
-
-    totalStudents.value = resData.total_students || totalStudents.value
-
-    /* =====================================================
-       API USER
-    ===================================================== */
-
-    if (resData.user) {
-      const u = resData.user
+    if (data.user) {
+      const user = data.user
 
       currentUser.value = {
-        name: u.name || u.full_name || u.username || 'Administrator',
+        name: user.name || user.full_name || user.username || 'Administrator',
 
-        role: u.role || u.user_type || u.designation || 'System Admin',
+        role: user.role || user.user_type || user.designation || 'System Admin',
 
-        image: getImageUrl(u.image || u.profile_photo || u.avatar || u.photo),
+        image: getImageUrl(user.image || user.profile_photo || user.avatar || user.photo),
       }
     }
   } catch (error) {
-    console.error('Error fetching dashboard data:', error.response?.data || error.message)
-  }
-}
-
-/* =========================================================
-   OTHER PAYMENTS
-
-   This function ONLY loads and calculates
-   Other Payment data.
-
-   It does NOT directly modify thisMonthCollection.
-========================================================= */
-
-const getTotalOtherPayment = async () => {
-  try {
-    const response = await api.get('/other-payments')
-
-    rawOtherPayments.value = response.data.data || []
-
-    /* =====================================================
-       TOTAL OTHER PAYMENT
-    ===================================================== */
-
-    totalOtherPayment.value = rawOtherPayments.value.reduce((total, payment) => {
-      return total + Number(payment.total_amount || 0)
-    }, 0)
-
-    /* =====================================================
-       THIS MONTH OTHER PAYMENT
-    ===================================================== */
-
-    const currentDate = new Date()
-    const currentYear = currentDate.getFullYear()
-    const currentMonth = currentDate.getMonth()
-
-    const thisMonthOtherPayment = rawOtherPayments.value.reduce((total, payment) => {
-      const paymentDateValue = payment.payment_date || payment.date || payment.created_at
-
-      const paymentDate = paymentDateValue ? new Date(paymentDateValue) : null
-
-      if (
-        paymentDate &&
-        paymentDate.getFullYear() === currentYear &&
-        paymentDate.getMonth() === currentMonth
-      ) {
-        return total + Number(payment.total_amount || 0)
-      }
-
-      return total
-    }, 0)
-
-    return thisMonthOtherPayment
-  } catch (error) {
-    console.error('Other Payment Error:', error)
-
-    return 0
+    console.error('Error fetching staff dashboard:', error.response?.data || error.message)
   }
 }
 
@@ -713,42 +558,14 @@ const getTotalOtherPayment = async () => {
 ========================================================= */
 
 onMounted(async () => {
-  /* =====================================================
-     First load Payments + Other Payments together.
-  ===================================================== */
-
-  const [dashboardResult, otherPaymentResult] = await Promise.all([
+  await Promise.all([
     getDashboardData(),
-    getTotalOtherPayment(),
+    getDashboardimages(),
+    getTotalExpense(),
+    getAcademicSessions(),
   ])
-
-  /* =====================================================
-     Combine This Month Collection
-  ===================================================== */
-
-  thisMonthCollection.value =
-    Number(thisMonthCollection.value || 0) + Number(otherPaymentResult || 0)
-
-  /* =====================================================
-     Independent Dashboard APIs
-  ===================================================== */
-
-  getDashboardimages()
-
-  /*
-   * IMPORTANT:
-   *
-   * Expense branch isolation is handled by
-   * ExpenseController.
-   *
-   * Manager -> all branches
-   * Branch Manager -> own branch
-   * Branch Accountant -> own branch
-   */
-  getTotalExpense()
 })
 </script>
-
 <style scoped>
 .dashboard-content {
   margin-left: 250px;
@@ -888,37 +705,55 @@ onMounted(async () => {
   height: 320px;
 }
 
+/* ================= QUICK OVERVIEW - COMPACT DESIGN ================= */
+
+.quick-box {
+  padding: 15px;
+}
+
 .quick-box h5 {
   font-weight: 700;
+  font-size: 20px;
+  margin-bottom: 14px !important;
 }
 
 .quick-item {
   display: flex;
   align-items: center;
-  gap: 18px;
-  padding: 15px;
+  gap: 12px;
+  padding: 10px 12px;
   background: #f8fafc;
-  border-radius: 16px;
-  margin-bottom: 15px;
-  transition: 0.3s;
+  border-radius: 12px;
+  margin-bottom: 9px;
+  transition: background 0.25s ease;
+}
+
+.quick-item:last-child {
+  margin-bottom: 0;
 }
 
 .quick-item:hover {
   background: #eff6ff;
-  transform: translateX(5px);
 }
 
 .quick-item i {
-  font-size: 32px;
+  font-size: 25px;
+  min-width: 28px;
+  text-align: center;
 }
 
 .quick-item h4 {
-  margin: 0;
+  margin: 0 0 2px;
+  font-size: 20px;
   font-weight: 700;
+  line-height: 1.3;
 }
 
 .quick-item small {
   color: #64748b;
+  font-size: 15px;
+  line-height: 1.3;
+  display: block;
 }
 
 .small-stat {
@@ -926,7 +761,7 @@ onMounted(async () => {
 }
 
 .small-stat i {
-  font-size: 45px;
+  font-size: 48px;
 }
 
 .small-stat h3 {

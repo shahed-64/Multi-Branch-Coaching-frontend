@@ -148,12 +148,17 @@
                     </td>
 
                     <td>
-                      {{ p.month || 'N/A' }}
+                      {{ p.month || p.due_month || 'N/A' }}
                     </td>
 
                     <td>
                       <strong class="amount">
-                        ৳ {{ Number(p.paid_amount || 0).toLocaleString() }}
+                        ৳
+                        {{
+                          Number(
+                            p.month ? p.paid_amount || 0 : p.due_payment_amount || 0,
+                          ).toLocaleString()
+                        }}
                       </strong>
                     </td>
 

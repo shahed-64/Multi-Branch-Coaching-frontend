@@ -14,6 +14,21 @@
         <div class="welcome-subtitle">Here's what's happening in your institute today.</div>
       </div>
 
+      <div class="academic-session-selector">
+        <label for="academicSession">Academic Session</label>
+
+        <select
+          id="academicSession"
+          v-model="selectedAcademicSessionId"
+          :disabled="sessionLoading || academicSessions.length === 0"
+        >
+          <option v-for="session in academicSessions" :key="session.id" :value="session.id">
+            {{ session.name }}
+            {{ session.is_active ? '(Active)' : '' }}
+          </option>
+        </select>
+      </div>
+
       <div class="topbar-profile">
         <div class="profile-info">
           <div class="profile-name">
@@ -711,6 +726,56 @@ const currentUser = ref({
 })
 
 /* =====================================================
+   Academic Session
+===================================================== */
+
+const academicSessions = ref([])
+const selectedAcademicSessionId = ref(null)
+const sessionLoading = ref(false)
+const sessionInitialized = ref(false)
+
+const getAcademicSessions = async () => {
+  try {
+    sessionLoading.value = true
+
+    const response = await api.get('/academic-sessions')
+
+    const root = response.data
+    const sessions = Array.isArray(root)
+      ? root
+      : Array.isArray(root?.data)
+        ? root.data
+        : Array.isArray(root?.data?.data)
+          ? root.data.data
+          : []
+
+    academicSessions.value = sessions
+
+    const activeSession = sessions.find(
+      (session) =>
+        session.is_active === true || session.is_active === 1 || session.is_active === '1',
+    )
+
+    selectedAcademicSessionId.value = activeSession?.id ?? sessions[0]?.id ?? null
+
+    sessionInitialized.value = true
+  } catch (error) {
+    console.error('Error fetching academic sessions:', error)
+    academicSessions.value = []
+    selectedAcademicSessionId.value = null
+    sessionInitialized.value = true
+  } finally {
+    sessionLoading.value = false
+  }
+}
+
+const getSessionParams = () => {
+  return selectedAcademicSessionId.value
+    ? { academic_session_id: selectedAcademicSessionId.value }
+    : {}
+}
+
+/* =====================================================
    Selected Date
 ===================================================== */
 
@@ -732,11 +797,6 @@ const selectedGrade = ref('All Grades')
 ===================================================== */
 
 const upcomingHolidays = ref([])
-
-/* =====================================================
-   Dynamic Notifications
-===================================================== */
-
 const notifications = ref([])
 
 /* =====================================================
@@ -746,69 +806,40 @@ const notifications = ref([])
 const extractArray = (response) => {
   const root = response?.data
 
-  if (Array.isArray(root)) {
-    return root
-  }
-
-  if (Array.isArray(root?.data)) {
-    return root.data
-  }
-
-  if (Array.isArray(root?.data?.data)) {
-    return root.data.data
-  }
-
-  if (Array.isArray(root?.students)) {
-    return root.students
-  }
-
-  if (Array.isArray(root?.results)) {
-    return root.results
-  }
-
-  if (Array.isArray(root?.examinations)) {
-    return root.examinations
-  }
+  if (Array.isArray(root)) return root
+  if (Array.isArray(root?.data)) return root.data
+  if (Array.isArray(root?.data?.data)) return root.data.data
+  if (Array.isArray(root?.students)) return root.students
+  if (Array.isArray(root?.results)) return root.results
+  if (Array.isArray(root?.examinations)) return root.examinations
 
   return []
 }
 
 const getNotificationDate = (item, fields = []) => {
   for (const field of fields) {
-    if (item?.[field]) {
-      return item[field]
-    }
+    if (item?.[field]) return item[field]
   }
 
   return item?.created_at || null
 }
 
 const formatNotificationTime = (dateString) => {
-  if (!dateString) {
-    return 'Recently'
-  }
+  if (!dateString) return 'Recently'
 
   const date = new Date(dateString)
 
-  if (Number.isNaN(date.getTime())) {
-    return 'Recently'
-  }
+  if (Number.isNaN(date.getTime())) return 'Recently'
 
   const today = new Date()
-
   const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate())
 
   const dateStart = new Date(date.getFullYear(), date.getMonth(), date.getDate())
 
   const diffDays = Math.round((todayStart - dateStart) / (1000 * 60 * 60 * 24))
 
-  if (diffDays === 0) {
-    return 'Today'
-  }
-
-  if (diffDays === 1) {
-    return 'Yesterday'
-  }
+  if (diffDays === 0) return 'Today'
+  if (diffDays === 1) return 'Yesterday'
 
   if (diffDays > 1 && diffDays < 7) {
     return `${diffDays} days ago`
@@ -834,46 +865,44 @@ const getStudentClassName = (student) => {
 }
 
 /* =====================================================
-   Get Dynamic Notifications
+   Dynamic Notifications
 ===================================================== */
 
 const getNotifications = async () => {
   try {
+    const sessionParams = getSessionParams()
+
     const [studentsResult, resultsResult, examinationsResult] = await Promise.allSettled([
-      /* Latest Student / New Admission */
       api.get('/students', {
         params: {
           per_page: 1,
+          ...sessionParams,
         },
       }),
 
-      /* Latest Result */
       api.get('/results', {
         params: {
           per_page: 1,
+          ...sessionParams,
         },
       }),
 
-      /* Latest Examination */
-      api.get('/examinations'),
+      api.get('/examinations', {
+        params: sessionParams,
+      }),
     ])
 
     const newNotifications = []
 
-    /* =================================================
-       1. NEW ADMISSION
-    ================================================= */
-
+    // New admission
     if (studentsResult.status === 'fulfilled') {
       const students = extractArray(studentsResult.value)
 
       if (students.length > 0) {
         const student = students[0]
-
         const studentName = student?.full_name || student?.name || 'A new student'
 
         const className = getStudentClassName(student)
-
         const admissionDate = getNotificationDate(student, ['admission_date'])
 
         newNotifications.push({
@@ -886,22 +915,17 @@ const getNotifications = async () => {
       }
     }
 
-    /* =================================================
-       2. RECENT PUBLISHED RESULT
-    ================================================= */
-
+    // Recent result
     if (resultsResult.status === 'fulfilled') {
       const results = extractArray(resultsResult.value)
 
       if (results.length > 0) {
         const result = results[0]
-
         const student = result?.student || {}
 
         const studentName = student?.full_name || student?.name || 'A student'
 
         const className = getStudentClassName(student)
-
         const examType = result?.exam_type || 'Examination'
 
         const resultDate = getNotificationDate(result, ['published_at', 'result_date'])
@@ -916,10 +940,7 @@ const getNotifications = async () => {
       }
     }
 
-    /* =================================================
-       3. UPCOMING EXAMINATION
-    ================================================= */
-
+    // Examination
     if (examinationsResult.status === 'fulfilled') {
       const examinations = extractArray(examinationsResult.value)
 
@@ -932,17 +953,9 @@ const getNotifications = async () => {
 
         const examinationDate = getNotificationDate(examination, ['examination_date', 'exam_date'])
 
-        let examinationText = ''
-
-        if (examinationDate) {
-          examinationText =
-            `${examinationType} examination for ${examinationYear} ` +
-            `is scheduled for ${formatNotificationTime(examinationDate).toLowerCase()}.`
-        } else {
-          examinationText =
-            `${examinationType} examination for ${examinationYear} ` +
-            `has been added to the examination schedule.`
-        }
+        const examinationText = examinationDate
+          ? `${examinationType} examination for ${examinationYear} is scheduled for ${formatNotificationTime(examinationDate).toLowerCase()}.`
+          : `${examinationType} examination for ${examinationYear} has been added to the examination schedule.`
 
         newNotifications.push({
           id: `exam-${examination.id || 'latest'}`,
@@ -954,16 +967,9 @@ const getNotifications = async () => {
       }
     }
 
-    /* =================================================
-       Final Notifications
-    ================================================= */
-
     notifications.value = newNotifications.slice(0, 3)
-
-    console.log('Dashboard notifications:', notifications.value)
   } catch (error) {
     console.error('Error fetching notifications:', error)
-
     notifications.value = []
   }
 }
@@ -1003,42 +1009,42 @@ const monthlyAttendance = ref({
 })
 
 const monthlyAttendanceLoading = ref(false)
-
-/* =====================================================
-   Monthly Attendance API
-===================================================== */
-
 const getMonthlyAttendance = async () => {
+  if (!selectedDate.value) return
+
   try {
     monthlyAttendanceLoading.value = true
 
-    const today = new Date()
-
-    const month = `${today.getFullYear()}-` + `${String(today.getMonth() + 1).padStart(2, '0')}`
+    // Date Picker-এ নির্বাচিত তারিখের বছর ও মাস
+    const month = selectedDate.value.slice(0, 7)
 
     const response = await api.get('/student-attendance/monthly-summary', {
       params: {
         month,
+        ...getSessionParams(),
       },
     })
 
     if (!response.data?.status) {
+      monthlyAttendance.value = {
+        total_records: 0,
+        present: 0,
+        absent: 0,
+        leave: 0,
+        present_percentage: 0,
+        absent_percentage: 0,
+        leave_percentage: 0,
+      }
       return
     }
 
     monthlyAttendance.value = {
       total_records: Number(response.data.total_records) || 0,
-
       present: Number(response.data.present) || 0,
-
       absent: Number(response.data.absent) || 0,
-
       leave: Number(response.data.leave) || 0,
-
       present_percentage: Number(response.data.present_percentage) || 0,
-
       absent_percentage: Number(response.data.absent_percentage) || 0,
-
       leave_percentage: Number(response.data.leave_percentage) || 0,
     }
   } catch (error) {
@@ -1049,7 +1055,7 @@ const getMonthlyAttendance = async () => {
 }
 
 /* =====================================================
-   Monthly Attendance 3-Color Circle
+   Monthly Attendance Pie
 ===================================================== */
 
 const monthlyAttendancePieStyle = computed(() => {
@@ -1062,30 +1068,25 @@ const monthlyAttendancePieStyle = computed(() => {
   const total = present + absent + leave
 
   if (total <= 0) {
-    return {
-      background: '#e5e7eb',
-    }
+    return { background: '#e5e7eb' }
   }
-
-  const presentEnd = present
-  const absentEnd = present + absent
 
   return {
     background: `conic-gradient(
-      #10B981 0% ${presentEnd}%,
-      #EF4444 ${presentEnd}% ${absentEnd}%,
-      #F59E0B ${absentEnd}% 100%
+      #10B981 0% ${present}%,
+      #EF4444 ${present}% ${present + absent}%,
+      #F59E0B ${present + absent}% 100%
     )`,
   }
 })
 
 /* =====================================================
    Current Staff & Teachers Attendance
+   This remains today's staff/teacher attendance.
 ===================================================== */
 
 const currentStaffTeachersAttendance = ref({
   is_holiday: false,
-
   teachers: {
     total: 0,
     present: 0,
@@ -1095,7 +1096,6 @@ const currentStaffTeachersAttendance = ref({
     applicable: 0,
     percentage: 0,
   },
-
   staff: {
     total: 0,
     present: 0,
@@ -1115,42 +1115,28 @@ const getCurrentStaffTeachersAttendance = async () => {
 
     const response = await api.get('/staff/dashboard/current-attendance')
 
-    if (!response.data?.status) {
-      return
-    }
+    if (!response.data?.status) return
 
     currentStaffTeachersAttendance.value = {
       is_holiday: Boolean(response.data.is_holiday),
 
       teachers: {
         total: Number(response.data.teachers?.total) || 0,
-
         present: Number(response.data.teachers?.present) || 0,
-
         absent: Number(response.data.teachers?.absent) || 0,
-
         leave: Number(response.data.teachers?.leave) || 0,
-
         off_day: Number(response.data.teachers?.off_day) || 0,
-
         applicable: Number(response.data.teachers?.applicable) || 0,
-
         percentage: Number(response.data.teachers?.percentage) || 0,
       },
 
       staff: {
         total: Number(response.data.staff?.total) || 0,
-
         present: Number(response.data.staff?.present) || 0,
-
         absent: Number(response.data.staff?.absent) || 0,
-
         leave: Number(response.data.staff?.leave) || 0,
-
         off_day: Number(response.data.staff?.off_day) || 0,
-
         applicable: Number(response.data.staff?.applicable) || 0,
-
         percentage: Number(response.data.staff?.percentage) || 0,
       },
     }
@@ -1178,30 +1164,21 @@ const getDashboardData = async () => {
       }
     }
 
-    const response = await api.get('/staff/dashboard')
-
-    /* =================================================
-       Existing Dashboard Values
-    ================================================= */
+    const response = await api.get('/staff/dashboard', {
+      params: {
+        academic_session_id: selectedAcademicSessionId.value,
+      },
+    })
 
     totalStaff.value = Number(response.data.total_staff) || 0
-
     totalStudents.value = Number(response.data.total_students) || 0
-
     totalTeachers.value = Number(response.data.total_teachers) || 0
-
-    /* =================================================
-       Current User
-    ================================================= */
 
     if (response.data.user) {
       currentUser.value = {
         name: response.data.user.name || '',
-
         role: response.data.user.role || 'Admin',
-
         designation: response.data.user.designation || response.data.user.role || 'Admin',
-
         image: response.data.user.image || response.data.user.avatar || '',
       }
     }
@@ -1209,14 +1186,16 @@ const getDashboardData = async () => {
     console.error('Error fetching dashboard data:', error)
   }
 }
-
 /* =====================================================
    Shift Count
 ===================================================== */
-
 const getShiftCount = async () => {
   try {
-    const response = await api.get('/shifts')
+    const response = await api.get('/shifts', {
+      params: {
+        academic_session_id: selectedAcademicSessionId.value,
+      },
+    })
 
     let shifts = []
 
@@ -1231,7 +1210,6 @@ const getShiftCount = async () => {
     totalShifts.value = shifts.length
   } catch (error) {
     console.error('Error fetching shifts:', error)
-
     totalShifts.value = 0
   }
 }
@@ -1239,69 +1217,48 @@ const getShiftCount = async () => {
 /* =====================================================
    Upcoming Holidays
 ===================================================== */
-
 const getUpcomingHolidays = async () => {
+  if (!selectedDate.value) return
+
   try {
+    const selected = new Date(`${selectedDate.value}T00:00:00`)
+    const year = selected.getFullYear()
+
+    const startDate = selectedDate.value
+    const endDate = `${year}-12-31`
+
     const response = await api.get('/holidays')
 
-    const holidays = Array.isArray(response.data?.data) ? response.data.data : []
-
-    const today = getTodayDate()
+    const holidays = response.data?.data || []
 
     upcomingHolidays.value = holidays
       .filter((holiday) => {
-        const startDate = String(holiday.start_date || '').slice(0, 10)
-
-        return startDate && startDate >= today
+        return holiday.start_date >= startDate && holiday.start_date <= endDate
       })
-
-      .sort((a, b) => {
-        const aDate = String(a.start_date || '').slice(0, 10)
-
-        const bDate = String(b.start_date || '').slice(0, 10)
-
-        return aDate.localeCompare(bDate)
-      })
-
+      .sort((a, b) => a.start_date.localeCompare(b.start_date))
       .slice(0, 4)
-
       .map((holiday) => {
-        const dateString = String(holiday.start_date || '').slice(0, 10)
-
-        const date = new Date(`${dateString}T00:00:00`)
+        const date = new Date(`${holiday.start_date}T00:00:00`)
 
         return {
-          id: holiday.id,
-
-          day: String(date.getDate()).padStart(2, '0'),
-
-          month: date
-            .toLocaleDateString('en-US', {
-              month: 'short',
-            })
-            .toUpperCase(),
-
-          title: holiday.title || 'Holiday',
-
-          description: holiday.description || 'Institute holiday',
+          day: date.getDate(),
+          month: date.toLocaleString('en-US', { month: 'short' }),
+          title: holiday.title,
+          description: holiday.description,
         }
       })
   } catch (error) {
     console.error('Error fetching upcoming holidays:', error)
-
     upcomingHolidays.value = []
   }
 }
-
 /* =====================================================
    Date Helpers
 ===================================================== */
 
 const formatDate = (date) => {
   const year = date.getFullYear()
-
   const month = String(date.getMonth() + 1).padStart(2, '0')
-
   const day = String(date.getDate()).padStart(2, '0')
 
   return `${year}-${month}-${day}`
@@ -1309,35 +1266,23 @@ const formatDate = (date) => {
 
 const getDateBefore = (dateString, days) => {
   const date = new Date(`${dateString}T00:00:00`)
-
   date.setDate(date.getDate() - days)
-
   return formatDate(date)
 }
 
 const getDateAfter = (dateString, days) => {
   const date = new Date(`${dateString}T00:00:00`)
-
   date.setDate(date.getDate() + days)
-
   return formatDate(date)
 }
 
-/* =====================================================
-   Day Label
-===================================================== */
-
 const getDayName = (dateString) => {
   const date = new Date(`${dateString}T00:00:00`)
-
-  return date.toLocaleDateString('en-US', {
-    weekday: 'short',
-  })
+  return date.toLocaleDateString('en-US', { weekday: 'short' })
 }
 
 const getDayNumber = (dateString) => {
   const date = new Date(`${dateString}T00:00:00`)
-
   return String(date.getDate()).padStart(2, '0')
 }
 
@@ -1350,43 +1295,29 @@ const getAttendanceByDate = async (date) => {
     const response = await api.get('/staff/dashboard/attendance-trend', {
       params: {
         date,
+        ...getSessionParams(),
       },
     })
 
-    if (!response.data?.status) {
-      return null
-    }
+    if (!response.data?.status) return null
 
     return {
       date,
-
       total_students: Number(response.data.total_students) || 0,
-
       present: Number(response.data.present) || 0,
-
       absent: Number(response.data.absent) || 0,
-
       late: Number(response.data.late) || 0,
-
       leave: Number(response.data.leave) || 0,
-
       present_percentage: Number(response.data.present_percentage) || 0,
-
       absent_percentage: Number(response.data.absent_percentage) || 0,
-
       late_percentage: Number(response.data.late_percentage) || 0,
-
       leave_percentage: Number(response.data.leave_percentage) || 0,
-
       average_status: Number(response.data.average_status) || 0,
-
       day: getDayName(date),
-
       day_number: getDayNumber(date),
     }
   } catch (error) {
     console.error(`Error fetching attendance for ${date}:`, error)
-
     return null
   }
 }
@@ -1415,10 +1346,6 @@ const getAttendanceTrend = async () => {
 
     const validResults = results.filter(Boolean)
 
-    /* =================================================
-       Selected Date Summary
-    ================================================= */
-
     const selectedDayData = validResults.find((item) => item.date === selectedDate.value) || {
       total_students: 0,
       present: 0,
@@ -1432,31 +1359,17 @@ const getAttendanceTrend = async () => {
       average_status: 0,
     }
 
-    /* =================================================
-       Store Everything
-    ================================================= */
-
     attendanceTrend.value = {
       total_students: selectedDayData.total_students,
-
       present: selectedDayData.present,
-
       absent: selectedDayData.absent,
-
       late: selectedDayData.late,
-
       leave: selectedDayData.leave,
-
       present_percentage: selectedDayData.present_percentage,
-
       absent_percentage: selectedDayData.absent_percentage,
-
       late_percentage: selectedDayData.late_percentage,
-
       leave_percentage: selectedDayData.leave_percentage,
-
       average_status: selectedDayData.average_status,
-
       trend: validResults,
     }
   } catch (error) {
@@ -1474,14 +1387,8 @@ const chartPoints = computed(() => {
   const trend = attendanceTrend.value.trend || []
 
   if (!trend.length) {
-    return {
-      present: [],
-      absent: [],
-      leave: [],
-    }
+    return { present: [], absent: [], leave: [] }
   }
-
-  const maxValue = 100
 
   const left = 50
   const right = 830
@@ -1493,10 +1400,8 @@ const chartPoints = computed(() => {
   const makePoints = (key, labelOffset) => {
     return trend.map((item, index) => {
       const value = Number(item[key] || 0)
-
       const x = left + index * step
-
-      const y = bottom - (value / maxValue) * (bottom - top)
+      const y = bottom - (value / 100) * (bottom - top)
 
       return {
         x,
@@ -1505,27 +1410,17 @@ const chartPoints = computed(() => {
         date: item.date,
         day: item.day,
         day_number: item.day_number,
-
         labelY: Math.max(top + 10, Math.min(bottom - 5, y + labelOffset)),
       }
     })
   }
 
   return {
-    /* Present → label above */
     present: makePoints('present_percentage', -12),
-
-    /* Absent → label below */
     absent: makePoints('absent_percentage', 18),
-
-    /* Leave → label further above */
     leave: makePoints('leave_percentage', -27),
   }
 })
-
-/* =====================================================
-   Diamond Marker
-===================================================== */
 
 const getDiamondPoints = (point) => {
   const size = 5
@@ -1538,20 +1433,10 @@ const getDiamondPoints = (point) => {
   ].join(' ')
 }
 
-/* =====================================================
-   SVG Chart Paths
-===================================================== */
-
 const makeChartPath = (points) => {
-  if (!points.length) {
-    return ''
-  }
+  if (!points.length) return ''
 
-  return points
-    .map((point, index) => {
-      return `${index === 0 ? 'M' : 'L'}${point.x},${point.y}`
-    })
-    .join(' ')
+  return points.map((point, index) => `${index === 0 ? 'M' : 'L'}${point.x},${point.y}`).join(' ')
 }
 
 const presentChartPath = computed(() => makeChartPath(chartPoints.value.present))
@@ -1559,10 +1444,6 @@ const presentChartPath = computed(() => makeChartPath(chartPoints.value.present)
 const absentChartPath = computed(() => makeChartPath(chartPoints.value.absent))
 
 const leaveChartPath = computed(() => makeChartPath(chartPoints.value.leave))
-
-/* =====================================================
-   Chart Labels
-===================================================== */
 
 const chartLabels = computed(() => {
   return (attendanceTrend.value.trend || []).map((item) => ({
@@ -1577,9 +1458,7 @@ const chartLabels = computed(() => {
 ===================================================== */
 
 const getInitials = (name) => {
-  if (!name) {
-    return '?'
-  }
+  if (!name) return '?'
 
   const parts = name.trim().split(' ').filter(Boolean)
 
@@ -1591,9 +1470,7 @@ const getInitials = (name) => {
 }
 
 const getStaffImage = (image) => {
-  if (!image) {
-    return ''
-  }
+  if (!image) return ''
 
   if (image.startsWith('http://') || image.startsWith('https://')) {
     return image
@@ -1603,11 +1480,26 @@ const getStaffImage = (image) => {
 }
 
 /* =====================================================
-   Selected Date Watch
+   Watchers
 ===================================================== */
 
 watch(selectedDate, () => {
+  if (sessionInitialized.value) {
+    getAttendanceTrend()
+    getMonthlyAttendance()
+    getUpcomingHolidays()
+  }
+})
+
+watch(selectedAcademicSessionId, (newSessionId, oldSessionId) => {
+  if (!sessionInitialized.value || !newSessionId) return
+  if (newSessionId === oldSessionId) return
+
+  getDashboardData()
   getAttendanceTrend()
+  getMonthlyAttendance()
+  getNotifications()
+  getShiftCount()
 })
 
 /* =====================================================
@@ -1615,6 +1507,8 @@ watch(selectedDate, () => {
 ===================================================== */
 
 onMounted(async () => {
+  await getAcademicSessions()
+
   await Promise.all([
     getDashboardData(),
     getShiftCount(),
@@ -2986,5 +2880,46 @@ onMounted(async () => {
   text-align: center;
   color: #9ca3af;
   font-size: 13px;
+}
+
+.academic-session-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 170px;
+}
+
+.academic-session-selector label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #667085;
+}
+
+.academic-session-selector select {
+  width: 100%;
+  border: 1px solid #e5e9f0;
+  background: #f9fafc;
+  border-radius: 9px;
+  padding: 9px 12px;
+  font-size: 12px;
+  color: #273142;
+  outline: none;
+}
+
+.academic-session-selector select:focus {
+  border-color: #b8cdfc;
+  background: #ffffff;
+}
+
+@media (max-width: 700px) {
+  .dashboard-topbar {
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .academic-session-selector {
+    width: 100%;
+    order: 3;
+  }
 }
 </style>

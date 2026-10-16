@@ -365,7 +365,19 @@
                   This old payment has no assigned session. Select one before updating.
                 </small>
               </div>
+              <!-- Payment Type -->
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">
+                  Payment Type <span class="text-danger">*</span>
+                </label>
 
+                <select v-model="form.payment_type" class="form-select" required>
+                  <option value="">Select Payment Type</option>
+                  <option value="Other">Other</option>
+                  <option value="Admission Fee">Admission Fee</option>
+                  <option value="Exam Fee">Exam Fee</option>
+                </select>
+              </div>
               <!-- Item Name -->
               <div class="col-md-6">
                 <label class="form-label fw-semibold">
@@ -518,6 +530,7 @@ const emptyForm = () => ({
   payment_method: 'Cash',
   payment_date: new Date().toLocaleDateString('en-CA'),
   remarks: '',
+  payment_type: 'Other',
 })
 
 const form = ref(emptyForm())
@@ -879,6 +892,7 @@ const validateForm = () => {
 const buildPayload = () => ({
   student_id: Number(form.value.student_id),
   student_session_id: Number(form.value.student_session_id),
+  payment_type: form.value.payment_type,
   item_name: form.value.item_name.trim(),
   quantity: Number(form.value.quantity),
   price: Number(form.value.price),

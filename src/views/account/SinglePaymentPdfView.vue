@@ -142,26 +142,37 @@
           </thead>
 
           <tbody>
-            <tr>
+            <!-- Monthly Fee: শুধু মাসিক পেমেন্টের ক্ষেত্রে -->
+            <tr v-if="!isStandaloneDuePayment">
               <td class="col-index">1</td>
-              <td>Monthly Fee</td>
+              <td>Monthly Fee — {{ payment.month || 'N/A' }}</td>
               <td class="amount-column">BDT {{ formatAmount(monthlyFee) }}</td>
             </tr>
 
-            <tr>
+            <!-- চলতি মাসে জমা দেওয়া টাকা -->
+            <tr v-if="!isStandaloneDuePayment">
               <td class="col-index">2</td>
               <td>Paid Amount</td>
               <td class="amount-column">BDT {{ formatAmount(payment.paid_amount) }}</td>
             </tr>
 
-            <tr v-if="Number(payment.admission_fee) > 0">
+            <!-- আগের মাসের বকেয়া পরিশোধ -->
+            <tr v-if="hasPreviousDuePayment">
               <td class="col-index">3</td>
+              <td>Due Payment — {{ payment.due_month }}</td>
+              <td class="amount-column">BDT {{ formatAmount(payment.due_payment_amount) }}</td>
+            </tr>
+
+            <!-- Admission Fee -->
+            <tr v-if="Number(payment.admission_fee) > 0">
+              <td class="col-index">4</td>
               <td>Admission Fee</td>
               <td class="amount-column">BDT {{ formatAmount(payment.admission_fee) }}</td>
             </tr>
 
+            <!-- Exam Fee -->
             <tr v-if="Number(payment.exam_fee) > 0">
-              <td class="col-index">4</td>
+              <td class="col-index">5</td>
               <td>Exam Fee</td>
               <td class="amount-column">BDT {{ formatAmount(payment.exam_fee) }}</td>
             </tr>
@@ -270,18 +281,41 @@ const monthlyFee = computed(() => {
   return Number(studentSession.value?.monthly_fee || 0)
 })
 
+// শুধু বকেয়া পরিশোধের রেকর্ড কি না
+const isStandaloneDuePayment = computed(() => {
+  const p = payment.value
+  return !!p && !p.month && !!p.due_month
+})
+
+// আগের মাসের বকেয়া পরিশোধ করা হয়েছে কি না
+const hasPreviousDuePayment = computed(() => {
+  return !!payment.value?.due_month && Number(payment.value?.due_payment_amount || 0) > 0
+})
+
+// এই রসিদে প্রকৃত জমা টাকা
+const totalPaid = computed(() => {
+  const p = payment.value
+
+  if (!p) return 0
+
+  // শুধু বকেয়া পরিশোধ
+  if (isStandaloneDuePayment.value) {
+    return Number(p.due_payment_amount || 0)
+  }
+
+  // মাসিক ফি + আগের মাসের বকেয়া + অন্যান্য ফি
+  return (
+    Number(p.paid_amount || 0) +
+    Number(p.due_payment_amount || 0) +
+    Number(p.admission_fee || 0) +
+    Number(p.exam_fee || 0)
+  )
+})
 /*
 |--------------------------------------------------------------------------
 | Total Paid For This Payment Only
 |--------------------------------------------------------------------------
 */
-const totalPaid = computed(() => {
-  return (
-    Number(payment.value?.paid_amount || 0) +
-    Number(payment.value?.admission_fee || 0) +
-    Number(payment.value?.exam_fee || 0)
-  )
-})
 
 /*
 |--------------------------------------------------------------------------
@@ -422,7 +456,32 @@ Shift: ${studentSession.value?.shift?.shift_name || 'N/A'}
 
 Version: ${payment.value.student?.version || 'N/A'}
 
-Month: ${payment.value.month || 'N/A'}
+Month: ${payment.value.month || payment.value.due_month || 'N/A'}
+
+${
+  !isStandaloneDuePayment.value
+    ? `Monthly Fee: BDT ${formatAmount(monthlyFee.value)}
+Paid Amount: BDT ${formatAmount(payment.value.paid_amount)}`
+    : ''
+}
+
+${
+  hasPreviousDuePayment.value
+    ? `Due Payment (${payment.value.due_month}): BDT ${formatAmount(payment.value.due_payment_amount)}`
+    : ''
+}
+
+${
+  Number(payment.value.admission_fee || 0) > 0
+    ? `Admission Fee: BDT ${formatAmount(payment.value.admission_fee)}`
+    : ''
+}
+
+${
+  Number(payment.value.exam_fee || 0) > 0
+    ? `Exam Fee: BDT ${formatAmount(payment.value.exam_fee)}`
+    : ''
+}
 
 Total Paid: BDT ${formatAmount(totalPaid.value)}
 
