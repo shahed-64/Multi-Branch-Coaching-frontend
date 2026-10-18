@@ -73,12 +73,6 @@
       <span>Dashboard</span>
     </router-link>
 
-    <!-- ================= BRANCHES ================= -->
-    <router-link to="/branch" active-class="active-menu" @click="closeSidebar">
-      <i class="fa-solid fa-code-branch"></i>
-      <span>Branches</span>
-    </router-link>
-
     <!-- ================= INSTITUTE SETUP DROPDOWN ================= -->
     <div class="dropdown sidebar-dropdown">
       <button class="student-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
@@ -100,6 +94,11 @@
             Institute Information
           </router-link>
         </li>
+        <!-- ================= BRANCHES ================= -->
+        <router-link to="/branch" active-class="active-menu" @click="closeSidebar">
+          <i class="fa-solid fa-code-branch"></i>
+          <span>Branches</span>
+        </router-link>
         <li>
           <router-link
             class="dropdown-item"
@@ -361,42 +360,84 @@
         </li>
       </ul>
     </div>
-
+    <!-- ================= SHIFT ================= -->
+    <router-link to="/shift" active-class="active-menu" @click="closeSidebar">
+      <i class="fa-solid fa-clock"></i>
+      <span>Shift</span>
+    </router-link>
     <!-- ================= SUBJECT ================= -->
     <router-link to="/subject" active-class="active-menu" @click="closeSidebar">
       <i class="fa-solid fa-book-open"></i>
       <span>Subjects</span>
     </router-link>
 
-    <!-- ================= EXAMINATION ================= -->
-    <router-link to="/exam" active-class="active-menu" @click="closeSidebar">
-      <i class="fa-solid fa-file-pen"></i>
-      <span>Examination</span>
-    </router-link>
+    <!-- ================= EXAMINATION & RESULT DROPDOWN ================= -->
+    <div class="dropdown sidebar-dropdown">
+      <button class="student-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+        <span>
+          <i class="fa-solid fa-square-poll-vertical"></i>
+          Examination & Result
+        </span>
+      </button>
 
-    <!-- ================= RESULT ================= -->
-    <router-link to="/result" active-class="active-menu" @click="closeSidebar">
-      <i class="fa-solid fa-square-poll-vertical"></i>
-      <span>Result</span>
-    </router-link>
-
-    <!-- ================= RESULT GRADING ================= -->
-    <router-link to="/resultGrade" active-class="active-menu" @click="closeSidebar">
-      <i class="fa-solid fa-award"></i>
-      <span>Result Grading</span>
-    </router-link>
-
-    <!-- ================= FINAL AVERAGE RESULT ================= -->
-    <router-link to="/finalAvrageResult" active-class="active-menu" @click="closeSidebar">
-      <i class="fa-solid fa-chart-line"></i>
-      <span>Final Avrage Result</span>
-    </router-link>
-
-    <!-- ================= SHIFT ================= -->
-    <router-link to="/shift" active-class="active-menu" @click="closeSidebar">
-      <i class="fa-solid fa-clock"></i>
-      <span>Shift</span>
-    </router-link>
+      <ul class="dropdown-menu">
+        <li>
+          <router-link
+            class="dropdown-item"
+            to="/exam"
+            active-class="active-menu"
+            @click="closeSidebar"
+          >
+            <i class="fa-solid fa-file-pen"></i>
+            Examination
+          </router-link>
+        </li>
+        <li>
+          <router-link
+            class="dropdown-item"
+            to="/result"
+            active-class="active-menu"
+            @click="closeSidebar"
+          >
+            <i class="fa-solid fa-square-poll-vertical"></i>
+            Result
+          </router-link>
+        </li>
+        <li>
+          <router-link
+            class="dropdown-item"
+            to="/resultGrade"
+            active-class="active-menu"
+            @click="closeSidebar"
+          >
+            <i class="fa-solid fa-award"></i>
+            Result Grading
+          </router-link>
+        </li>
+        <li>
+          <router-link
+            class="dropdown-item"
+            to="/instituteresult"
+            active-class="active-menu"
+            @click="closeSidebar"
+          >
+            <i class="fa-solid fa-square-poll-vertical"></i>
+            Institute Result
+          </router-link>
+        </li>
+        <li>
+          <router-link
+            class="dropdown-item"
+            to="/finalAvrageResult"
+            active-class="active-menu"
+            @click="closeSidebar"
+          >
+            <i class="fa-solid fa-chart-line"></i>
+            Final Avrage Result
+          </router-link>
+        </li>
+      </ul>
+    </div>
 
     <!-- ================= HOLIDAY ================= -->
     <router-link to="/holiday" active-class="active-menu" @click="closeSidebar">

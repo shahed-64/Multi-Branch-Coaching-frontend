@@ -122,6 +122,15 @@ const router = createRouter({
         role: ['Admin', 'Manager', 'Branch Manager'],
       },
     },
+    {
+      path: '/instituteresult',
+      name: 'Instituteresult',
+      component: () => import('../views/InstituteresultView.vue'),
+      meta: {
+        requiresAuth: true,
+        role: ['Admin', 'Manager', 'Branch Manager'],
+      },
+    },
 
     {
       path: '/result',
