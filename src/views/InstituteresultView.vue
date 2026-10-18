@@ -156,6 +156,7 @@
           <table class="table table-hover align-middle mb-0">
             <thead class="table-light">
               <tr>
+                <th class="py-3">SL No.</th>
                 <th class="py-3">Student ID</th>
                 <th class="py-3">Student Name</th>
                 <th class="py-3 text-center">Total Marks</th>
@@ -167,6 +168,7 @@
 
             <tbody>
               <tr v-for="(result, index) in results" :key="result.result_id ?? index">
+                <td>{{ index + 1 }}</td>
                 <td class="fw-semibold">
                   {{ result.student_id || 'N/A' }}
                 </td>
@@ -596,8 +598,24 @@ onMounted(() => {
 /* PDF / browser print layout */
 @media print {
   @page {
-    size: A4 landscape;
-    margin: 12mm;
+    size: A4 portrait;
+    margin: 10mm;
+  }
+  .pdf-result-table {
+    width: 100%;
+    table-layout: fixed;
+    font-size: 9px;
+  }
+
+  .pdf-result-table th,
+  .pdf-result-table td {
+    padding: 6px 4px;
+    overflow-wrap: anywhere;
+  }
+
+  .pdf-details {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    font-size: 11px;
   }
 
   :global(html),

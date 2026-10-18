@@ -141,6 +141,15 @@ const router = createRouter({
         role: ['Admin', 'Manager', 'Branch Manager'],
       },
     },
+    {
+      path: '/finalAvrageResultMerit',
+      name: 'FinalAvrageResultMeritView',
+      component: () => import('../views/FinalAvrageResultMeritView.vue'),
+      meta: {
+        requiresAuth: true,
+        role: ['Admin', 'Manager', 'Branch Manager'],
+      },
+    },
 
     {
       path: '/resultGrade',

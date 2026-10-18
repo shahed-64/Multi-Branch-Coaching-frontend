@@ -1,7 +1,6 @@
 <template>
   <div>
     <!-- ================= MOBILE HEADER ================= -->
-
     <div class="mobile-topbar d-md-none">
       <button type="button" class="menu-btn" @click="toggleMenu">
         <i class="fa-solid fa-bars"></i>
@@ -11,27 +10,21 @@
         <h5>
           {{ institute?.institute_name || 'Coaching MS' }}
         </h5>
-
         <small>Management System</small>
       </div>
     </div>
 
     <!-- ================= SIDEBAR ================= -->
-
     <div :class="['sidebar', { open: isOpen }]">
       <!-- ================= INSTITUTE LOGO ================= -->
-
       <div class="sidebar-logo">
         <div class="logo-box">
-          <!-- Dynamic Institute Logo -->
           <img
             v-if="institute?.logo"
             :src="getLogoUrl(institute.logo)"
             :alt="institute?.institute_name || 'Institute Logo'"
             class="institute-logo"
           />
-
-          <!-- Default Logo -->
           <i v-else class="fa-solid fa-graduation-cap"></i>
         </div>
 
@@ -39,16 +32,13 @@
           <h4>
             {{ institute?.institute_name || 'Coaching MS' }}
           </h4>
-
           <span>Management System</span>
         </div>
       </div>
 
       <!-- ================= MENU ================= -->
-
       <div class="sidebar-menu">
-        <!-- ================= DASHBOARD ================= -->
-
+        <!-- DASHBOARD -->
         <router-link
           to="/account/dashboard"
           class="menu-item"
@@ -59,8 +49,7 @@
           <span>Dashboard</span>
         </router-link>
 
-        <!-- ================= STUDENT PAYMENT ================= -->
-
+        <!-- STUDENT PAYMENT -->
         <router-link
           to="/student/payment"
           class="menu-item"
@@ -71,8 +60,7 @@
           <span>Student Payment</span>
         </router-link>
 
-        <!-- ================= STUDENT DUE PAYMENT ================= -->
-
+        <!-- STUDENT DUE PAYMENT -->
         <router-link
           to="/student/due_payment"
           class="menu-item"
@@ -83,8 +71,7 @@
           <span>Student Due Payment</span>
         </router-link>
 
-        <!-- ================= OTHERS PAYMENT ================= -->
-
+        <!-- OTHERS PAYMENT -->
         <router-link
           to="/others-payment"
           class="menu-item"
@@ -95,8 +82,7 @@
           <span>Others Payment</span>
         </router-link>
 
-        <!-- ================= PAYMENT HISTORY ================= -->
-
+        <!-- PAYMENT HISTORY -->
         <router-link
           to="/payment/history"
           class="menu-item"
@@ -107,8 +93,7 @@
           <span>Payment History</span>
         </router-link>
 
-        <!-- ================= SINGLE STUDENT PAYMENT ================= -->
-
+        <!-- SINGLE STUDENT PAYMENT -->
         <router-link
           to="/payment/single"
           class="menu-item"
@@ -118,59 +103,55 @@
           <i class="fa-solid fa-user-check"></i>
           <span>Single Student Payment</span>
         </router-link>
-        <div class="dropdown sidebar-dropdown">
-          <button class="student-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
-            <span>
-              <i class="fa-solid fa-user-graduate"></i>
-              Register & Ledger
+
+        <!-- REGISTER & LEDGER ACCORDION DROPDOWN -->
+        <div class="menu-item-has-children" :class="{ open: openMenus.registerLedger }">
+          <button class="menu-btn-toggle" @click="toggleMenuAccordion('registerLedger')">
+            <span class="btn-text">
+              <i class="fa-solid fa-user-graduate menu-icon"></i>
+              <span>Register & Ledger</span>
             </span>
+            <i class="fa-solid fa-chevron-right chevron-icon"></i>
           </button>
 
-          <ul class="dropdown-menu">
-            <li>
-              <router-link
-                class="dropdown-item"
-                to="/registerKhata"
-                active-class="active-menu"
-                @click="closeSidebar"
-              >
-                <i class="fa-solid fa-users"></i>
-                All History Of Register
-              </router-link>
-              <router-link
-                class="dropdown-item"
-                to="/ledger"
-                active-class="active-menu"
-                @click="closeSidebar"
-              >
-                <i class="fa-solid fa-users"></i>
-                All History Of Ledger
-              </router-link>
-            </li>
-
-            <li>
-              <button
-                type="button"
-                class="dropdown-item"
-                data-bs-toggle="modal"
-                data-bs-target="#addModal"
-              >
-                <i class="fa-solid fa-user-plus"></i>
-                Add Student
-              </button>
-            </li>
-          </ul>
+          <div class="submenu-container">
+            <router-link
+              to="/registerKhata"
+              class="submenu-link"
+              active-class="active-submenu"
+              @click="closeMenu"
+            >
+              <i class="fa-solid fa-users"></i>
+              <span>All History Of Register</span>
+            </router-link>
+            <router-link
+              to="/ledger"
+              class="submenu-link"
+              active-class="active-submenu"
+              @click="closeMenu"
+            >
+              <i class="fa-solid fa-users"></i>
+              <span>All History Of Ledger</span>
+            </router-link>
+            <button
+              type="button"
+              class="submenu-link text-start border-0 bg-transparent w-100"
+              data-bs-toggle="modal"
+              data-bs-target="#addModal"
+            >
+              <i class="fa-solid fa-user-plus"></i>
+              <span>Add Student</span>
+            </button>
+          </div>
         </div>
-        <!-- ================= EXPENSE ================= -->
 
+        <!-- EXPENSE -->
         <router-link to="/expense" class="menu-item" active-class="active-menu" @click="closeMenu">
           <i class="fa-solid fa-money-check-dollar"></i>
           <span>Expense</span>
         </router-link>
 
-        <!-- ================= MAIN DASHBOARD ================= -->
-
-        <!-- ================= MAIN DASHBOARD ================= -->
+        <!-- MAIN DASHBOARD -->
         <router-link
           v-if="role === 'Manager' || role === 'Branch Manager'"
           to="/dashboard"
@@ -184,7 +165,6 @@
       </div>
 
       <!-- ================= FOOTER ================= -->
-
       <div class="logout-section">
         <button type="button" @click="logout" class="logout-btn">
           <i class="fa-solid fa-right-from-bracket"></i>
@@ -194,199 +174,106 @@
     </div>
 
     <!-- ================= OVERLAY ================= -->
-
     <div v-if="isOpen" class="sidebar-overlay d-md-none" @click="closeMenu"></div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive, onMounted, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import api from '@/services/api'
 
-// ============================================================
-// ROUTER
-// ============================================================
-
 const router = useRouter()
-
-// ============================================================
-// SIDEBAR
-// ============================================================
+const route = useRoute()
 
 const isOpen = ref(false)
-
-// ============================================================
-// USER ROLE
-// ============================================================
-
 const role = localStorage.getItem('role')
-
-// ============================================================
-// INSTITUTE
-// ============================================================
-
 const institute = ref(null)
 
-// ============================================================
-// FETCH INSTITUTE INFORMATION
-// ============================================================
+// Accordion Toggle State
+const openMenus = reactive({
+  registerLedger: false,
+})
+
+// Auto open dropdown based on current route
+const autoOpenMenuByRoute = () => {
+  const path = route.path
+  if (['/registerKhata', '/ledger'].includes(path)) {
+    openMenus.registerLedger = true
+  }
+}
+
+watch(
+  () => route.path,
+  () => {
+    autoOpenMenuByRoute()
+  },
+)
+
+const toggleMenuAccordion = (menuKey) => {
+  openMenus[menuKey] = !openMenus[menuKey]
+}
 
 const fetchInstitute = async () => {
-  console.log('🔥 FETCH INSTITUTE API RUNNING')
-
   try {
-    console.time('api-fetch-institute')
-
     const response = await api.get('/institute-info')
-
-    console.timeEnd('api-fetch-institute')
-
-    console.log('INSTITUTE API STATUS:', response.status)
-    console.log('INSTITUTE API DATA:', response.data)
-
     institute.value = response.data.data || null
   } catch (error) {
     console.error('Institute API failed:', error)
-
-    if (error.response) {
-      console.error('API STATUS:', error.response.status)
-      console.error('API DATA:', error.response.data)
-    }
-
     institute.value = null
   }
 }
 
-// ============================================================
-// LOGO URL
-// ============================================================
-
 const getLogoUrl = (logo) => {
-  if (!logo) {
-    return ''
-  }
-
-  // ----------------------------------------------------------
-  // Data URL
-  // ----------------------------------------------------------
-
-  if (logo.startsWith('data:image')) {
-    return logo
-  }
-
-  // ----------------------------------------------------------
-  // Find API base URL
-  // ----------------------------------------------------------
+  if (!logo) return ''
+  if (logo.startsWith('data:image')) return logo
 
   const apiBaseUrl = api.defaults.baseURL || ''
-
-  // Example:
-  //
-  // VITE_API_URL =
-  // https://icon.shahedislam.xyz/public/api
-  //
-  // We need:
-  //
-  // https://icon.shahedislam.xyz/public
-  //
-  // because storage is outside /api.
-  //
-
   const storageBaseUrl = apiBaseUrl.replace(/\/api\/?$/, '')
-
-  // ----------------------------------------------------------
-  // Already full URL
-  // ----------------------------------------------------------
 
   if (logo.startsWith('http://') || logo.startsWith('https://')) {
     try {
       const logoUrl = new URL(logo)
-
-      // If backend accidentally sends local URL
-      // replace it with current API server.
-
       if (logoUrl.hostname === '127.0.0.1' || logoUrl.hostname === 'localhost') {
         const cleanPath = logoUrl.pathname.replace(/^\/+/, '')
-
         return `${storageBaseUrl}/${cleanPath}`
       }
-
-      // Production/external full URL
       return logo
     } catch (error) {
-      console.error('Invalid logo URL:', logo)
-
       return ''
     }
   }
 
-  // ----------------------------------------------------------
-  // /storage/...
-  // ----------------------------------------------------------
-
-  if (logo.startsWith('/storage/')) {
-    return `${storageBaseUrl}${logo}`
-  }
-
-  // ----------------------------------------------------------
-  // storage/...
-  // ----------------------------------------------------------
-
-  if (logo.startsWith('storage/')) {
-    return `${storageBaseUrl}/${logo}`
-  }
-
-  // ----------------------------------------------------------
-  // institute/...
-  // ----------------------------------------------------------
-
+  if (logo.startsWith('/storage/')) return `${storageBaseUrl}${logo}`
+  if (logo.startsWith('storage/')) return `${storageBaseUrl}/${logo}`
   return `${storageBaseUrl}/storage/${logo}`
 }
-
-// ============================================================
-// TOGGLE SIDEBAR
-// ============================================================
 
 const toggleMenu = () => {
   isOpen.value = !isOpen.value
 }
 
-// ============================================================
-// CLOSE SIDEBAR
-// ============================================================
-
 const closeMenu = () => {
   isOpen.value = false
 }
 
-// ============================================================
-// LOGOUT
-// ============================================================
-
 const logout = () => {
   localStorage.removeItem('token')
   localStorage.removeItem('role')
-
   isOpen.value = false
-
   router.push('/login')
 }
 
-// ============================================================
-// MOUNT
-// ============================================================
-
 onMounted(() => {
   fetchInstitute()
+  autoOpenMenuByRoute()
 })
 </script>
 
 <style scoped>
 /* =========================================================
-   SIDEBAR
+    SIDEBAR
 ========================================================= */
-
 .sidebar {
   width: 260px;
   min-height: 100vh;
@@ -402,10 +289,7 @@ onMounted(() => {
   transition: 0.35s;
 }
 
-/* =========================================================
-   SIDEBAR LOGO
-========================================================= */
-
+/* SIDEBAR LOGO */
 .sidebar-logo {
   display: flex;
   align-items: center;
@@ -414,10 +298,6 @@ onMounted(() => {
   margin-bottom: 22px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
-
-/* =========================================================
-   LOGO BOX
-========================================================= */
 
 .logo-box {
   width: 52px;
@@ -433,10 +313,6 @@ onMounted(() => {
   flex-shrink: 0;
 }
 
-/* =========================================================
-   INSTITUTE LOGO
-========================================================= */
-
 .institute-logo {
   width: 100%;
   height: 100%;
@@ -445,10 +321,6 @@ onMounted(() => {
   border-radius: 12px;
   display: block;
 }
-
-/* =========================================================
-   LOGO TEXT
-========================================================= */
 
 .logo-text {
   display: flex;
@@ -471,18 +343,14 @@ onMounted(() => {
   margin-top: 2px;
 }
 
-/* =========================================================
-   MENU WRAPPER
-========================================================= */
-
 .sidebar-menu {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-/* =========================================================
-   MOBILE HEADER
-========================================================= */
-
+/* MOBILE HEADER */
 .mobile-topbar {
   display: none;
   position: sticky;
@@ -525,21 +393,17 @@ onMounted(() => {
   padding: 0;
 }
 
-/* =========================================================
-   MENU ITEM
-========================================================= */
-
+/* MENU ITEM */
 .menu-item {
   display: flex;
   align-items: center;
   gap: 14px;
   width: 100%;
-  padding: 13px 16px;
-  margin-bottom: 8px;
-  border-radius: 12px;
+  padding: 11px 16px;
+  border-radius: 10px;
   text-decoration: none;
   color: #d1d5db;
-  font-size: 15px;
+  font-size: 14.5px;
   font-weight: 500;
   transition: 0.25s ease;
 }
@@ -547,7 +411,7 @@ onMounted(() => {
 .menu-item i {
   width: 20px;
   text-align: center;
-  font-size: 16px;
+  font-size: 15px;
   color: #9ca3af;
   transition: 0.25s;
 }
@@ -566,14 +430,12 @@ onMounted(() => {
   color: #60a5fa;
 }
 
-/* =========================================================
-   ACTIVE MENU
-========================================================= */
-
+/* ACTIVE MENU */
 .active-menu {
   background: #2563eb !important;
   color: #fff !important;
   box-shadow: 0 8px 18px rgba(37, 99, 235, 0.35);
+  font-weight: 600;
 }
 
 .active-menu i {
@@ -581,18 +443,115 @@ onMounted(() => {
 }
 
 /* =========================================================
-   SIDEBAR FOOTER
+    ACCORDION DROPDOWN STYLING
 ========================================================= */
+.menu-item-has-children {
+  width: 100%;
+}
 
+.menu-btn-toggle {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 16px;
+  border-radius: 10px;
+  font-size: 14.5px;
+  font-weight: 500;
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.btn-text {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.menu-btn-toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.menu-btn-toggle:hover .menu-icon {
+  color: #60a5fa;
+}
+
+.chevron-icon {
+  font-size: 11px;
+  color: #9ca3af;
+  transition:
+    transform 0.25s ease,
+    color 0.25s ease;
+}
+
+.menu-item-has-children.open > .menu-btn-toggle {
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+}
+
+.menu-item-has-children.open > .menu-btn-toggle .chevron-icon {
+  transform: rotate(90deg);
+  color: #60a5fa;
+}
+
+.submenu-container {
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 12px;
+  margin-top: 2px;
+  margin-left: 14px;
+  border-left: 2px solid rgba(255, 255, 255, 0.07);
+}
+
+.menu-item-has-children.open > .submenu-container {
+  display: flex;
+}
+
+.submenu-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #9ca3af;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.submenu-link:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.submenu-link i {
+  font-size: 12px;
+  width: 16px;
+  text-align: center;
+}
+
+.active-submenu {
+  background: rgba(37, 99, 235, 0.2) !important;
+  color: #60a5fa !important;
+  font-weight: 600;
+}
+
+.active-submenu i {
+  color: #60a5fa !important;
+}
+
+/* FOOTER */
 .logout-section {
   margin-top: auto;
   padding-top: 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
-
-/* =========================================================
-   LOGOUT BUTTON
-========================================================= */
 
 .logout-btn {
   width: 100%;
@@ -600,13 +559,13 @@ onMounted(() => {
   outline: none;
   background: #ef4444;
   color: #fff;
-  padding: 13px 16px;
-  border-radius: 12px;
+  padding: 12px 16px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  font-size: 15px;
+  font-size: 14.5px;
   font-weight: 600;
   cursor: pointer;
   transition: 0.25s;
@@ -618,31 +577,16 @@ onMounted(() => {
   box-shadow: 0 10px 20px rgba(239, 68, 68, 0.35);
 }
 
-/* =========================================================
-   SCROLLBAR
-========================================================= */
-
+/* SCROLLBAR */
 .sidebar::-webkit-scrollbar {
   width: 6px;
 }
-
-.sidebar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
 .sidebar::-webkit-scrollbar-thumb {
   background: #334155;
   border-radius: 20px;
 }
 
-.sidebar::-webkit-scrollbar-thumb:hover {
-  background: #475569;
-}
-
-/* =========================================================
-   OVERLAY
-========================================================= */
-
+/* OVERLAY */
 .sidebar-overlay {
   position: fixed;
   inset: 0;
@@ -651,154 +595,24 @@ onMounted(() => {
   z-index: 999;
 }
 
-/* =========================================================
-   MOBILE
-========================================================= */
-
 @media (max-width: 767px) {
   .mobile-topbar {
     display: flex;
   }
-
   .sidebar {
     left: -280px;
     width: 260px;
     height: 100vh;
     overflow-y: auto;
   }
-
   .sidebar.open {
     left: 0;
   }
 }
 
-/* =========================================================
-   DESKTOP
-========================================================= */
-
 @media (min-width: 768px) {
   .sidebar {
     left: 0;
   }
-}
-
-/* =========================================================
-   SMALL MOBILE
-========================================================= */
-
-@media (max-width: 400px) {
-  .mobile-topbar {
-    padding: 12px 14px;
-  }
-
-  .mobile-brand h5 {
-    font-size: 16px;
-    max-width: 210px;
-  }
-
-  .logo-box {
-    width: 46px;
-    height: 46px;
-  }
-
-  .logo-text h4 {
-    font-size: 15px;
-  }
-
-  .logo-text span {
-    font-size: 11px;
-  }
-}
-
-/* =========================================================
-   BOX SIZING
-========================================================= */
-
-.sidebar * {
-  box-sizing: border-box;
-}
-
-/* =========================================================
-   ACTIVE / CLICK EFFECT
-========================================================= */
-
-.menu-item:active,
-.logout-btn:active {
-  transform: scale(0.98);
-}
-
-.sidebar-dropdown {
-  width: 100%;
-  margin-bottom: 4px;
-}
-
-.student-btn {
-  width: 100%;
-  background: transparent !important;
-  border: none !important;
-  outline: none;
-  color: #e5e7eb !important;
-  text-align: left;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 11px 14px;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.25s ease;
-}
-
-.student-btn > span {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.student-btn:hover {
-  background: rgba(255, 255, 255, 0.08) !important;
-  color: #fff !important;
-}
-
-.student-btn > span > i {
-  width: 22px;
-  text-align: center;
-  font-size: 15px;
-}
-
-/* =========================================================
-   DROPDOWN MENU
-========================================================= */
-
-.dropdown-menu {
-  width: 100%;
-  background: #1f2937 !important;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-  padding: 6px;
-  margin-top: 4px !important;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-}
-
-.dropdown-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: #e5e7eb !important;
-  padding: 10px 12px;
-  border-radius: 8px;
-  font-size: 13px;
-  transition: all 0.25s ease;
-}
-
-.dropdown-item:hover {
-  background: #2563eb !important;
-  color: #fff !important;
-  transform: translateX(3px);
-}
-
-.dropdown-item i {
-  width: 19px;
-  text-align: center;
 }
 </style>

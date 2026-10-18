@@ -26,7 +26,6 @@
           :alt="institute?.institute_name || 'Institute Logo'"
           class="institute-logo"
         />
-
         <i v-else class="fa-solid fa-graduation-cap"></i>
       </div>
 
@@ -34,14 +33,11 @@
         <h5 class="logo-title">
           {{ institute?.institute_name || 'Coaching MS' }}
         </h5>
-
-        <span class="logo-subtitle"> Management System </span>
+        <span class="logo-subtitle">Management System</span>
       </div>
     </div>
 
-    <!-- ================================================= -->
-    <!-- ================= MANAGER BRANCH SWITCH ========= -->
-    <!-- ================================================= -->
+    <!-- ================= MANAGER BRANCH SWITCH ================= -->
     <div v-if="role === 'Manager'" class="manager-branch-switch">
       <div class="branch-switch-label">
         <i class="fa-solid fa-code-branch"></i>
@@ -55,7 +51,6 @@
         @change="changeBranch"
       >
         <option value="">All Branches</option>
-
         <option v-for="branch in branches" :key="branch.id" :value="String(branch.id)">
           {{ branch.name }}
         </option>
@@ -67,424 +62,407 @@
       </div>
     </div>
 
-    <!-- ================= DASHBOARD ================= -->
-    <router-link to="/dashboard" active-class="active-menu" @click="closeSidebar">
-      <i class="fa-solid fa-gauge-high"></i>
-      <span>Dashboard</span>
-    </router-link>
+    <!-- ================= MENU LIST ================= -->
+    <nav class="sidebar-menu">
+      <!-- DASHBOARD -->
+      <router-link
+        to="/dashboard"
+        class="menu-link"
+        active-class="active-menu"
+        @click="closeSidebar"
+      >
+        <i class="fa-solid fa-gauge-high menu-icon"></i>
+        <span>Dashboard</span>
+      </router-link>
 
-    <!-- ================= INSTITUTE SETUP DROPDOWN ================= -->
-    <div class="dropdown sidebar-dropdown">
-      <button class="student-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
-        <span>
-          <i class="fa-solid fa-building-columns"></i>
-          Institute Setup
-        </span>
-      </button>
+      <!-- INSTITUTE SETUP DROPDOWN -->
+      <div class="menu-item-has-children" :class="{ open: openMenus.institute }">
+        <button class="menu-btn-toggle" @click="toggleMenu('institute')">
+          <span class="btn-text">
+            <i class="fa-solid fa-building-columns menu-icon"></i>
+            <span>Institute Setup</span>
+          </span>
+          <i class="fa-solid fa-chevron-right chevron-icon"></i>
+        </button>
 
-      <ul class="dropdown-menu">
-        <li>
+        <div class="submenu-container">
           <router-link
-            class="dropdown-item"
             to="/Institure-Info"
-            active-class="active-menu"
+            class="submenu-link"
+            active-class="active-submenu"
             @click="closeSidebar"
           >
             <i class="fa-solid fa-circle-info"></i>
-            Institute Information
+            <span>Institute Info</span>
           </router-link>
-        </li>
-        <!-- ================= BRANCHES ================= -->
-        <router-link to="/branch" active-class="active-menu" @click="closeSidebar">
-          <i class="fa-solid fa-code-branch"></i>
-          <span>Branches</span>
-        </router-link>
-        <li>
           <router-link
-            class="dropdown-item"
+            to="/branch"
+            class="submenu-link"
+            active-class="active-submenu"
+            @click="closeSidebar"
+          >
+            <i class="fa-solid fa-code-branch"></i>
+            <span>Branches</span>
+          </router-link>
+          <router-link
             to="/Institure-Session"
-            active-class="active-menu"
+            class="submenu-link"
+            active-class="active-submenu"
             @click="closeSidebar"
           >
             <i class="fa-solid fa-calendar-days"></i>
-            Institute Session
+            <span>Institute Session</span>
           </router-link>
-        </li>
-        <li>
           <router-link
-            class="dropdown-item"
             to="/migration"
-            active-class="active-menu"
+            class="submenu-link"
+            active-class="active-submenu"
             @click="closeSidebar"
           >
             <i class="fa-solid fa-arrows-split-up-and-left"></i>
-            Migration
+            <span>Migration</span>
           </router-link>
-        </li>
-        <li>
           <router-link
-            class="dropdown-item"
             to="/single_student_migration"
-            active-class="active-menu"
+            class="submenu-link"
+            active-class="active-submenu"
             @click="closeSidebar"
           >
             <i class="fa-solid fa-user-gear"></i>
-            Single Student Migration
+            <span>Single Migration</span>
           </router-link>
-        </li>
-      </ul>
-    </div>
+        </div>
+      </div>
 
-    <!-- ================= STUDENTS ================= -->
-    <div class="dropdown sidebar-dropdown">
-      <button class="student-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
-        <span>
-          <i class="fa-solid fa-user-graduate"></i>
-          Students
-        </span>
-      </button>
+      <!-- STUDENTS DROPDOWN -->
+      <div class="menu-item-has-children" :class="{ open: openMenus.students }">
+        <button class="menu-btn-toggle" @click="toggleMenu('students')">
+          <span class="btn-text">
+            <i class="fa-solid fa-user-graduate menu-icon"></i>
+            <span>Students</span>
+          </span>
+          <i class="fa-solid fa-chevron-right chevron-icon"></i>
+        </button>
 
-      <ul class="dropdown-menu">
-        <li>
+        <div class="submenu-container">
           <router-link
-            class="dropdown-item"
             to="/student"
-            active-class="active-menu"
+            class="submenu-link"
+            active-class="active-submenu"
             @click="closeSidebar"
           >
             <i class="fa-solid fa-users"></i>
-            All Students
+            <span>All Students</span>
           </router-link>
           <router-link
-            class="dropdown-item"
             to="/student-attendance"
-            active-class="active-menu"
+            class="submenu-link"
+            active-class="active-submenu"
             @click="closeSidebar"
           >
             <i class="fa-solid fa-clipboard-user"></i>
-            Student Attendance
+            <span>Student Attendance</span>
           </router-link>
           <router-link
-            class="dropdown-item"
             to="/student-attendance-overview"
-            active-class="active-menu"
+            class="submenu-link"
+            active-class="active-submenu"
             @click="closeSidebar"
           >
             <i class="fa-solid fa-chart-pie"></i>
-            Attendance Overview
+            <span>Attendance Overview</span>
           </router-link>
-        </li>
-
-        <li>
           <button
             type="button"
-            class="dropdown-item"
+            class="submenu-link text-start border-0 bg-transparent"
             data-bs-toggle="modal"
             data-bs-target="#addModal"
           >
             <i class="fa-solid fa-user-plus"></i>
-            Add Student
+            <span>Add Student</span>
           </button>
-        </li>
-      </ul>
-    </div>
+        </div>
+      </div>
 
-    <!-- ================= TEACHERS ================= -->
-    <div class="dropdown sidebar-dropdown">
-      <button class="student-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
-        <span>
-          <i class="fa-solid fa-chalkboard-user"></i>
-          Teachers
-        </span>
-      </button>
+      <!-- TEACHERS DROPDOWN -->
+      <div class="menu-item-has-children" :class="{ open: openMenus.teachers }">
+        <button class="menu-btn-toggle" @click="toggleMenu('teachers')">
+          <span class="btn-text">
+            <i class="fa-solid fa-chalkboard-user menu-icon"></i>
+            <span>Teachers</span>
+          </span>
+          <i class="fa-solid fa-chevron-right chevron-icon"></i>
+        </button>
 
-      <ul class="dropdown-menu">
-        <li>
+        <div class="submenu-container">
           <router-link
-            class="dropdown-item"
             to="/teacherView"
-            active-class="active-menu"
+            class="submenu-link"
+            active-class="active-submenu"
             @click="closeSidebar"
           >
             <i class="fa-solid fa-id-badge"></i>
-            All Teachers
+            <span>All Teachers</span>
           </router-link>
-        </li>
-
-        <li>
           <router-link
-            class="dropdown-item"
             to="/teacherattendance"
-            active-class="active-menu"
+            class="submenu-link"
+            active-class="active-submenu"
             @click="closeSidebar"
           >
             <i class="fa-solid fa-calendar-check"></i>
-            Teacher Attendance
+            <span>Teacher Attendance</span>
           </router-link>
-        </li>
-
-        <li>
           <router-link
-            class="dropdown-item"
             to="/AttendancOverview"
-            active-class="active-menu"
+            class="submenu-link"
+            active-class="active-submenu"
             @click="closeSidebar"
           >
             <i class="fa-solid fa-chart-column"></i>
-            Attendance Summary
+            <span>Attendance Summary</span>
           </router-link>
-        </li>
-
-        <li>
           <router-link
-            class="dropdown-item"
             to="/AttendanceHistry"
-            active-class="active-menu"
+            class="submenu-link"
+            active-class="active-submenu"
             @click="closeSidebar"
           >
             <i class="fa-solid fa-clock-rotate-left"></i>
-            Attendance History
+            <span>Attendance History</span>
           </router-link>
-        </li>
-      </ul>
-    </div>
+        </div>
+      </div>
 
-    <!-- ================= STAFF ================= -->
-    <div class="dropdown sidebar-dropdown">
-      <button class="student-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
-        <span>
-          <i class="fa-solid fa-user-tie"></i>
-          Staff
-        </span>
-      </button>
+      <!-- STAFF DROPDOWN -->
+      <div class="menu-item-has-children" :class="{ open: openMenus.staff }">
+        <button class="menu-btn-toggle" @click="toggleMenu('staff')">
+          <span class="btn-text">
+            <i class="fa-solid fa-user-tie menu-icon"></i>
+            <span>Staff</span>
+          </span>
+          <i class="fa-solid fa-chevron-right chevron-icon"></i>
+        </button>
 
-      <ul class="dropdown-menu">
-        <li v-if="role === 'Manager' || role === 'Branch Manager' || role === 'Admin'">
+        <div class="submenu-container">
           <router-link
-            class="dropdown-item"
+            v-if="role === 'Manager' || role === 'Branch Manager' || role === 'Admin'"
             to="/staff"
-            active-class="active-menu"
+            class="submenu-link"
+            active-class="active-submenu"
             @click="closeSidebar"
           >
             <i class="fa-solid fa-address-book"></i>
-            All Staff
+            <span>All Staff</span>
           </router-link>
-        </li>
-
-        <li>
           <router-link
-            class="dropdown-item"
             to="/staffAttendance"
-            active-class="active-menu"
+            class="submenu-link"
+            active-class="active-submenu"
             @click="closeSidebar"
           >
             <i class="fa-solid fa-calendar-check"></i>
-            Staff Attendance
+            <span>Staff Attendance</span>
           </router-link>
-        </li>
-
-        <li>
           <router-link
-            class="dropdown-item"
             to="/StaffAttendancOverview"
-            active-class="active-menu"
+            class="submenu-link"
+            active-class="active-submenu"
             @click="closeSidebar"
           >
             <i class="fa-solid fa-chart-column"></i>
-            Attendance Summary
+            <span>Attendance Summary</span>
           </router-link>
-        </li>
-
-        <li>
           <router-link
-            class="dropdown-item"
             to="/StaffAttendanceHistry"
-            active-class="active-menu"
+            class="submenu-link"
+            active-class="active-submenu"
             @click="closeSidebar"
           >
             <i class="fa-solid fa-clock-rotate-left"></i>
-            Attendance History
+            <span>Attendance History</span>
           </router-link>
-        </li>
-      </ul>
-    </div>
+        </div>
+      </div>
 
-    <!-- ================================================= -->
-    <!-- ================= ACADEMIC SECTION ============== -->
-    <!-- ================================================= -->
+      <!-- ================= ACADEMIC SECTION ================= -->
+      <div class="menu-section-title">Academic</div>
 
-    <div class="menu-section-title">Academic</div>
+      <!-- CLASS INFO DROPDOWN -->
+      <div class="menu-item-has-children" :class="{ open: openMenus.classInfo }">
+        <button class="menu-btn-toggle" @click="toggleMenu('classInfo')">
+          <span class="btn-text">
+            <i class="fa-solid fa-school-flag menu-icon"></i>
+            <span>Class Info</span>
+          </span>
+          <i class="fa-solid fa-chevron-right chevron-icon"></i>
+        </button>
 
-    <!-- ================= CLASS INFO DROPDOWN ================= -->
-    <div class="dropdown sidebar-dropdown">
-      <button class="student-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
-        <span>
-          <i class="fa-solid fa-school-flag"></i>
-          Class Info
-        </span>
-      </button>
-
-      <ul class="dropdown-menu">
-        <li>
+        <div class="submenu-container">
           <router-link
-            class="dropdown-item"
             to="/class"
-            active-class="active-menu"
+            class="submenu-link"
+            active-class="active-submenu"
             @click="closeSidebar"
           >
             <i class="fa-solid fa-school"></i>
-            Class
+            <span>Class</span>
           </router-link>
-        </li>
-        <li>
           <router-link
-            class="dropdown-item"
             to="/ClassGroup"
-            active-class="active-menu"
+            class="submenu-link"
+            active-class="active-submenu"
             @click="closeSidebar"
           >
             <i class="fa-solid fa-layer-group"></i>
-            Class Group
+            <span>Class Group</span>
           </router-link>
-        </li>
-        <li>
           <router-link
-            class="dropdown-item"
             to="/section"
-            active-class="active-menu"
+            class="submenu-link"
+            active-class="active-submenu"
             @click="closeSidebar"
           >
             <i class="fa-solid fa-object-group"></i>
-            Sections
+            <span>Sections</span>
           </router-link>
-        </li>
-      </ul>
-    </div>
-    <!-- ================= SHIFT ================= -->
-    <router-link to="/shift" active-class="active-menu" @click="closeSidebar">
-      <i class="fa-solid fa-clock"></i>
-      <span>Shift</span>
-    </router-link>
-    <!-- ================= SUBJECT ================= -->
-    <router-link to="/subject" active-class="active-menu" @click="closeSidebar">
-      <i class="fa-solid fa-book-open"></i>
-      <span>Subjects</span>
-    </router-link>
+        </div>
+      </div>
 
-    <!-- ================= EXAMINATION & RESULT DROPDOWN ================= -->
-    <div class="dropdown sidebar-dropdown">
-      <button class="student-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
-        <span>
-          <i class="fa-solid fa-square-poll-vertical"></i>
-          Examination & Result
-        </span>
-      </button>
+      <!-- SHIFT & SUBJECT -->
+      <router-link to="/shift" class="menu-link" active-class="active-menu" @click="closeSidebar">
+        <i class="fa-solid fa-clock menu-icon"></i>
+        <span>Shift</span>
+      </router-link>
 
-      <ul class="dropdown-menu">
-        <li>
+      <router-link to="/subject" class="menu-link" active-class="active-menu" @click="closeSidebar">
+        <i class="fa-solid fa-book-open menu-icon"></i>
+        <span>Subjects</span>
+      </router-link>
+
+      <!-- EXAMINATION & RESULT DROPDOWN -->
+      <div class="menu-item-has-children" :class="{ open: openMenus.exam }">
+        <button class="menu-btn-toggle" @click="toggleMenu('exam')">
+          <span class="btn-text">
+            <i class="fa-solid fa-square-poll-vertical menu-icon"></i>
+            <span>Examination & Result</span>
+          </span>
+          <i class="fa-solid fa-chevron-right chevron-icon"></i>
+        </button>
+
+        <div class="submenu-container">
           <router-link
-            class="dropdown-item"
             to="/exam"
-            active-class="active-menu"
+            class="submenu-link"
+            active-class="active-submenu"
             @click="closeSidebar"
           >
             <i class="fa-solid fa-file-pen"></i>
-            Examination
+            <span>Examination</span>
           </router-link>
-        </li>
-        <li>
           <router-link
-            class="dropdown-item"
             to="/result"
-            active-class="active-menu"
+            class="submenu-link"
+            active-class="active-submenu"
             @click="closeSidebar"
           >
             <i class="fa-solid fa-square-poll-vertical"></i>
-            Result
+            <span>Result</span>
           </router-link>
-        </li>
-        <li>
           <router-link
-            class="dropdown-item"
             to="/resultGrade"
-            active-class="active-menu"
+            class="submenu-link"
+            active-class="active-submenu"
             @click="closeSidebar"
           >
             <i class="fa-solid fa-award"></i>
-            Result Grading
+            <span>Result Grading</span>
           </router-link>
-        </li>
-        <li>
+
+          <!-- NESTED INSTITUTE RESULT -->
+          <div class="nested-menu-item" :class="{ open: openMenus.instituteResult }">
+            <button
+              class="submenu-link nested-btn-toggle"
+              @click.stop="toggleMenu('instituteResult')"
+            >
+              <span class="d-flex align-items-center gap-2">
+                <i class="fa-solid fa-building-columns"></i>
+                <span>Institute Result</span>
+              </span>
+              <i class="fa-solid fa-chevron-right chevron-icon-sm"></i>
+            </button>
+
+            <div class="nested-submenu-container">
+              <router-link
+                to="/instituteresult"
+                class="nested-submenu-link"
+                active-class="active-nested-submenu"
+                @click="closeSidebar"
+              >
+                <i class="fa-solid fa-list-ol"></i>
+                <span>Single Exam Merit List</span>
+              </router-link>
+              <router-link
+                to="/finalAvrageResultMerit"
+                class="nested-submenu-link"
+                active-class="active-nested-submenu"
+                @click="closeSidebar"
+              >
+                <i class="fa-solid fa-chart-line"></i>
+                <span>Final Average Merit List</span>
+              </router-link>
+            </div>
+          </div>
+
           <router-link
-            class="dropdown-item"
-            to="/instituteresult"
-            active-class="active-menu"
-            @click="closeSidebar"
-          >
-            <i class="fa-solid fa-square-poll-vertical"></i>
-            Institute Result
-          </router-link>
-        </li>
-        <li>
-          <router-link
-            class="dropdown-item"
             to="/finalAvrageResult"
-            active-class="active-menu"
+            class="submenu-link"
+            active-class="active-submenu"
             @click="closeSidebar"
           >
             <i class="fa-solid fa-chart-line"></i>
-            Final Avrage Result
+            <span>Final Average Result</span>
           </router-link>
-        </li>
-      </ul>
-    </div>
+        </div>
+      </div>
 
-    <!-- ================= HOLIDAY ================= -->
-    <router-link to="/holiday" active-class="active-menu" @click="closeSidebar">
-      <i class="fa-solid fa-calendar-days"></i>
-      <span>Holidays</span>
-    </router-link>
+      <router-link to="/holiday" class="menu-link" active-class="active-menu" @click="closeSidebar">
+        <i class="fa-solid fa-calendar-days menu-icon"></i>
+        <span>Holidays</span>
+      </router-link>
 
-    <!-- ================================================= -->
-    <!-- ================= ACCOUNT SECTION ================ -->
-    <!-- ================================================= -->
+      <!-- ================= ACCOUNT SECTION ================= -->
+      <div v-if="role === 'Manager' || role === 'Branch Manager'" class="menu-section-title">
+        Account
+      </div>
 
-    <div
-      v-if="role === 'Manager' || role === 'Branch Manager'"
-      class="menu-section-title account-section-title"
-    >
-      Account
-    </div>
+      <router-link
+        v-if="role === 'Manager' || role === 'Branch Manager'"
+        to="/account/dashboard"
+        class="menu-link"
+        active-class="active-menu"
+        @click="closeSidebar"
+      >
+        <i class="fa-solid fa-wallet menu-icon"></i>
+        <span>Account Dashboard</span>
+      </router-link>
 
-    <!-- ================= ACCOUNT DASHBOARD ================= -->
-    <router-link
-      v-if="role === 'Manager' || role === 'Branch Manager'"
-      to="/account/dashboard"
-      active-class="active-menu"
-      @click="closeSidebar"
-    >
-      <i class="fa-solid fa-wallet"></i>
-      <span>Account Dashboard</span>
-    </router-link>
+      <router-link
+        to="/settings"
+        class="menu-link"
+        active-class="active-menu"
+        @click="closeSidebar"
+      >
+        <i class="fa-solid fa-gear menu-icon"></i>
+        <span>Settings</span>
+      </router-link>
+    </nav>
 
-    <!-- ================= SETTINGS ================= -->
-    <router-link to="/settings" active-class="active-menu" @click="closeSidebar">
-      <i class="fa-solid fa-gear"></i>
-      <span>Settings</span>
-    </router-link>
-
-    <!-- ================= BACKUP ================= -->
+    <!-- BACKUP SECTION -->
     <div class="backup-section">
       <button type="button" @click="runBackup" :disabled="loading" class="backup-btn">
-        <span v-if="loading">
-          <i class="fa-solid fa-spinner fa-spin me-2"></i>
-          Backing up...
-        </span>
-
-        <span v-else>
-          <i class="fa-solid fa-database me-2"></i>
-          Take Database Backup
-        </span>
+        <span v-if="loading"> <i class="fa-solid fa-spinner fa-spin me-2"></i> Backing up... </span>
+        <span v-else> <i class="fa-solid fa-database me-2"></i> Database Backup </span>
       </button>
 
       <p v-if="message" class="backup-message" :class="isError ? 'text-danger' : 'text-success'">
@@ -492,7 +470,7 @@
       </p>
     </div>
 
-    <!-- ================= LOGOUT ================= -->
+    <!-- LOGOUT -->
     <button type="button" @click="logout" class="logout-btn">
       <i class="fa-solid fa-right-from-bracket"></i>
       <span>Logout</span>
@@ -501,11 +479,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive, onMounted, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import api from '../services/api'
 
 const router = useRouter()
+const route = useRoute()
 
 const isSidebarOpen = ref(false)
 const role = localStorage.getItem('role')
@@ -513,86 +492,116 @@ const role = localStorage.getItem('role')
 const loading = ref(false)
 const message = ref('')
 const isError = ref(false)
-
 const institute = ref(null)
 
-// =====================================================
-// MANAGER BRANCH SWITCH
-// =====================================================
+// Menu Open States
+const openMenus = reactive({
+  institute: false,
+  students: false,
+  teachers: false,
+  staff: false,
+  classInfo: false,
+  exam: false,
+  instituteResult: false,
+})
 
+// Current Route অনুসার ড্রপডাউন অটো-ওপেন লজিক
+const autoOpenMenuByRoute = () => {
+  const path = route.path
+
+  if (
+    [
+      '/Institure-Info',
+      '/branch',
+      '/Institure-Session',
+      '/migration',
+      '/single_student_migration',
+    ].includes(path)
+  ) {
+    openMenus.institute = true
+  } else if (['/student', '/student-attendance', '/student-attendance-overview'].includes(path)) {
+    openMenus.students = true
+  } else if (
+    ['/teacherView', '/teacherattendance', '/AttendancOverview', '/AttendanceHistry'].includes(path)
+  ) {
+    openMenus.teachers = true
+  } else if (
+    ['/staff', '/staffAttendance', '/StaffAttendancOverview', '/StaffAttendanceHistry'].includes(
+      path,
+    )
+  ) {
+    openMenus.staff = true
+  } else if (['/class', '/ClassGroup', '/section'].includes(path)) {
+    openMenus.classInfo = true
+  } else if (
+    ['/exam', '/result', '/resultGrade', '/instituteresult', '/finalAvrageResult'].includes(path)
+  ) {
+    openMenus.exam = true
+    if (path === '/instituteresult') {
+      openMenus.instituteResult = true
+    }
+  }
+}
+
+// Watchers for Route Change
+watch(
+  () => route.path,
+  () => {
+    autoOpenMenuByRoute()
+  },
+)
+
+const toggleMenu = (menuKey) => {
+  if (menuKey === 'instituteResult') {
+    openMenus.instituteResult = !openMenus.instituteResult
+    return
+  }
+
+  Object.keys(openMenus).forEach((key) => {
+    if (key !== menuKey && key !== 'instituteResult') {
+      openMenus[key] = false
+    }
+  })
+  openMenus[menuKey] = !openMenus[menuKey]
+}
+
+// Manager Branch Switch Variables
 const branches = ref([])
 const branchLoading = ref(false)
-
 const selectedBranchId = ref(localStorage.getItem('selected_branch_id') || '')
-
-// =====================================================
-// LOGO URL
-// =====================================================
 
 const getLogoUrl = (logo) => {
   if (!logo) return ''
-
-  if (logo.startsWith('http://') || logo.startsWith('https://') || logo.startsWith('data:image')) {
+  if (logo.startsWith('http://') || logo.startsWith('https://') || logo.startsWith('data:image'))
     return logo
-  }
-
-  if (logo.startsWith('/storage/')) {
-    return logo
-  }
-
-  if (logo.startsWith('storage/')) {
-    return `/${logo}`
-  }
-
+  if (logo.startsWith('/storage/')) return logo
+  if (logo.startsWith('storage/')) return `/${logo}`
   return `/storage/${logo}`
 }
-
-// =====================================================
-// FETCH INSTITUTE INFORMATION
-// =====================================================
 
 const fetchInstitute = async () => {
   try {
     const response = await api.get('/institute-info')
-
-    console.log('INSTITUTE INFO:', response.data)
-
     institute.value = response.data.data || null
   } catch (error) {
     console.error('Institute info failed:', error)
-
     institute.value = null
   }
 }
 
-// =====================================================
-// FETCH BRANCHES
-// শুধুমাত্র Manager-এর জন্য
-// =====================================================
-
 const fetchBranches = async () => {
-  if (role !== 'Manager') {
-    return
-  }
-
+  if (role !== 'Manager') return
   branchLoading.value = true
-
   try {
     const response = await api.get('/branches')
-
     branches.value = response.data.branches || []
   } catch (error) {
     console.error('Fetch branches error:', error)
-
     branches.value = []
   } finally {
     branchLoading.value = false
   }
 }
-
-// =====================================================
-// CHANGE CURRENT BRANCH
-// =====================================================
 
 const changeBranch = () => {
   if (selectedBranchId.value) {
@@ -600,102 +609,57 @@ const changeBranch = () => {
   } else {
     localStorage.removeItem('selected_branch_id')
   }
-
   window.location.reload()
 }
-
-// =====================================================
-// BACKUP
-// =====================================================
 
 const runBackup = async () => {
   loading.value = true
   message.value = ''
   isError.value = false
-
   try {
     const token = localStorage.getItem('token')
-
     const response = await api.post(
       '/backup',
       {},
       {
         responseType: 'blob',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       },
     )
 
-    const blob = new Blob([response.data], {
-      type: 'application/sql',
-    })
-
+    const blob = new Blob([response.data], { type: 'application/sql' })
     let fileName = 'backup.sql'
-
     const contentDisposition = response.headers['content-disposition']
-
     if (contentDisposition) {
       const fileNameMatch = contentDisposition.match(/filename="?([^"]+)"?/)
-
-      if (fileNameMatch && fileNameMatch[1]) {
-        fileName = fileNameMatch[1]
-      }
+      if (fileNameMatch && fileNameMatch[1]) fileName = fileNameMatch[1]
     }
 
     const url = window.URL.createObjectURL(blob)
-
     const link = document.createElement('a')
-
     link.href = url
     link.setAttribute('download', fileName)
-
     document.body.appendChild(link)
-
     link.click()
-
     link.remove()
-
     window.URL.revokeObjectURL(url)
 
     message.value = 'Backup downloaded successfully.'
   } catch (error) {
     console.error('Backup failed:', error)
-
     isError.value = true
-
-    if (error.response && error.response.data instanceof Blob) {
-      try {
-        const text = await error.response.data.text()
-        const errorData = JSON.parse(text)
-
-        message.value = errorData.message || 'Backup failed. Please try again.'
-      } catch (e) {
-        message.value = 'Backup failed. Please try again.'
-      }
-    } else {
-      message.value = error.response?.data?.message || 'Backup failed. Please try again.'
-    }
+    message.value = 'Backup failed. Please try again.'
   } finally {
     loading.value = false
   }
 }
 
-// =====================================================
-// LOGOUT
-// =====================================================
-
 const logout = () => {
   localStorage.removeItem('token')
   localStorage.removeItem('role')
   localStorage.removeItem('selected_branch_id')
-
   router.push('/login')
 }
-
-// =====================================================
-// SIDEBAR
-// =====================================================
 
 const closeSidebar = () => {
   isSidebarOpen.value = false
@@ -705,26 +669,22 @@ const toggleSidebar = () => {
   isSidebarOpen.value = !isSidebarOpen.value
 }
 
-// =====================================================
-// INITIAL LOAD
-// =====================================================
-
 onMounted(() => {
   fetchInstitute()
   fetchBranches()
+  autoOpenMenuByRoute() // Page Load হলে অটো ওপেন করার জন্য
 })
 </script>
 
 <style scoped>
 /* =========================================================
-    DESKTOP SIDEBAR
+    SIDEBAR CORE
 ========================================================= */
-
 .sidebar {
   width: 260px;
   min-height: 100vh;
   background: #111827;
-  padding: 20px;
+  padding: 18px 14px;
   position: fixed;
   left: 0;
   top: 0;
@@ -732,286 +692,314 @@ onMounted(() => {
   overflow-y: auto;
   z-index: 999;
   transition: all 0.3s ease;
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 6px 0 18px rgba(0, 0, 0, 0.18);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.25);
   box-sizing: border-box;
 }
 
-/* =========================================================
-    SIDEBAR LOGO
-========================================================= */
-
+/* LOGO */
 .sidebar-logo {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding-bottom: 20px;
-  margin-bottom: 18px;
+  gap: 12px;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* =========================================================
-    LOGO ICON CONTAINER
-========================================================= */
-
 .logo-icon {
-  width: 52px;
-  height: 52px;
-  flex: 0 0 52px;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: transparent !important;
-  color: #fff;
-  border-radius: 14px;
-  font-size: 22px;
+  background: rgba(37, 99, 235, 0.15);
+  color: #3b82f6;
+  border-radius: 12px;
+  font-size: 20px;
   overflow: hidden;
 }
-
-/* =========================================================
-    INSTITUTE LOGO
-========================================================= */
 
 .institute-logo {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  padding: 5px;
-  border-radius: 10px;
-  display: block;
-}
-
-/* =========================================================
-    LOGO CONTENT
-========================================================= */
-
-.logo-content {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
+  padding: 2px;
 }
 
 .logo-title {
   margin: 0;
   color: #fff;
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 700;
-  line-height: 1.3;
-  word-break: break-word;
+  line-height: 1.2;
 }
 
 .logo-subtitle {
   color: #94a3b8;
   font-size: 11px;
-  letter-spacing: 0.4px;
-  margin-top: 2px;
+}
+
+/* SECTION TITLE */
+.menu-section-title {
+  color: #475569;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 18px 12px 8px;
 }
 
 /* =========================================================
-    MENU LINKS
+    ACCORDION MENU & SUBMENU
 ========================================================= */
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
 
-.sidebar > a {
+/* SINGLE MENU LINK */
+.menu-link {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #e5e7eb;
+  color: #9ca3af;
   text-decoration: none;
-  padding: 11px 14px;
-  margin-bottom: 6px;
-  border-radius: 10px;
-  font-size: 14px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13.5px;
   font-weight: 500;
-  transition: all 0.25s ease;
+  transition: all 0.2s ease;
 }
 
-.sidebar > a:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
-  transform: translateX(3px);
+.menu-link:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #f3f4f6;
 }
 
-.sidebar > a i {
-  width: 22px;
+.menu-icon {
+  width: 20px;
   text-align: center;
   font-size: 15px;
-  flex-shrink: 0;
+  color: #6b7280;
+  transition: color 0.2s ease;
+}
+
+.menu-link:hover .menu-icon {
+  color: #3b82f6;
+}
+
+/* TOGGLE BUTTONS (ACCORDION PARENT) */
+.menu-btn-toggle {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-text {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.menu-btn-toggle:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #f3f4f6;
+}
+
+.menu-btn-toggle:hover .menu-icon {
+  color: #3b82f6;
+}
+
+.chevron-icon {
+  font-size: 11px;
+  color: #6b7280;
+  transition:
+    transform 0.25s ease,
+    color 0.25s ease;
+}
+
+/* OPEN ACCORDION STATE */
+.menu-item-has-children.open > .menu-btn-toggle {
+  background: rgba(255, 255, 255, 0.03);
+  color: #fff;
+}
+
+.menu-item-has-children.open > .menu-btn-toggle .chevron-icon {
+  transform: rotate(90deg);
+  color: #3b82f6;
+}
+
+/* SUBMENU CONTAINER */
+.submenu-container {
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 12px;
+  margin-top: 2px;
+  margin-left: 14px;
+  border-left: 2px solid rgba(255, 255, 255, 0.07);
+}
+
+.menu-item-has-children.open > .submenu-container {
+  display: flex;
+}
+
+/* SUBMENU LINKS */
+.submenu-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #9ca3af;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.submenu-link:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.submenu-link i {
+  font-size: 12px;
+  width: 16px;
+  text-align: center;
+}
+
+/* NESTED SUBMENU */
+.nested-btn-toggle {
+  justify-content: space-between;
+  width: 100%;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+}
+
+.nested-menu-item.open > .nested-btn-toggle .chevron-icon-sm {
+  transform: rotate(90deg);
+  color: #0d9488;
+}
+
+.chevron-icon-sm {
+  font-size: 10px;
+  transition: transform 0.25s ease;
+}
+
+.nested-submenu-container {
+  display: none;
+  padding-left: 10px;
+  margin-top: 2px;
+  border-left: 2px solid rgba(13, 148, 136, 0.3);
+}
+
+.nested-menu-item.open > .nested-submenu-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nested-submenu-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #9ca3af;
+  text-decoration: none;
+  padding: 7px 10px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  transition: all 0.2s ease;
+}
+
+.nested-submenu-link:hover {
+  background: rgba(13, 148, 136, 0.15);
+  color: #2dd4bf;
 }
 
 /* =========================================================
-    ACTIVE MENU
+    ACTIVE STATES & FOCUS COLORS
 ========================================================= */
-
+/* Main Active Link */
 .active-menu {
   background: #2563eb !important;
-  color: #fff !important;
-  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.3);
+  color: #ffffff !important;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.active-menu .menu-icon {
+  color: #ffffff !important;
+}
+
+/* Active Submenu Link */
+.active-submenu {
+  background: rgba(37, 99, 235, 0.2) !important;
+  color: #60a5fa !important;
+  font-weight: 600;
+}
+
+.active-submenu i {
+  color: #60a5fa !important;
+}
+
+/* Active Nested Submenu (Teal Special Color) */
+.active-nested-submenu {
+  background: #0d9488 !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(13, 148, 136, 0.3);
 }
 
 /* =========================================================
-    MANAGER BRANCH SWITCH
+    MANAGER BRANCH & UTILITIES
 ========================================================= */
-
 .manager-branch-switch {
   margin-bottom: 12px;
-  padding: 12px;
-  background: rgba(37, 99, 235, 0.1);
-  border: 1px solid rgba(96, 165, 250, 0.18);
-  border-radius: 12px;
+  padding: 10px 12px;
+  background: rgba(37, 99, 235, 0.08);
+  border: 1px solid rgba(96, 165, 250, 0.15);
+  border-radius: 10px;
 }
 
 .branch-switch-label {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   color: #cbd5e1;
-  font-size: 11px;
-  font-weight: 600;
-  margin-bottom: 7px;
+  font-size: 10px;
+  font-weight: 700;
+  margin-bottom: 6px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.branch-switch-label i {
-  color: #60a5fa;
-  font-size: 13px;
 }
 
 .branch-switch-select {
   width: 100%;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  padding: 9px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 7px 8px;
   background: #1f2937;
   color: #fff;
-  font-size: 13px;
+  font-size: 12px;
   outline: none;
-  cursor: pointer;
 }
-
-.branch-switch-select:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
-}
-
-.branch-switch-select:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.branch-switch-select option {
-  background: #1f2937;
-  color: #fff;
-}
-
-.branch-loading {
-  margin-top: 6px;
-  color: #94a3b8;
-  font-size: 10px;
-}
-
-/* =========================================================
-    SECTION TITLE
-========================================================= */
-
-.menu-section-title {
-  color: #64748b;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  padding: 15px 14px 6px;
-}
-
-.account-section-title {
-  margin-top: 4px;
-}
-
-/* =========================================================
-    DROPDOWN
-========================================================= */
-
-.sidebar-dropdown {
-  width: 100%;
-  margin-bottom: 4px;
-}
-
-.student-btn {
-  width: 100%;
-  background: transparent !important;
-  border: none !important;
-  outline: none;
-  color: #e5e7eb !important;
-  text-align: left;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 11px 14px;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.25s ease;
-}
-
-.student-btn > span {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.student-btn:hover {
-  background: rgba(255, 255, 255, 0.08) !important;
-  color: #fff !important;
-}
-
-.student-btn > span > i {
-  width: 22px;
-  text-align: center;
-  font-size: 15px;
-}
-
-/* =========================================================
-    DROPDOWN MENU
-========================================================= */
-
-.dropdown-menu {
-  width: 100%;
-  background: #1f2937 !important;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-  padding: 6px;
-  margin-top: 4px !important;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-}
-
-.dropdown-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: #e5e7eb !important;
-  padding: 10px 12px;
-  border-radius: 8px;
-  font-size: 13px;
-  transition: all 0.25s ease;
-}
-
-.dropdown-item:hover {
-  background: #2563eb !important;
-  color: #fff !important;
-  transform: translateX(3px);
-}
-
-.dropdown-item i {
-  width: 19px;
-  text-align: center;
-}
-
-/* =========================================================
-    BACKUP
-========================================================= */
 
 .backup-section {
-  margin-top: 14px;
+  margin-top: 16px;
   padding-top: 14px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
@@ -1019,62 +1007,41 @@ onMounted(() => {
 .backup-btn {
   width: 100%;
   border: none;
-  border-radius: 9px;
-  padding: 11px 12px;
+  border-radius: 8px;
+  padding: 9px 12px;
   background: #2563eb;
   color: #fff;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
-  transition: all 0.25s ease;
+  transition: background 0.2s ease;
 }
 
-.backup-btn:hover:not(:disabled) {
+.backup-btn:hover {
   background: #1d4ed8;
-  transform: translateY(-1px);
 }
-
-.backup-btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.backup-message {
-  font-size: 11px;
-  margin: 8px 2px 0;
-  word-break: break-word;
-}
-
-/* =========================================================
-    LOGOUT
-========================================================= */
 
 .logout-btn {
   width: 100%;
   border: none;
-  border-radius: 10px;
-  padding: 12px 15px;
-  margin-top: 12px;
-  margin-bottom: 5px;
+  border-radius: 8px;
+  padding: 10px;
+  margin-top: 10px;
   background: #dc2626;
   color: #fff;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px;
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 10px;
-  transition: all 0.25s ease;
+  gap: 8px;
+  transition: background 0.2s ease;
 }
 
 .logout-btn:hover {
   background: #b91c1c;
-  transform: translateY(-2px);
 }
 
-/* =========================================================
-    MOBILE HEADER
-========================================================= */
-
+/* MOBILE RESPONSIVE */
 .mobile-header {
   position: sticky;
   top: 0;
@@ -1084,42 +1051,23 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 14px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
 }
 
 .menu-btn {
   border: none;
   background: transparent;
   color: #fff;
-  font-size: 27px;
-  line-height: 1;
-  padding: 0;
+  font-size: 22px;
 }
-
-.mobile-header-title {
-  min-width: 0;
-}
-
-.mobile-header-title h5 {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 250px;
-}
-
-/* =========================================================
-    OVERLAY
-========================================================= */
 
 .sidebar-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.5);
   visibility: hidden;
   opacity: 0;
   transition: all 0.3s ease;
   z-index: 997;
-  backdrop-filter: blur(2px);
 }
 
 .sidebar-overlay.active {
@@ -1127,75 +1075,18 @@ onMounted(() => {
   opacity: 1;
 }
 
-/* =========================================================
-    SCROLLBAR
-========================================================= */
-
-.sidebar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.sidebar::-webkit-scrollbar-thumb {
-  background: #334155;
-  border-radius: 20px;
-}
-
-.sidebar::-webkit-scrollbar-thumb:hover {
-  background: #475569;
-}
-
-/* =========================================================
-    MOBILE
-========================================================= */
-
 @media (max-width: 768px) {
   .sidebar {
     left: -100%;
-    width: 260px;
-    box-shadow: 8px 0 25px rgba(0, 0, 0, 0.25);
   }
-
   .sidebar.active {
     left: 0;
   }
 }
 
-/* =========================================================
-    DESKTOP
-========================================================= */
-
 @media (min-width: 769px) {
   .mobile-header {
     display: none !important;
-  }
-}
-
-/* =========================================================
-    SMALL MOBILE
-========================================================= */
-
-@media (max-width: 400px) {
-  .sidebar {
-    width: 250px;
-  }
-
-  .mobile-header {
-    padding: 11px 13px;
-  }
-
-  .mobile-header-title h5 {
-    font-size: 15px;
-    max-width: 210px;
-  }
-
-  .logo-icon {
-    width: 46px;
-    height: 46px;
-    flex-basis: 46px;
-  }
-
-  .logo-title {
-    font-size: 15px;
   }
 }
 </style>
