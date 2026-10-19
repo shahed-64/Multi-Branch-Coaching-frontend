@@ -256,9 +256,9 @@
                 />
               </div>
 
-              <!-- ROLE -->
-              <div class="col-12 mb-3">
+              <div class="col-md-6 mb-3">
                 <label class="form-label font-semibold">Role</label>
+
                 <select v-model="form.role" class="form-select" required>
                   <option value="" disabled>Select Role</option>
                   <option value="Branch Manager">Branch Manager</option>
@@ -270,8 +270,9 @@
               </div>
 
               <!-- CUSTOM ROLE NAME -->
-              <div v-if="form.role === 'Others'" class="col-12 mb-3">
+              <div v-if="form.role === 'Others'" class="col-md-6 mb-3">
                 <label class="form-label font-semibold">Custom Role Name</label>
+
                 <input
                   v-model="form.custom_role"
                   type="text"
@@ -421,20 +422,18 @@
           <input v-model="selectedStaff.email" class="form-control mb-2" placeholder="Email" />
 
           <!-- EDIT ROLE -->
-          <div class="mb-3">
-            <label class="form-label font-semibold text-muted small mb-1">Role</label>
-            <select v-model="selectedStaff.role" class="form-select" required>
-              <option value="Branch Manager">Branch Manager</option>
-              <option value="Admin">Admin</option>
-              <option value="Branch Accountant">Branch Accountant</option>
-              <option value="Result Entry">Result Entry</option>
-              <option value="Others">Others</option>
-            </select>
-          </div>
+          <select v-model="selectedStaff.role" class="form-select mb-2" required>
+            <option value="Branch Manager">Branch Manager</option>
+            <option value="Admin">Admin</option>
+            <option value="Branch Accountant">Branch Accountant</option>
+            <option value="Result Entry">Result Entry</option>
+            <option value="Others">Others</option>
+          </select>
 
           <!-- EDIT CUSTOM ROLE NAME -->
-          <div v-if="selectedStaff.role === 'Others'" class="mb-3">
-            <label class="form-label font-semibold text-muted small mb-1">Custom Role Name</label>
+          <div v-if="selectedStaff.role === 'Others'" class="mb-2">
+            <label class="form-label font-semibold">Custom Role Name</label>
+
             <input
               v-model="selectedStaff.custom_role"
               type="text"
