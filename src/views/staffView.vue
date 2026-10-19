@@ -257,18 +257,29 @@
               </div>
 
               <!-- ROLE -->
-              <div class="col-md-6 mb-3">
-                <label class="form-label font-semibold"> Role </label>
-
+              <div class="col-12 mb-3">
+                <label class="form-label font-semibold">Role</label>
                 <select v-model="form.role" class="form-select" required>
                   <option value="" disabled>Select Role</option>
-
                   <option value="Branch Manager">Branch Manager</option>
-
                   <option value="Admin">Admin</option>
-
                   <option value="Branch Accountant">Branch Accountant</option>
+                  <option value="Result Entry">Result Entry</option>
+                  <option value="Others">Others</option>
                 </select>
+              </div>
+
+              <!-- CUSTOM ROLE NAME -->
+              <div v-if="form.role === 'Others'" class="col-12 mb-3">
+                <label class="form-label font-semibold">Custom Role Name</label>
+                <input
+                  v-model="form.custom_role"
+                  type="text"
+                  class="form-control"
+                  placeholder="e.g. Guard, Swiper"
+                  maxlength="100"
+                  required
+                />
               </div>
 
               <!-- BRANCH -->
@@ -278,7 +289,15 @@
                 <select
                   v-model="form.branch_id"
                   class="form-select"
-                  :required="['Branch Manager', 'Admin', 'Branch Accountant'].includes(form.role)"
+                  :required="
+                    [
+                      'Branch Manager',
+                      'Admin',
+                      'Branch Accountant',
+                      'Result Entry',
+                      'Others',
+                    ].includes(form.role)
+                  "
                 >
                   <option value="" disabled>Select Branch</option>
 
@@ -402,13 +421,29 @@
           <input v-model="selectedStaff.email" class="form-control mb-2" placeholder="Email" />
 
           <!-- EDIT ROLE -->
-          <select v-model="selectedStaff.role" class="form-select mb-2">
-            <option value="Branch Manager">Branch Manager</option>
+          <div class="mb-3">
+            <label class="form-label font-semibold text-muted small mb-1">Role</label>
+            <select v-model="selectedStaff.role" class="form-select" required>
+              <option value="Branch Manager">Branch Manager</option>
+              <option value="Admin">Admin</option>
+              <option value="Branch Accountant">Branch Accountant</option>
+              <option value="Result Entry">Result Entry</option>
+              <option value="Others">Others</option>
+            </select>
+          </div>
 
-            <option value="Admin">Admin</option>
-
-            <option value="Branch Accountant">Branch Accountant</option>
-          </select>
+          <!-- EDIT CUSTOM ROLE NAME -->
+          <div v-if="selectedStaff.role === 'Others'" class="mb-3">
+            <label class="form-label font-semibold text-muted small mb-1">Custom Role Name</label>
+            <input
+              v-model="selectedStaff.custom_role"
+              type="text"
+              class="form-control"
+              placeholder="e.g. Guard, Swiper"
+              maxlength="100"
+              required
+            />
+          </div>
 
           <!-- EDIT BRANCH -->
           <div class="mb-2">
@@ -418,7 +453,9 @@
               v-model="selectedStaff.branch_id"
               class="form-select mb-2"
               :required="
-                ['Branch Manager', 'Admin', 'Branch Accountant'].includes(selectedStaff.role)
+                ['Branch Manager', 'Admin', 'Branch Accountant', 'Result Entry', 'Others'].includes(
+                  selectedStaff.role,
+                )
               "
             >
               <option value="" disabled>Select Branch</option>
@@ -667,7 +704,7 @@ const form = reactive({
   role: '',
   email: '',
   salary: '',
-
+  custom_role: '',
   image: null,
 
   shift_id: '',
@@ -696,7 +733,7 @@ const selectedStaff = ref({
 
   shift_id: '',
   branch_id: '',
-
+  custom_role: '',
   password: '',
   password_confirmation: '',
 })
@@ -802,6 +839,7 @@ const resetAddForm = () => {
   form.user_name = ''
   form.skill = ''
   form.role = ''
+  form.custom_role = ''
   form.email = ''
   form.salary = ''
 
@@ -852,11 +890,19 @@ const addStaff = async () => {
     // STAFF DATA
     // =========================
     Object.keys(form).forEach((key) => {
+      if (key === 'image' || key === 'custom_role') {
+        return
+      }
+
+      if (key === 'role') {
+        const role = form.role === 'Others' ? form.custom_role.trim() : form.role
+
+        formData.append('role', role)
+        return
+      }
+
       if (form[key] !== null && form[key] !== undefined && form[key] !== '') {
-        // Image আলাদাভাবে append হবে
-        if (key !== 'image') {
-          formData.append(key, form[key])
-        }
+        formData.append(key, form[key])
       }
     })
 
@@ -954,22 +1000,34 @@ const openView = (item) => {
 // OPEN EDIT
 // =====================================================
 
+const standardRoles = [
+  'Manager',
+  'Branch Manager',
+  'Admin',
+  'Branch Accountant',
+  'Branch Admin',
+  'Accountant',
+  'Result Entry',
+]
+
 const openEdit = (item) => {
   if (!isManager.value) {
     return
   }
 
+  const isCustomRole = !standardRoles.includes(item.role)
+
   selectedStaff.value = {
     ...item,
 
-    branch_id: item.branch_id || item.branch?.id || '',
+    role: isCustomRole ? 'Others' : item.role,
+    custom_role: isCustomRole ? item.role : '',
 
+    branch_id: item.branch_id || item.branch?.id || '',
     shift_id: item.shift_id || item.shift?.id || '',
 
     imageFile: null,
-
     password: '',
-
     password_confirmation: '',
   }
 }
@@ -1129,7 +1187,17 @@ const updateStaff = async () => {
 
     formData.append('skill', selectedStaff.value.skill || '')
 
-    formData.append('role', selectedStaff.value.role)
+    const role =
+      selectedStaff.value.role === 'Others'
+        ? selectedStaff.value.custom_role.trim()
+        : selectedStaff.value.role
+
+    if (!role) {
+      alert('Please enter a custom role name.')
+      return
+    }
+
+    formData.append('role', role)
 
     formData.append('email', selectedStaff.value.email)
 

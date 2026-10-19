@@ -15,6 +15,15 @@ const router = createRouter({
       component: () => import('../views/loginView.vue'),
       meta: { guest: true },
     },
+    {
+      path: '/not-allowed',
+      name: 'NotAllowed',
+      component: () => import('../views/NotAllowedView.vue'),
+      meta: {
+        requiresAuth: true,
+        allowedRoles: ['Others'],
+      },
+    },
 
     {
       path: '/dashboard',
@@ -138,7 +147,7 @@ const router = createRouter({
       component: () => import('../views/ResultView.vue'),
       meta: {
         requiresAuth: true,
-        role: ['Admin', 'Manager', 'Branch Manager'],
+        role: ['Admin', 'Manager', 'Branch Manager', 'Result Entry'],
       },
     },
     {
@@ -466,27 +475,43 @@ router.beforeEach((to) => {
   const token = localStorage.getItem('token')
   const role = localStorage.getItem('role')
 
-  // 1. Check if authentication is required
+  // Login required
   if (to.meta.requiresAuth && !token) {
     return { name: 'loginView' }
   }
 
-  // 2. Check if already logged in and trying to access guest routes
-  if (to.meta.guest && token) {
-    if (to.name === 'loginView') {
-      return role === 'Accountant' ? { name: 'AccountDashboard' } : { name: 'dashboardView' }
-    }
+  // Others can access only the restricted page
+  if (token && role === 'Others' && to.name !== 'NotAllowed') {
+    return { name: 'NotAllowed' }
   }
 
-  // 3. Check role permissions safely
-  if (to.meta.role && token) {
-    if (!to.meta.role.includes(role)) {
-      const targetRoute = role === 'Accountant' ? 'AccountDashboard' : 'dashboardView'
+  // Result Entry can access only the Result page
+  if (token && role === 'Result Entry' && to.name !== 'Result') {
+    return { name: 'Result' }
+  }
 
-      // Prevent infinite redirection
-      if (to.name !== targetRoute) {
-        return { name: targetRoute }
-      }
+  // Redirect logged-in users away from Login page
+  if (to.meta.guest && token) {
+    if (role === 'Others') {
+      return { name: 'NotAllowed' }
+    }
+
+    if (role === 'Result Entry') {
+      return { name: 'Result' }
+    }
+
+    return role === 'Accountant' || role === 'Branch Accountant'
+      ? { name: 'AccountDashboard' }
+      : { name: 'dashboardView' }
+  }
+
+  // Check normal role permissions
+  if (to.meta.role && token && !to.meta.role.includes(role)) {
+    const targetRoute =
+      role === 'Accountant' || role === 'Branch Accountant' ? 'AccountDashboard' : 'dashboardView'
+
+    if (to.name !== targetRoute) {
+      return { name: targetRoute }
     }
   }
 

@@ -1,10 +1,9 @@
 <template>
-  <!-- ================= MOBILE HEADER ================= -->
+  <!-- MOBILE HEADER -->
   <div class="mobile-header d-md-none">
     <button type="button" class="menu-btn" @click="toggleSidebar">
       <i class="fa-solid fa-bars"></i>
     </button>
-
     <div class="mobile-header-title">
       <h5 class="mb-0 text-white">
         {{ institute?.institute_name || 'Admin Panel' }}
@@ -12,12 +11,12 @@
     </div>
   </div>
 
-  <!-- ================= OVERLAY ================= -->
+  <!-- OVERLAY -->
   <div class="sidebar-overlay" :class="{ active: isSidebarOpen }" @click="closeSidebar"></div>
 
-  <!-- ================= SIDEBAR ================= -->
-  <aside class="sidebar" :class="{ active: isSidebarOpen }">
-    <!-- ================= INSTITUTE LOGO ================= -->
+  <!-- SIDEBAR -->
+  <aside class="sidebar" :class="{ active: isSidebarOpen, 'result-entry-sidebar': isResultEntry }">
+    <!-- LOGO -->
     <div class="sidebar-logo">
       <div class="logo-icon">
         <img
@@ -28,7 +27,6 @@
         />
         <i v-else class="fa-solid fa-graduation-cap"></i>
       </div>
-
       <div class="logo-content">
         <h5 class="logo-title">
           {{ institute?.institute_name || 'Coaching MS' }}
@@ -37,17 +35,16 @@
       </div>
     </div>
 
-    <!-- ================= MANAGER BRANCH SWITCH ================= -->
+    <!-- MANAGER BRANCH SWITCH -->
     <div v-if="role === 'Manager'" class="manager-branch-switch">
       <div class="branch-switch-label">
         <i class="fa-solid fa-code-branch"></i>
         <span>Current Branch</span>
       </div>
-
       <select
         v-model="selectedBranchId"
         class="branch-switch-select"
-        :disabled="branchLoading"
+        :disabled="branchLoading || isResultEntry"
         @change="changeBranch"
       >
         <option value="">All Branches</option>
@@ -55,126 +52,76 @@
           {{ branch.name }}
         </option>
       </select>
-
       <div v-if="branchLoading" class="branch-loading">
         <i class="fa-solid fa-spinner fa-spin"></i>
         Loading branches...
       </div>
     </div>
 
-    <!-- ================= MENU LIST ================= -->
+    <!-- MENU LIST -->
     <nav class="sidebar-menu">
       <!-- DASHBOARD -->
       <router-link
         to="/dashboard"
         class="menu-link"
         active-class="active-menu"
-        @click="closeSidebar"
+        :tabindex="isResultEntry ? -1 : 0"
+        :aria-disabled="isResultEntry"
+        @click="handleMenuClick($event)"
       >
         <i class="fa-solid fa-gauge-high menu-icon"></i>
         <span>Dashboard</span>
       </router-link>
 
-      <!-- INSTITUTE SETUP DROPDOWN -->
+      <!-- INSTITUTE SETUP -->
       <div class="menu-item-has-children" :class="{ open: openMenus.institute }">
-        <button class="menu-btn-toggle" @click="toggleMenu('institute')">
+        <button class="menu-btn-toggle" :disabled="isResultEntry" @click="toggleMenu('institute')">
           <span class="btn-text">
             <i class="fa-solid fa-building-columns menu-icon"></i>
             <span>Institute Setup</span>
           </span>
           <i class="fa-solid fa-chevron-right chevron-icon"></i>
         </button>
-
         <div class="submenu-container">
           <router-link
-            to="/Institure-Info"
+            v-for="item in instituteItems"
+            :key="item.path"
+            :to="item.path"
             class="submenu-link"
             active-class="active-submenu"
             @click="closeSidebar"
           >
-            <i class="fa-solid fa-circle-info"></i>
-            <span>Institute Info</span>
-          </router-link>
-          <router-link
-            to="/branch"
-            class="submenu-link"
-            active-class="active-submenu"
-            @click="closeSidebar"
-          >
-            <i class="fa-solid fa-code-branch"></i>
-            <span>Branches</span>
-          </router-link>
-          <router-link
-            to="/Institure-Session"
-            class="submenu-link"
-            active-class="active-submenu"
-            @click="closeSidebar"
-          >
-            <i class="fa-solid fa-calendar-days"></i>
-            <span>Institute Session</span>
-          </router-link>
-          <router-link
-            to="/migration"
-            class="submenu-link"
-            active-class="active-submenu"
-            @click="closeSidebar"
-          >
-            <i class="fa-solid fa-arrows-split-up-and-left"></i>
-            <span>Migration</span>
-          </router-link>
-          <router-link
-            to="/single_student_migration"
-            class="submenu-link"
-            active-class="active-submenu"
-            @click="closeSidebar"
-          >
-            <i class="fa-solid fa-user-gear"></i>
-            <span>Single Migration</span>
+            <i :class="item.icon"></i>
+            <span>{{ item.label }}</span>
           </router-link>
         </div>
       </div>
 
-      <!-- STUDENTS DROPDOWN -->
+      <!-- STUDENTS -->
       <div class="menu-item-has-children" :class="{ open: openMenus.students }">
-        <button class="menu-btn-toggle" @click="toggleMenu('students')">
+        <button class="menu-btn-toggle" :disabled="isResultEntry" @click="toggleMenu('students')">
           <span class="btn-text">
             <i class="fa-solid fa-user-graduate menu-icon"></i>
             <span>Students</span>
           </span>
           <i class="fa-solid fa-chevron-right chevron-icon"></i>
         </button>
-
         <div class="submenu-container">
           <router-link
-            to="/student"
+            v-for="item in studentItems"
+            :key="item.path"
+            :to="item.path"
             class="submenu-link"
             active-class="active-submenu"
             @click="closeSidebar"
           >
-            <i class="fa-solid fa-users"></i>
-            <span>All Students</span>
-          </router-link>
-          <router-link
-            to="/student-attendance"
-            class="submenu-link"
-            active-class="active-submenu"
-            @click="closeSidebar"
-          >
-            <i class="fa-solid fa-clipboard-user"></i>
-            <span>Student Attendance</span>
-          </router-link>
-          <router-link
-            to="/student-attendance-overview"
-            class="submenu-link"
-            active-class="active-submenu"
-            @click="closeSidebar"
-          >
-            <i class="fa-solid fa-chart-pie"></i>
-            <span>Attendance Overview</span>
+            <i :class="item.icon"></i>
+            <span>{{ item.label }}</span>
           </router-link>
           <button
             type="button"
             class="submenu-link text-start border-0 bg-transparent"
+            :disabled="isResultEntry"
             data-bs-toggle="modal"
             data-bs-target="#addModal"
           >
@@ -184,69 +131,42 @@
         </div>
       </div>
 
-      <!-- TEACHERS DROPDOWN -->
+      <!-- TEACHERS -->
       <div class="menu-item-has-children" :class="{ open: openMenus.teachers }">
-        <button class="menu-btn-toggle" @click="toggleMenu('teachers')">
+        <button class="menu-btn-toggle" :disabled="isResultEntry" @click="toggleMenu('teachers')">
           <span class="btn-text">
             <i class="fa-solid fa-chalkboard-user menu-icon"></i>
             <span>Teachers</span>
           </span>
           <i class="fa-solid fa-chevron-right chevron-icon"></i>
         </button>
-
         <div class="submenu-container">
           <router-link
-            to="/teacherView"
+            v-for="item in teacherItems"
+            :key="item.path"
+            :to="item.path"
             class="submenu-link"
             active-class="active-submenu"
             @click="closeSidebar"
           >
-            <i class="fa-solid fa-id-badge"></i>
-            <span>All Teachers</span>
-          </router-link>
-          <router-link
-            to="/teacherattendance"
-            class="submenu-link"
-            active-class="active-submenu"
-            @click="closeSidebar"
-          >
-            <i class="fa-solid fa-calendar-check"></i>
-            <span>Teacher Attendance</span>
-          </router-link>
-          <router-link
-            to="/AttendancOverview"
-            class="submenu-link"
-            active-class="active-submenu"
-            @click="closeSidebar"
-          >
-            <i class="fa-solid fa-chart-column"></i>
-            <span>Attendance Summary</span>
-          </router-link>
-          <router-link
-            to="/AttendanceHistry"
-            class="submenu-link"
-            active-class="active-submenu"
-            @click="closeSidebar"
-          >
-            <i class="fa-solid fa-clock-rotate-left"></i>
-            <span>Attendance History</span>
+            <i :class="item.icon"></i>
+            <span>{{ item.label }}</span>
           </router-link>
         </div>
       </div>
 
-      <!-- STAFF DROPDOWN -->
+      <!-- STAFF -->
       <div class="menu-item-has-children" :class="{ open: openMenus.staff }">
-        <button class="menu-btn-toggle" @click="toggleMenu('staff')">
+        <button class="menu-btn-toggle" :disabled="isResultEntry" @click="toggleMenu('staff')">
           <span class="btn-text">
             <i class="fa-solid fa-user-tie menu-icon"></i>
             <span>Staff</span>
           </span>
           <i class="fa-solid fa-chevron-right chevron-icon"></i>
         </button>
-
         <div class="submenu-container">
           <router-link
-            v-if="role === 'Manager' || role === 'Branch Manager' || role === 'Admin'"
+            v-if="['Manager', 'Branch Manager', 'Admin'].includes(role)"
             to="/staff"
             class="submenu-link"
             active-class="active-submenu"
@@ -256,110 +176,88 @@
             <span>All Staff</span>
           </router-link>
           <router-link
-            to="/staffAttendance"
+            v-for="item in staffItems"
+            :key="item.path"
+            :to="item.path"
             class="submenu-link"
             active-class="active-submenu"
             @click="closeSidebar"
           >
-            <i class="fa-solid fa-calendar-check"></i>
-            <span>Staff Attendance</span>
-          </router-link>
-          <router-link
-            to="/StaffAttendancOverview"
-            class="submenu-link"
-            active-class="active-submenu"
-            @click="closeSidebar"
-          >
-            <i class="fa-solid fa-chart-column"></i>
-            <span>Attendance Summary</span>
-          </router-link>
-          <router-link
-            to="/StaffAttendanceHistry"
-            class="submenu-link"
-            active-class="active-submenu"
-            @click="closeSidebar"
-          >
-            <i class="fa-solid fa-clock-rotate-left"></i>
-            <span>Attendance History</span>
+            <i :class="item.icon"></i>
+            <span>{{ item.label }}</span>
           </router-link>
         </div>
       </div>
 
-      <!-- ================= ACADEMIC SECTION ================= -->
+      <!-- ACADEMIC -->
       <div class="menu-section-title">Academic</div>
 
-      <!-- CLASS INFO DROPDOWN -->
+      <!-- CLASS INFO -->
       <div class="menu-item-has-children" :class="{ open: openMenus.classInfo }">
-        <button class="menu-btn-toggle" @click="toggleMenu('classInfo')">
+        <button class="menu-btn-toggle" :disabled="isResultEntry" @click="toggleMenu('classInfo')">
           <span class="btn-text">
             <i class="fa-solid fa-school-flag menu-icon"></i>
             <span>Class Info</span>
           </span>
           <i class="fa-solid fa-chevron-right chevron-icon"></i>
         </button>
-
         <div class="submenu-container">
           <router-link
-            to="/class"
+            v-for="item in classItems"
+            :key="item.path"
+            :to="item.path"
             class="submenu-link"
             active-class="active-submenu"
             @click="closeSidebar"
           >
-            <i class="fa-solid fa-school"></i>
-            <span>Class</span>
-          </router-link>
-          <router-link
-            to="/ClassGroup"
-            class="submenu-link"
-            active-class="active-submenu"
-            @click="closeSidebar"
-          >
-            <i class="fa-solid fa-layer-group"></i>
-            <span>Class Group</span>
-          </router-link>
-          <router-link
-            to="/section"
-            class="submenu-link"
-            active-class="active-submenu"
-            @click="closeSidebar"
-          >
-            <i class="fa-solid fa-object-group"></i>
-            <span>Sections</span>
+            <i :class="item.icon"></i>
+            <span>{{ item.label }}</span>
           </router-link>
         </div>
       </div>
 
-      <!-- SHIFT & SUBJECT -->
-      <router-link to="/shift" class="menu-link" active-class="active-menu" @click="closeSidebar">
+      <!-- SHIFT -->
+      <router-link
+        to="/shift"
+        class="menu-link"
+        active-class="active-menu"
+        @click="handleMenuClick($event)"
+      >
         <i class="fa-solid fa-clock menu-icon"></i>
         <span>Shift</span>
       </router-link>
 
-      <router-link to="/subject" class="menu-link" active-class="active-menu" @click="closeSidebar">
+      <!-- SUBJECTS -->
+      <router-link
+        to="/subject"
+        class="menu-link"
+        active-class="active-menu"
+        @click="handleMenuClick($event)"
+      >
         <i class="fa-solid fa-book-open menu-icon"></i>
         <span>Subjects</span>
       </router-link>
 
-      <!-- EXAMINATION & RESULT DROPDOWN -->
+      <!-- EXAMINATION & RESULT -->
       <div class="menu-item-has-children" :class="{ open: openMenus.exam }">
-        <button class="menu-btn-toggle" @click="toggleMenu('exam')">
+        <button class="menu-btn-toggle" :disabled="isResultEntry" @click="toggleMenu('exam')">
           <span class="btn-text">
             <i class="fa-solid fa-square-poll-vertical menu-icon"></i>
-            <span>Examination & Result</span>
+            <span>Examination &amp; Result</span>
           </span>
           <i class="fa-solid fa-chevron-right chevron-icon"></i>
         </button>
-
         <div class="submenu-container">
           <router-link
             to="/exam"
             class="submenu-link"
             active-class="active-submenu"
-            @click="closeSidebar"
+            @click="handleMenuClick($event)"
           >
             <i class="fa-solid fa-file-pen"></i>
             <span>Examination</span>
           </router-link>
+
           <router-link
             to="/result"
             class="submenu-link"
@@ -369,20 +267,21 @@
             <i class="fa-solid fa-square-poll-vertical"></i>
             <span>Result</span>
           </router-link>
+
           <router-link
             to="/resultGrade"
             class="submenu-link"
             active-class="active-submenu"
-            @click="closeSidebar"
+            @click="handleMenuClick($event)"
           >
             <i class="fa-solid fa-award"></i>
             <span>Result Grading</span>
           </router-link>
 
-          <!-- NESTED INSTITUTE RESULT -->
           <div class="nested-menu-item" :class="{ open: openMenus.instituteResult }">
             <button
               class="submenu-link nested-btn-toggle"
+              :disabled="isResultEntry"
               @click.stop="toggleMenu('instituteResult')"
             >
               <span class="d-flex align-items-center gap-2">
@@ -391,13 +290,12 @@
               </span>
               <i class="fa-solid fa-chevron-right chevron-icon-sm"></i>
             </button>
-
             <div class="nested-submenu-container">
               <router-link
                 to="/instituteresult"
                 class="nested-submenu-link"
                 active-class="active-nested-submenu"
-                @click="closeSidebar"
+                @click="handleMenuClick($event)"
               >
                 <i class="fa-solid fa-list-ol"></i>
                 <span>Single Exam Merit List</span>
@@ -406,7 +304,7 @@
                 to="/finalAvrageResultMerit"
                 class="nested-submenu-link"
                 active-class="active-nested-submenu"
-                @click="closeSidebar"
+                @click="handleMenuClick($event)"
               >
                 <i class="fa-solid fa-chart-line"></i>
                 <span>Final Average Merit List</span>
@@ -418,7 +316,7 @@
             to="/finalAvrageResult"
             class="submenu-link"
             active-class="active-submenu"
-            @click="closeSidebar"
+            @click="handleMenuClick($event)"
           >
             <i class="fa-solid fa-chart-line"></i>
             <span>Final Average Result</span>
@@ -426,45 +324,55 @@
         </div>
       </div>
 
-      <router-link to="/holiday" class="menu-link" active-class="active-menu" @click="closeSidebar">
+      <!-- HOLIDAYS -->
+      <router-link
+        to="/holiday"
+        class="menu-link"
+        active-class="active-menu"
+        @click="handleMenuClick($event)"
+      >
         <i class="fa-solid fa-calendar-days menu-icon"></i>
         <span>Holidays</span>
       </router-link>
 
-      <!-- ================= ACCOUNT SECTION ================= -->
-      <div v-if="role === 'Manager' || role === 'Branch Manager'" class="menu-section-title">
+      <!-- ACCOUNT -->
+      <div v-if="['Manager', 'Branch Manager'].includes(role)" class="menu-section-title">
         Account
       </div>
-
       <router-link
-        v-if="role === 'Manager' || role === 'Branch Manager'"
+        v-if="['Manager', 'Branch Manager'].includes(role)"
         to="/account/dashboard"
         class="menu-link"
         active-class="active-menu"
-        @click="closeSidebar"
+        @click="handleMenuClick($event)"
       >
         <i class="fa-solid fa-wallet menu-icon"></i>
         <span>Account Dashboard</span>
       </router-link>
 
+      <!-- SETTINGS -->
       <router-link
         to="/settings"
         class="menu-link"
         active-class="active-menu"
-        @click="closeSidebar"
+        @click="handleMenuClick($event)"
       >
         <i class="fa-solid fa-gear menu-icon"></i>
         <span>Settings</span>
       </router-link>
     </nav>
 
-    <!-- BACKUP SECTION -->
-    <div class="backup-section">
-      <button type="button" @click="runBackup" :disabled="loading" class="backup-btn">
+    <!-- BACKUP -->
+    <div class="backup-section" :class="{ 'result-entry-disabled': isResultEntry }">
+      <button
+        type="button"
+        @click="runBackup"
+        :disabled="loading || isResultEntry"
+        class="backup-btn"
+      >
         <span v-if="loading"> <i class="fa-solid fa-spinner fa-spin me-2"></i> Backing up... </span>
         <span v-else> <i class="fa-solid fa-database me-2"></i> Database Backup </span>
       </button>
-
       <p v-if="message" class="backup-message" :class="isError ? 'text-danger' : 'text-success'">
         {{ message }}
       </p>
@@ -488,13 +396,13 @@ const route = useRoute()
 
 const isSidebarOpen = ref(false)
 const role = localStorage.getItem('role')
+const isResultEntry = role === 'Result Entry'
 
 const loading = ref(false)
 const message = ref('')
 const isError = ref(false)
 const institute = ref(null)
 
-// Menu Open States
 const openMenus = reactive({
   institute: false,
   students: false,
@@ -505,7 +413,51 @@ const openMenus = reactive({
   instituteResult: false,
 })
 
-// Current Route অনুসার ড্রপডাউন অটো-ওপেন লজিক
+const instituteItems = [
+  { path: '/Institure-Info', label: 'Institute Info', icon: 'fa-solid fa-circle-info' },
+  { path: '/branch', label: 'Branches', icon: 'fa-solid fa-code-branch' },
+  { path: '/Institure-Session', label: 'Institute Session', icon: 'fa-solid fa-calendar-days' },
+  { path: '/migration', label: 'Migration', icon: 'fa-solid fa-arrows-split-up-and-left' },
+  { path: '/single_student_migration', label: 'Single Migration', icon: 'fa-solid fa-user-gear' },
+]
+
+const studentItems = [
+  { path: '/student', label: 'All Students', icon: 'fa-solid fa-users' },
+  { path: '/student-attendance', label: 'Student Attendance', icon: 'fa-solid fa-clipboard-user' },
+  {
+    path: '/student-attendance-overview',
+    label: 'Attendance Overview',
+    icon: 'fa-solid fa-chart-pie',
+  },
+]
+
+const teacherItems = [
+  { path: '/teacherView', label: 'All Teachers', icon: 'fa-solid fa-id-badge' },
+  { path: '/teacherattendance', label: 'Teacher Attendance', icon: 'fa-solid fa-calendar-check' },
+  { path: '/AttendancOverview', label: 'Attendance Summary', icon: 'fa-solid fa-chart-column' },
+  { path: '/AttendanceHistry', label: 'Attendance History', icon: 'fa-solid fa-clock-rotate-left' },
+]
+
+const staffItems = [
+  { path: '/staffAttendance', label: 'Staff Attendance', icon: 'fa-solid fa-calendar-check' },
+  {
+    path: '/StaffAttendancOverview',
+    label: 'Attendance Summary',
+    icon: 'fa-solid fa-chart-column',
+  },
+  {
+    path: '/StaffAttendanceHistry',
+    label: 'Attendance History',
+    icon: 'fa-solid fa-clock-rotate-left',
+  },
+]
+
+const classItems = [
+  { path: '/class', label: 'Class', icon: 'fa-solid fa-school' },
+  { path: '/ClassGroup', label: 'Class Group', icon: 'fa-solid fa-layer-group' },
+  { path: '/section', label: 'Sections', icon: 'fa-solid fa-object-group' },
+]
+
 const autoOpenMenuByRoute = () => {
   const path = route.path
 
@@ -534,24 +486,37 @@ const autoOpenMenuByRoute = () => {
   } else if (['/class', '/ClassGroup', '/section'].includes(path)) {
     openMenus.classInfo = true
   } else if (
-    ['/exam', '/result', '/resultGrade', '/instituteresult', '/finalAvrageResult'].includes(path)
+    [
+      '/exam',
+      '/result',
+      '/resultGrade',
+      '/instituteresult',
+      '/finalAvrageResult',
+      '/finalAvrageResultMerit',
+    ].includes(path)
   ) {
     openMenus.exam = true
-    if (path === '/instituteresult') {
+    if (path === '/instituteresult' || path === '/finalAvrageResultMerit') {
       openMenus.instituteResult = true
     }
   }
 }
 
-// Watchers for Route Change
 watch(
   () => route.path,
   () => {
-    autoOpenMenuByRoute()
+    if (isResultEntry) {
+      openMenus.exam = true
+      openMenus.instituteResult = false
+    } else {
+      autoOpenMenuByRoute()
+    }
   },
 )
 
 const toggleMenu = (menuKey) => {
+  if (isResultEntry) return
+
   if (menuKey === 'instituteResult') {
     openMenus.instituteResult = !openMenus.instituteResult
     return
@@ -565,7 +530,6 @@ const toggleMenu = (menuKey) => {
   openMenus[menuKey] = !openMenus[menuKey]
 }
 
-// Manager Branch Switch Variables
 const branches = ref([])
 const branchLoading = ref(false)
 const selectedBranchId = ref(localStorage.getItem('selected_branch_id') || '')
@@ -604,6 +568,7 @@ const fetchBranches = async () => {
 }
 
 const changeBranch = () => {
+  if (isResultEntry) return
   if (selectedBranchId.value) {
     localStorage.setItem('selected_branch_id', selectedBranchId.value)
   } else {
@@ -613,9 +578,12 @@ const changeBranch = () => {
 }
 
 const runBackup = async () => {
+  if (isResultEntry) return
+
   loading.value = true
   message.value = ''
   isError.value = false
+
   try {
     const token = localStorage.getItem('token')
     const response = await api.post(
@@ -630,9 +598,10 @@ const runBackup = async () => {
     const blob = new Blob([response.data], { type: 'application/sql' })
     let fileName = 'backup.sql'
     const contentDisposition = response.headers['content-disposition']
+
     if (contentDisposition) {
       const fileNameMatch = contentDisposition.match(/filename="?([^"]+)"?/)
-      if (fileNameMatch && fileNameMatch[1]) fileName = fileNameMatch[1]
+      if (fileNameMatch?.[1]) fileName = fileNameMatch[1]
     }
 
     const url = window.URL.createObjectURL(blob)
@@ -654,6 +623,15 @@ const runBackup = async () => {
   }
 }
 
+const handleMenuClick = (event) => {
+  if (isResultEntry) {
+    event.preventDefault()
+    event.stopPropagation()
+    return
+  }
+  closeSidebar()
+}
+
 const logout = () => {
   localStorage.removeItem('token')
   localStorage.removeItem('role')
@@ -670,16 +648,17 @@ const toggleSidebar = () => {
 }
 
 onMounted(() => {
-  fetchInstitute()
-  fetchBranches()
-  autoOpenMenuByRoute() // Page Load হলে অটো ওপেন করার জন্য
+  if (!isResultEntry) {
+    fetchInstitute()
+    fetchBranches()
+    autoOpenMenuByRoute()
+  } else {
+    openMenus.exam = true
+  }
 })
 </script>
 
 <style scoped>
-/* =========================================================
-    SIDEBAR CORE
-========================================================= */
 .sidebar {
   width: 260px;
   min-height: 100vh;
@@ -697,7 +676,6 @@ onMounted(() => {
   box-sizing: border-box;
 }
 
-/* LOGO */
 .sidebar-logo {
   display: flex;
   align-items: center;
@@ -741,7 +719,6 @@ onMounted(() => {
   font-size: 11px;
 }
 
-/* SECTION TITLE */
 .menu-section-title {
   color: #475569;
   font-size: 10px;
@@ -751,16 +728,12 @@ onMounted(() => {
   padding: 18px 12px 8px;
 }
 
-/* =========================================================
-    ACCORDION MENU & SUBMENU
-========================================================= */
 .sidebar-menu {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-/* SINGLE MENU LINK */
 .menu-link {
   display: flex;
   align-items: center;
@@ -791,7 +764,6 @@ onMounted(() => {
   color: #3b82f6;
 }
 
-/* TOGGLE BUTTONS (ACCORDION PARENT) */
 .menu-btn-toggle {
   width: 100%;
   background: transparent;
@@ -832,7 +804,6 @@ onMounted(() => {
     color 0.25s ease;
 }
 
-/* OPEN ACCORDION STATE */
 .menu-item-has-children.open > .menu-btn-toggle {
   background: rgba(255, 255, 255, 0.03);
   color: #fff;
@@ -843,7 +814,6 @@ onMounted(() => {
   color: #3b82f6;
 }
 
-/* SUBMENU CONTAINER */
 .submenu-container {
   display: none;
   flex-direction: column;
@@ -858,7 +828,6 @@ onMounted(() => {
   display: flex;
 }
 
-/* SUBMENU LINKS */
 .submenu-link {
   display: flex;
   align-items: center;
@@ -882,7 +851,6 @@ onMounted(() => {
   text-align: center;
 }
 
-/* NESTED SUBMENU */
 .nested-btn-toggle {
   justify-content: space-between;
   width: 100%;
@@ -931,22 +899,17 @@ onMounted(() => {
   color: #2dd4bf;
 }
 
-/* =========================================================
-    ACTIVE STATES & FOCUS COLORS
-========================================================= */
-/* Main Active Link */
 .active-menu {
   background: #2563eb !important;
-  color: #ffffff !important;
+  color: #fff !important;
   font-weight: 600;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
 .active-menu .menu-icon {
-  color: #ffffff !important;
+  color: #fff !important;
 }
 
-/* Active Submenu Link */
 .active-submenu {
   background: rgba(37, 99, 235, 0.2) !important;
   color: #60a5fa !important;
@@ -957,17 +920,13 @@ onMounted(() => {
   color: #60a5fa !important;
 }
 
-/* Active Nested Submenu (Teal Special Color) */
 .active-nested-submenu {
   background: #0d9488 !important;
-  color: #ffffff !important;
+  color: #fff !important;
   font-weight: 600;
   box-shadow: 0 4px 10px rgba(13, 148, 136, 0.3);
 }
 
-/* =========================================================
-    MANAGER BRANCH & UTILITIES
-========================================================= */
 .manager-branch-switch {
   margin-bottom: 12px;
   padding: 10px 12px;
@@ -1041,7 +1000,6 @@ onMounted(() => {
   background: #b91c1c;
 }
 
-/* MOBILE RESPONSIVE */
 .mobile-header {
   position: sticky;
   top: 0;
@@ -1088,5 +1046,38 @@ onMounted(() => {
   .mobile-header {
     display: none !important;
   }
+}
+
+/* Result Entry restrictions */
+.result-entry-disabled {
+  pointer-events: none;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.result-entry-sidebar .sidebar-menu > .menu-link,
+.result-entry-sidebar .sidebar-menu > .menu-item-has-children > .menu-btn-toggle,
+.result-entry-sidebar .sidebar-menu > .menu-item-has-children > .submenu-container,
+.result-entry-sidebar .backup-section {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.result-entry-sidebar .sidebar-menu > .menu-item-has-children.open > .submenu-container {
+  pointer-events: none;
+}
+
+.result-entry-sidebar
+  .sidebar-menu
+  > .menu-item-has-children.open
+  > .submenu-container
+  a[href='/result'] {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.result-entry-sidebar .logout-btn {
+  pointer-events: auto;
+  opacity: 1;
 }
 </style>

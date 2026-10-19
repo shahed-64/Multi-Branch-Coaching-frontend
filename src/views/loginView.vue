@@ -129,8 +129,12 @@ const login = async () => {
     localStorage.setItem('role', role)
 
     // Redirect based on role
-    if (role === 'Accountant') {
+    if (role === 'Others') {
+      router.push('/not-allowed')
+    } else if (role === 'Accountant' || role === 'Branch Accountant') {
       router.push('/account/dashboard')
+    } else if (role === 'Result Entry') {
+      router.push('/result')
     } else {
       router.push('/dashboard')
     }

@@ -1,6 +1,5 @@
 <template>
   <RouterView />
-
   <dashPageView />
 
   <div class="result-page-wrapper py-4">
@@ -63,17 +62,18 @@
         >
           <h4 class="fw-bold text-dark mb-0">Student Result List</h4>
 
-          <div class="d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center gap-3 flex-wrap">
             <div class="search-box position-relative" style="width: 260px">
               <input
                 type="text"
                 class="form-control"
                 v-model="search"
                 placeholder="Search by Student ID or Name..."
+                @input="currentPage = 1"
               />
-              <span class="position-absolute top-50 end-0 translate-middle-y me-3 text-muted"
-                >🔍</span
-              >
+              <span class="position-absolute top-50 end-0 translate-middle-y me-3 text-muted">
+                🔍
+              </span>
             </div>
 
             <button
@@ -124,10 +124,20 @@
                   </span>
                 </td>
 
-                <td class="text-center">
+                <td class="text-center text-nowrap">
+                  <button
+                    v-if="!isResultEntry"
+                    type="button"
+                    class="btn btn-warning btn-sm me-1"
+                    @click="openEditModal(result)"
+                  >
+                    Edit
+                  </button>
+
                   <a
                     :href="`/resultShow?id=${result?.id}`"
                     target="_blank"
+                    rel="noopener noreferrer"
                     class="btn btn-primary btn-sm"
                   >
                     PDF
@@ -169,10 +179,7 @@
                 v-for="(page, index) in pageNumbers"
                 :key="`${page}-${index}`"
                 class="page-item"
-                :class="{
-                  active: page === currentPage,
-                  disabled: page === '...',
-                }"
+                :class="{ active: page === currentPage, disabled: page === '...' }"
               >
                 <button
                   v-if="page !== '...'"
@@ -202,7 +209,7 @@
     </div>
   </div>
 
-  <!-- ADD RESULT MODAL -->
+  <!-- ADD / EDIT RESULT MODAL -->
   <Teleport to="body">
     <div
       v-if="isAddModalOpen"
@@ -213,24 +220,25 @@
     >
       <div class="result-modal-dialog" @click.stop>
         <div class="result-modal-content">
-          <!-- MODAL HEADER -->
           <div class="result-modal-header">
-            <h5 class="fw-bold text-dark mb-0">Insert Student Result &amp; Marks</h5>
+            <h5 class="fw-bold text-dark mb-0">
+              {{ isEditMode ? 'Edit Student Result & Marks' : 'Insert Student Result & Marks' }}
+            </h5>
 
             <button
               type="button"
               class="btn-close shadow-none"
+              aria-label="Close"
               @click.stop="closeAddModal"
             ></button>
           </div>
 
-          <!-- MODAL BODY -->
           <div class="result-modal-body">
             <form @submit.prevent="saveNewResult">
               <!-- STUDENT SELECTION -->
               <div class="row">
                 <div class="col-md-3 mb-3 position-relative">
-                  <label class="form-label small fw-bold text-muted"> Student ID / Name </label>
+                  <label class="form-label small fw-bold text-muted">Student ID / Name</label>
 
                   <div class="input-group">
                     <input
@@ -238,12 +246,14 @@
                       class="form-control rounded-3"
                       v-model="studentSearchText"
                       placeholder="Type ID or Name..."
-                      @focus="isStudentDropdownOpen = true"
+                      @focus="isStudentDropdownOpen = !isEditMode"
                       @input="isStudentDropdownOpen = true"
+                      :readonly="isEditMode"
+                      required
                     />
 
                     <button
-                      v-if="studentSearchText"
+                      v-if="studentSearchText && !isEditMode"
                       type="button"
                       class="btn btn-outline-secondary"
                       @click="clearStudentSelection"
@@ -253,7 +263,7 @@
                   </div>
 
                   <div
-                    v-if="isStudentDropdownOpen"
+                    v-if="isStudentDropdownOpen && !isEditMode"
                     class="dropdown-menu show shadow-lg border rounded-3 bg-white position-absolute w-100 mt-1"
                     style="max-height: 220px; overflow-y: auto; z-index: 1060"
                   >
@@ -289,17 +299,16 @@
 
                 <!-- ACADEMIC SESSION -->
                 <div class="col-md-3 mb-3">
-                  <label class="form-label small fw-bold text-muted"> Academic Session </label>
+                  <label class="form-label small fw-bold text-muted">Academic Session</label>
 
                   <select
                     class="form-select rounded-3"
                     v-model="form.student_session_id"
                     @change="selectStudentSession"
-                    :disabled="!selectedStudent"
+                    :disabled="!selectedStudent || isEditMode"
                     required
                   >
                     <option value="">Select Session</option>
-
                     <option
                       v-for="session in studentSessions"
                       :key="session.id"
@@ -316,7 +325,7 @@
 
                 <!-- EXAM YEAR -->
                 <div class="col-md-3 mb-3 position-relative">
-                  <label class="form-label small fw-bold text-muted"> Exam Year </label>
+                  <label class="form-label small fw-bold text-muted">Exam Year</label>
 
                   <div class="input-group">
                     <input
@@ -325,11 +334,11 @@
                       v-model="yearSearchText"
                       placeholder="Select session first..."
                       readonly
-                      @focus="isYearDropdownOpen = true"
+                      @focus="isYearDropdownOpen = !isEditMode"
                     />
 
                     <button
-                      v-if="yearSearchText"
+                      v-if="yearSearchText && !isEditMode"
                       type="button"
                       class="btn btn-outline-secondary"
                       @click="clearYearSelection"
@@ -339,7 +348,7 @@
                   </div>
 
                   <div
-                    v-if="isYearDropdownOpen"
+                    v-if="isYearDropdownOpen && !isEditMode"
                     class="dropdown-menu show shadow-lg border rounded-3 bg-white position-absolute w-100 mt-1"
                     style="max-height: 220px; overflow-y: auto; z-index: 1060"
                   >
@@ -350,9 +359,7 @@
                       class="dropdown-item py-2 px-3 border-bottom text-wrap text-start"
                       @click="selectYear(exam)"
                     >
-                      <span class="fw-bold text-warning">
-                        {{ exam.examination_year }}
-                      </span>
+                      <span class="fw-bold text-warning">{{ exam.examination_year }}</span>
                     </button>
 
                     <div
@@ -366,7 +373,7 @@
 
                 <!-- EXAM TYPE -->
                 <div class="col-md-3 mb-3 position-relative">
-                  <label class="form-label small fw-bold text-muted"> Exam Type </label>
+                  <label class="form-label small fw-bold text-muted">Exam Type</label>
 
                   <div class="input-group">
                     <input
@@ -374,13 +381,14 @@
                       class="form-control rounded-3"
                       v-model="examSearchText"
                       placeholder="Select exam type..."
-                      @focus="isExamDropdownOpen = true"
+                      @focus="isExamDropdownOpen = !isEditMode"
                       @input="isExamDropdownOpen = true"
-                      :disabled="!form.student_session_id"
+                      :disabled="!form.student_session_id || isEditMode"
+                      required
                     />
 
                     <button
-                      v-if="examSearchText"
+                      v-if="examSearchText && !isEditMode"
                       type="button"
                       class="btn btn-outline-secondary"
                       @click="clearExamSelection"
@@ -390,7 +398,7 @@
                   </div>
 
                   <div
-                    v-if="isExamDropdownOpen"
+                    v-if="isExamDropdownOpen && !isEditMode"
                     class="dropdown-menu show shadow-lg border rounded-3 bg-white position-absolute w-100 mt-1"
                     style="max-height: 220px; overflow-y: auto; z-index: 1060"
                   >
@@ -401,9 +409,7 @@
                       class="dropdown-item py-2 px-3 border-bottom text-wrap text-start"
                       @click="selectExam(exam)"
                     >
-                      <span class="fw-bold text-success">
-                        {{ exam.examination_type }}
-                      </span>
+                      <span class="fw-bold text-success">{{ exam.examination_type }}</span>
                     </button>
 
                     <div
@@ -424,51 +430,36 @@
                   <div class="card-body py-3">
                     <div class="row">
                       <div class="col-md-4 mb-3">
-                        <div class="d-flex align-items-center gap-2">
-                          <i class="bi bi-calendar-check text-primary fs-5"></i>
-                          <div>
-                            <small class="text-muted d-block fw-semibold"> Academic Session </small>
-                            <span class="fw-bold text-dark">
-                              {{
-                                selectedStudentSession.academic_session?.name ||
-                                selectedStudentSession.academicSession?.name ||
-                                'N/A'
-                              }}
-                            </span>
-                          </div>
-                        </div>
+                        <small class="text-muted d-block fw-semibold">Academic Session</small>
+                        <span class="fw-bold text-dark">
+                          {{
+                            selectedStudentSession.academic_session?.name ||
+                            selectedStudentSession.academicSession?.name ||
+                            'N/A'
+                          }}
+                        </span>
                       </div>
 
                       <div class="col-md-4 mb-3">
-                        <div class="d-flex align-items-center gap-2">
-                          <i class="bi bi-mortarboard-fill text-primary fs-5"></i>
-                          <div>
-                            <small class="text-muted d-block fw-semibold">Class</small>
-                            <span class="fw-bold text-dark">
-                              {{
-                                selectedStudentSession.class_info?.class_name ||
-                                selectedStudentSession.class_info?.name ||
-                                'N/A'
-                              }}
-                            </span>
-                          </div>
-                        </div>
+                        <small class="text-muted d-block fw-semibold">Class</small>
+                        <span class="fw-bold text-dark">
+                          {{
+                            selectedStudentSession.class_info?.class_name ||
+                            selectedStudentSession.class_info?.name ||
+                            'N/A'
+                          }}
+                        </span>
                       </div>
 
                       <div class="col-md-4 mb-3">
-                        <div class="d-flex align-items-center gap-2">
-                          <i class="bi bi-people-fill text-success fs-5"></i>
-                          <div>
-                            <small class="text-muted d-block fw-semibold">Group</small>
-                            <span class="fw-bold text-dark">
-                              {{
-                                selectedStudentSession.class_group?.group_name ||
-                                selectedStudentSession.class_group?.name ||
-                                'N/A'
-                              }}
-                            </span>
-                          </div>
-                        </div>
+                        <small class="text-muted d-block fw-semibold">Group</small>
+                        <span class="fw-bold text-dark">
+                          {{
+                            selectedStudentSession.class_group?.group_name ||
+                            selectedStudentSession.class_group?.name ||
+                            'N/A'
+                          }}
+                        </span>
                       </div>
 
                       <div class="col-md-6">
@@ -520,10 +511,8 @@
                 <div v-if="mainSubjects.length" class="mb-4">
                   <div class="d-flex justify-content-between align-items-center mb-3">
                     <h6 class="fw-bold text-primary mb-0">
-                      <i class="bi bi-book me-2"></i>
-                      Main Subjects
+                      <i class="bi bi-book me-2"></i>Main Subjects
                     </h6>
-
                     <span class="badge bg-primary-subtle text-primary">
                       {{ mainSubjects.length }} Subjects
                     </span>
@@ -548,6 +537,7 @@
                           step="0.01"
                           min="0"
                           max="999.99"
+                          required
                           class="form-control rounded-3"
                           :value="subject.marks"
                           placeholder="Enter Marks"
@@ -562,10 +552,8 @@
                 <div v-if="additionalSubjects.length" class="mt-4">
                   <div class="d-flex justify-content-between align-items-center mb-3">
                     <h6 class="fw-bold text-success mb-0">
-                      <i class="bi bi-plus-circle me-2"></i>
-                      Additional Subject
+                      <i class="bi bi-plus-circle me-2"></i>Additional Subject
                     </h6>
-
                     <span class="badge bg-success-subtle text-success">
                       {{ additionalSubjects.length }} Subjects
                     </span>
@@ -592,6 +580,7 @@
                           step="0.01"
                           min="0"
                           max="999.99"
+                          required
                           class="form-control rounded-3"
                           :value="subject.marks"
                           placeholder="Enter Marks"
@@ -616,10 +605,14 @@
                 <button
                   type="submit"
                   class="btn btn-success rounded-pill px-4 fw-bold shadow-sm"
-                  :disabled="isSaving"
+                  :disabled="isSaving || currentSubjects.length === 0"
                 >
-                  <span v-if="isSaving">Saving...</span>
-                  <span v-else>Add Result</span>
+                  <span v-if="isSaving">
+                    {{ isEditMode ? 'Updating...' : 'Saving...' }}
+                  </span>
+                  <span v-else>
+                    {{ isEditMode ? 'Update Result' : 'Add Result' }}
+                  </span>
                 </button>
               </div>
             </form>
@@ -635,42 +628,27 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import dashPageView from './dashPageView.vue'
 import api from '@/services/api'
 
-/**
- * =========================================================
- * STATE
- * =========================================================
- */
-
 const resultsList = ref([])
 const studentsList = ref([])
 const examinationsList = ref([])
 const currentSubjects = ref([])
 
 const search = ref('')
-
 const isAddModalOpen = ref(false)
 const isSaving = ref(false)
+const isEditMode = ref(false)
+const editingResultId = ref(null)
 
-/**
- * =========================================================
- * PAGINATION
- * =========================================================
- */
+// Result Entry can create results but cannot edit existing results.
+const userRole = localStorage.getItem('role')
+const isResultEntry = userRole === 'Result Entry'
 
 const currentPage = ref(1)
 const perPage = ref(10)
-
 const filteredTotal = ref(0)
 const totalPages = ref(1)
-
 const showingFrom = ref(0)
 const showingTo = ref(0)
-
-/**
- * =========================================================
- * SEARCH STATES
- * =========================================================
- */
 
 const studentSearchText = ref('')
 const yearSearchText = ref('')
@@ -680,12 +658,6 @@ const isStudentDropdownOpen = ref(false)
 const isYearDropdownOpen = ref(false)
 const isExamDropdownOpen = ref(false)
 
-/**
- * =========================================================
- * FORM
- * =========================================================
- */
-
 const form = reactive({
   student_id: '',
   student_session_id: '',
@@ -694,16 +666,8 @@ const form = reactive({
   subjects: [],
 })
 
-/**
- * =========================================================
- * SELECTED STUDENT
- * =========================================================
- */
-
 const selectedStudent = computed(() => {
-  if (!form.student_id) {
-    return null
-  }
+  if (!form.student_id) return null
 
   return (
     studentsList.value.find(
@@ -712,22 +676,13 @@ const selectedStudent = computed(() => {
   )
 })
 
-/**
- * =========================================================
- * STUDENT SESSIONS
- * =========================================================
- */
-
 const studentSessions = computed(() => {
   const sessions = selectedStudent.value?.student_sessions
-
   return Array.isArray(sessions) ? sessions : []
 })
 
 const selectedStudentSession = computed(() => {
-  if (!form.student_session_id) {
-    return null
-  }
+  if (!form.student_session_id) return null
 
   return (
     studentSessions.value.find(
@@ -736,24 +691,13 @@ const selectedStudentSession = computed(() => {
   )
 })
 
-/**
- * =========================================================
- * SESSION LABEL
- * =========================================================
- */
-
 const getSessionLabel = (session) => {
-  if (!session) {
-    return 'Unknown Session'
-  }
+  if (!session) return 'Unknown Session'
 
   const academicYear =
     session.academic_session?.name || session.academicSession?.name || 'Unknown Session'
-
   const className = session.class_info?.class_name || session.class_info?.name || 'N/A'
-
   const sectionName = session.section?.name || session.section?.section_name || ''
-
   const groupName = session.class_group?.group_name || session.class_group?.name || ''
 
   return [
@@ -766,16 +710,8 @@ const getSessionLabel = (session) => {
     .join(' | ')
 }
 
-/**
- * =========================================================
- * STUDENT GROUP NAME
- * =========================================================
- */
-
 const getStudentGroupName = (student) => {
-  if (!student) {
-    return 'N/A'
-  }
+  if (!student) return 'N/A'
 
   return (
     student.class_group?.group_name ||
@@ -788,32 +724,17 @@ const getStudentGroupName = (student) => {
   )
 }
 
-/**
- * =========================================================
- * MAIN SUBJECTS
- * =========================================================
- */
+const mainSubjects = computed(() =>
+  currentSubjects.value.filter((subject) => subject && !subject.is_additional),
+)
 
-const mainSubjects = computed(() => {
-  return currentSubjects.value.filter((subject) => subject && !subject.is_additional)
-})
+const additionalSubjects = computed(() =>
+  currentSubjects.value.filter((subject) => subject && subject.is_additional),
+)
 
 /**
- * =========================================================
- * ADDITIONAL SUBJECTS
- * =========================================================
+ * Fetch results and students.
  */
-
-const additionalSubjects = computed(() => {
-  return currentSubjects.value.filter((subject) => subject && subject.is_additional)
-})
-
-/**
- * =========================================================
- * FETCH RESULTS AND STUDENTS
- * =========================================================
- */
-
 const fetchData = async (page = 1) => {
   try {
     const response = await api.get('/results', {
@@ -825,32 +746,24 @@ const fetchData = async (page = 1) => {
     })
 
     const resultData = response.data.results?.data ?? []
-
     resultsList.value = Array.isArray(resultData)
-      ? resultData.filter((result) => result !== null && typeof result === 'object')
+      ? resultData.filter((result) => result && typeof result === 'object')
       : []
 
     studentsList.value = Array.isArray(response.data.students)
-      ? response.data.students.filter((student) => student !== null && typeof student === 'object')
+      ? response.data.students.filter((student) => student && typeof student === 'object')
       : []
 
-    const resultPagination = response.data.results_pagination || {}
-
-    currentPage.value = resultPagination.current_page || 1
-    totalPages.value = resultPagination.last_page || 1
-    filteredTotal.value = resultPagination.total || 0
-    showingFrom.value = resultPagination.from || 0
-    showingTo.value = resultPagination.to || 0
-
-    console.log('Students:', studentsList.value)
-    console.log('Results:', resultsList.value)
-    console.log('Result Pagination:', resultPagination)
+    const pagination = response.data.results_pagination || {}
+    currentPage.value = pagination.current_page || 1
+    totalPages.value = pagination.last_page || 1
+    filteredTotal.value = pagination.total || 0
+    showingFrom.value = pagination.from || 0
+    showingTo.value = pagination.to || 0
   } catch (error) {
     console.error('Error fetching result data:', error)
-
     resultsList.value = []
     studentsList.value = []
-
     filteredTotal.value = 0
     totalPages.value = 1
     showingFrom.value = 0
@@ -858,141 +771,80 @@ const fetchData = async (page = 1) => {
   }
 }
 
-/**
- * =========================================================
- * PAGINATION
- * =========================================================
- */
-
 const goToPage = (page) => {
-  if (page < 1 || page > totalPages.value || page === currentPage.value) {
-    return
-  }
-
+  if (page < 1 || page > totalPages.value || page === currentPage.value) return
   fetchData(page)
 }
 
 const previousPage = () => {
-  if (currentPage.value > 1) {
-    fetchData(currentPage.value - 1)
-  }
+  if (currentPage.value > 1) fetchData(currentPage.value - 1)
 }
 
 const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
-    fetchData(currentPage.value + 1)
-  }
+  if (currentPage.value < totalPages.value) fetchData(currentPage.value + 1)
 }
 
 const pageNumbers = computed(() => {
   const pages = []
-
   const total = totalPages.value
   const current = currentPage.value
 
   if (total <= 7) {
-    for (let i = 1; i <= total; i++) {
-      pages.push(i)
-    }
-
+    for (let i = 1; i <= total; i++) pages.push(i)
     return pages
   }
 
   pages.push(1)
+  if (current > 4) pages.push('...')
 
-  if (current > 4) {
-    pages.push('...')
-  }
-
-  const start = Math.max(2, current - 1)
-  const end = Math.min(total - 1, current + 1)
-
-  for (let i = start; i <= end; i++) {
+  for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) {
     pages.push(i)
   }
 
-  if (current < total - 3) {
-    pages.push('...')
-  }
-
+  if (current < total - 3) pages.push('...')
   pages.push(total)
-
   return pages
 })
-
-/**
- * =========================================================
- * FETCH EXAMINATIONS
- * =========================================================
- */
 
 const fetchExaminations = async () => {
   try {
     const response = await api.get('/examinations')
-
-    if (response.data.status) {
-      examinationsList.value = Array.isArray(response.data.data)
-        ? response.data.data.filter((exam) => exam !== null && typeof exam === 'object')
+    examinationsList.value =
+      response.data.status && Array.isArray(response.data.data)
+        ? response.data.data.filter((exam) => exam && typeof exam === 'object')
         : []
-    } else {
-      examinationsList.value = []
-    }
   } catch (error) {
     console.error('Error fetching examinations:', error)
-
     examinationsList.value = []
   }
 }
 
-/**
- * =========================================================
- * SEARCHABLE STUDENTS
- * =========================================================
- */
-
 const searchableStudents = computed(() => {
   const text = studentSearchText.value.toLowerCase().trim()
-
   const validStudents = studentsList.value.filter(
-    (student) => student !== null && typeof student === 'object',
+    (student) => student && typeof student === 'object',
   )
 
-  if (!text) {
-    return validStudents.slice(0, 50)
-  }
+  if (!text) return validStudents.slice(0, 50)
 
   return validStudents.filter((student) => {
     const id = student.student_id?.toString().toLowerCase() || ''
-
     const name = student.full_name?.toString().toLowerCase() || ''
-
     const group = getStudentGroupName(student)?.toString().toLowerCase() || ''
-
     return id.includes(text) || name.includes(text) || group.includes(text)
   })
 })
 
-/**
- * =========================================================
- * EXAMINATIONS FOR SELECTED BRANCH AND SESSION
- * =========================================================
- */
-
 const searchableExaminations = computed(() => {
   const text = examSearchText.value.toLowerCase().trim()
-
   const sessionYear =
     selectedStudentSession.value?.academic_session?.name ||
     selectedStudentSession.value?.academicSession?.name ||
     ''
 
-  if (!selectedStudent.value || !sessionYear) {
-    return []
-  }
+  if (!selectedStudent.value || !sessionYear) return []
 
-  let examinations = examinationsList.value.filter(
-    (exam) => exam !== null && typeof exam === 'object',
-  )
+  let examinations = examinationsList.value.filter((exam) => exam && typeof exam === 'object')
 
   if (selectedStudent.value.branch_id != null) {
     examinations = examinations.filter(
@@ -1004,22 +856,12 @@ const searchableExaminations = computed(() => {
     (exam) => String(exam.examination_year) === String(sessionYear),
   )
 
-  if (!text) {
-    return examinations.slice(0, 50)
-  }
+  if (!text) return examinations.slice(0, 50)
 
-  return examinations.filter((exam) => {
-    const type = exam.examination_type?.toString().toLowerCase() || ''
-
-    return type.includes(text)
-  })
+  return examinations.filter((exam) =>
+    (exam.examination_type?.toString().toLowerCase() || '').includes(text),
+  )
 })
-
-/**
- * =========================================================
- * YEARS FOR SELECTED SESSION
- * =========================================================
- */
 
 const searchableYears = computed(() => {
   const sessionYear =
@@ -1027,15 +869,11 @@ const searchableYears = computed(() => {
     selectedStudentSession.value?.academicSession?.name ||
     ''
 
-  if (!selectedStudent.value || !sessionYear) {
-    return []
-  }
+  if (!selectedStudent.value || !sessionYear) return []
 
   let examinations = examinationsList.value.filter(
     (exam) =>
-      exam !== null &&
-      typeof exam === 'object' &&
-      String(exam.examination_year) === String(sessionYear),
+      exam && typeof exam === 'object' && String(exam.examination_year) === String(sessionYear),
   )
 
   if (selectedStudent.value.branch_id != null) {
@@ -1045,35 +883,21 @@ const searchableYears = computed(() => {
   }
 
   const uniqueYears = new Map()
-
   examinations.forEach((exam) => {
     const year = String(exam.examination_year)
-
-    if (!uniqueYears.has(year)) {
-      uniqueYears.set(year, exam)
-    }
+    if (!uniqueYears.has(year)) uniqueYears.set(year, exam)
   })
 
   const years = Array.from(uniqueYears.values())
   const text = yearSearchText.value.toLowerCase().trim()
 
-  if (!text) {
-    return years.slice(0, 50)
-  }
+  if (!text) return years.slice(0, 50)
 
   return years.filter((exam) => String(exam.examination_year).toLowerCase().includes(text))
 })
 
-/**
- * =========================================================
- * SELECT STUDENT
- * =========================================================
- */
-
 const selectStudent = (student) => {
-  if (!student) {
-    return
-  }
+  if (!student) return
 
   form.student_id = student.id
   form.student_session_id = ''
@@ -1082,22 +906,14 @@ const selectStudent = (student) => {
   form.subjects = []
 
   studentSearchText.value = `${student.student_id} - ${student.full_name}`
-
   yearSearchText.value = ''
   examSearchText.value = ''
-
   currentSubjects.value = []
 
   isStudentDropdownOpen.value = false
   isYearDropdownOpen.value = false
   isExamDropdownOpen.value = false
 }
-
-/**
- * =========================================================
- * CLEAR STUDENT
- * =========================================================
- */
 
 const clearStudentSelection = () => {
   form.student_id = ''
@@ -1109,7 +925,6 @@ const clearStudentSelection = () => {
   studentSearchText.value = ''
   yearSearchText.value = ''
   examSearchText.value = ''
-
   currentSubjects.value = []
 
   isStudentDropdownOpen.value = true
@@ -1117,14 +932,7 @@ const clearStudentSelection = () => {
   isExamDropdownOpen.value = false
 }
 
-/**
- * =========================================================
- * SELECT ACADEMIC SESSION
- * =========================================================
- */
-
 const selectStudentSession = () => {
-  // Reset marks and exam type when the session changes.
   currentSubjects.value = []
   form.subjects = []
   form.exam_type = ''
@@ -1135,15 +943,12 @@ const selectStudentSession = () => {
   if (!session) {
     form.exam_year = ''
     yearSearchText.value = ''
-
     isYearDropdownOpen.value = false
     isExamDropdownOpen.value = false
-
     return
   }
 
   const year = session.academic_session?.name || session.academicSession?.name || ''
-
   form.exam_year = String(year)
   yearSearchText.value = String(year)
 
@@ -1153,124 +958,72 @@ const selectStudentSession = () => {
   loadStudentSubjects()
 }
 
-/**
- * =========================================================
- * LOAD SUBJECTS FROM SELECTED STUDENT SESSION
- * =========================================================
- */
-
 const loadStudentSubjects = () => {
   const session = selectedStudentSession.value
-
   currentSubjects.value = []
   form.subjects = []
 
-  if (!session) {
-    return
-  }
+  if (!session) return
 
-  // Prefer backend-prepared subjects for the selected session.
   let subjects = Array.isArray(session.assigned_subjects) ? session.assigned_subjects : []
 
-  // Fallback to subjects belonging to this session's class/group.
   if (subjects.length === 0) {
     const classSubjects = Array.isArray(session.class_info?.subjects)
       ? session.class_info.subjects
       : []
-
     const groupSubjects = Array.isArray(session.class_group?.subjects)
       ? session.class_group.subjects
       : []
-
     subjects = [...classSubjects, ...groupSubjects]
   }
 
   const subjectMap = new Map()
 
   subjects.forEach((subject) => {
-    if (!subject || typeof subject !== 'object' || subject.id == null) {
-      return
-    }
+    if (!subject || typeof subject !== 'object' || subject.id == null) return
 
     const id = Number(subject.id)
-
     const normalized = {
       unique_key: `subject_${id}`,
       id: subject.id,
-
       name: subject.name || subject.subject_name || subject.subject?.name || 'Unknown Subject',
-
       code: subject.code || subject.subject_code || subject.subject?.code || null,
-
       is_additional:
         subject.is_additional === true ||
         subject.is_additional === 1 ||
         subject.is_additional === '1',
-
       marks: '',
     }
 
     const existing = subjectMap.get(id)
-
-    if (!existing || normalized.is_additional) {
-      subjectMap.set(id, normalized)
-    }
+    if (!existing || normalized.is_additional) subjectMap.set(id, normalized)
   })
 
   currentSubjects.value = Array.from(subjectMap.values())
-
   syncFormSubjects()
-
-  console.log('Selected Student Session:', session)
-  console.log('Session Subjects:', currentSubjects.value)
 }
-
-/**
- * =========================================================
- * UPDATE SUBJECT MARKS
- * =========================================================
- */
 
 const updateSubjectMarks = (subjectKey, marks) => {
   const subject = currentSubjects.value.find((item) => item && item.unique_key === subjectKey)
 
-  if (!subject) {
-    return
-  }
+  if (!subject) return
 
   subject.marks = marks
-
   syncFormSubjects()
 }
 
-/**
- * =========================================================
- * SYNC SUBJECTS WITH FORM
- * =========================================================
- */
-
 const syncFormSubjects = () => {
   form.subjects = currentSubjects.value
-    .filter((subject) => subject !== null && typeof subject === 'object')
+    .filter((subject) => subject && typeof subject === 'object')
     .map((subject) => ({
       subject_id: subject.id,
-
       marks: subject.marks === '' || subject.marks === null ? null : Number(subject.marks),
-
       is_additional: subject.is_additional,
     }))
 }
 
-/**
- * =========================================================
- * SELECT EXAM TYPE
- * =========================================================
- */
-
 const selectExam = (exam) => {
-  if (!exam) {
-    return
-  }
+  if (!exam) return
 
   const sessionYear =
     selectedStudentSession.value?.academic_session?.name ||
@@ -1292,7 +1045,6 @@ const selectExam = (exam) => {
 
   form.exam_year = String(sessionYear)
   yearSearchText.value = String(sessionYear)
-
   form.exam_type = exam.examination_type
   examSearchText.value = exam.examination_type
 
@@ -1300,24 +1052,11 @@ const selectExam = (exam) => {
   isYearDropdownOpen.value = false
 }
 
-/**
- * =========================================================
- * CLEAR EXAM TYPE
- * =========================================================
- */
-
 const clearExamSelection = () => {
   form.exam_type = ''
   examSearchText.value = ''
-
   isExamDropdownOpen.value = true
 }
-
-/**
- * =========================================================
- * SELECT EXAM YEAR
- * =========================================================
- */
 
 const selectYear = (exam) => {
   const sessionYear =
@@ -1325,9 +1064,7 @@ const selectYear = (exam) => {
     selectedStudentSession.value?.academicSession?.name ||
     ''
 
-  if (!exam || !sessionYear) {
-    return
-  }
+  if (!exam || !sessionYear) return
 
   if (String(exam.examination_year) !== String(sessionYear)) {
     alert('Exam year must match the selected academic session.')
@@ -1336,25 +1073,15 @@ const selectYear = (exam) => {
 
   form.exam_year = String(sessionYear)
   yearSearchText.value = String(sessionYear)
-
   isYearDropdownOpen.value = false
 }
 
-/**
- * =========================================================
- * CLEAR EXAM YEAR
- * =========================================================
- */
-
 const clearYearSelection = () => {
-  // Academic session determines the year.
-  // Clearing the displayed year must not silently change sessions.
   if (selectedStudentSession.value) {
     const year =
       selectedStudentSession.value.academic_session?.name ||
       selectedStudentSession.value.academicSession?.name ||
       ''
-
     form.exam_year = String(year)
     yearSearchText.value = String(year)
   } else {
@@ -1365,27 +1092,7 @@ const clearYearSelection = () => {
   isYearDropdownOpen.value = false
 }
 
-/**
- * =========================================================
- * CLOSE MODAL
- * =========================================================
- */
-
-const closeAddModal = () => {
-  isAddModalOpen.value = false
-
-  isStudentDropdownOpen.value = false
-  isYearDropdownOpen.value = false
-  isExamDropdownOpen.value = false
-}
-
-/**
- * =========================================================
- * OPEN MODAL
- * =========================================================
- */
-
-const openAddModal = () => {
+const resetForm = () => {
   form.student_id = ''
   form.student_session_id = ''
   form.exam_year = ''
@@ -1395,24 +1102,131 @@ const openAddModal = () => {
   studentSearchText.value = ''
   yearSearchText.value = ''
   examSearchText.value = ''
-
   currentSubjects.value = []
 
+  editingResultId.value = null
+  isEditMode.value = false
   isStudentDropdownOpen.value = false
   isYearDropdownOpen.value = false
   isExamDropdownOpen.value = false
+}
 
+const closeAddModal = () => {
+  isAddModalOpen.value = false
+  isStudentDropdownOpen.value = false
+  isYearDropdownOpen.value = false
+  isExamDropdownOpen.value = false
+}
+
+const openAddModal = () => {
+  resetForm()
   isAddModalOpen.value = true
 }
 
 /**
- * =========================================================
- * SAVE RESULT
- * =========================================================
+ * Open the existing result in the same modal.
  */
+const openEditModal = (result) => {
+  // UI-level protection; backend must also reject Result Entry updates.
+  if (isResultEntry) {
+    alert('You are not allowed to edit existing results.')
+    return
+  }
 
+  if (!result?.id) {
+    alert('Result ID could not be found.')
+    return
+  }
+
+  resetForm()
+
+  let student = studentsList.value.find((item) => String(item.id) === String(result.student_id))
+
+  if (!student && result.student?.id) {
+    student = result.student
+    studentsList.value = [...studentsList.value, student]
+  }
+
+  if (!student) {
+    alert('Student details could not be loaded. Please refresh the page and try again.')
+    return
+  }
+
+  const sessionId = result.student_session_id
+
+  if (!sessionId) {
+    alert(
+      'This result does not contain a student session ID. Please check the Result API response.',
+    )
+    return
+  }
+
+  const sessionExists = (student.student_sessions || []).some(
+    (session) => String(session.id) === String(sessionId),
+  )
+
+  if (!sessionExists) {
+    alert(
+      'The academic session for this result is not available in the student data. Please check the Result API response.',
+    )
+    return
+  }
+
+  isEditMode.value = true
+  editingResultId.value = result.id
+
+  form.student_id = student.id
+  form.student_session_id = String(sessionId)
+
+  studentSearchText.value = `${student.student_id || ''} - ${student.full_name || ''}`
+
+  const session = (student.student_sessions || []).find(
+    (item) => String(item.id) === String(sessionId),
+  )
+
+  const sessionYear =
+    session?.academic_session?.name || session?.academicSession?.name || result.exam_year || ''
+
+  form.exam_year = String(result.exam_year || sessionYear)
+  yearSearchText.value = form.exam_year
+
+  form.exam_type = result.exam_type || ''
+  examSearchText.value = form.exam_type
+
+  loadStudentSubjects()
+
+  const savedSubjects = result.result_subjects || result.resultSubjects || []
+  const marksBySubject = new Map(
+    savedSubjects
+      .filter((item) => item && item.subject_id != null)
+      .map((item) => [String(item.subject_id), item.marks]),
+  )
+
+  currentSubjects.value = currentSubjects.value.map((subject) => ({
+    ...subject,
+    marks: marksBySubject.has(String(subject.id))
+      ? String(marksBySubject.get(String(subject.id)) ?? '')
+      : '',
+  }))
+
+  syncFormSubjects()
+
+  isStudentDropdownOpen.value = false
+  isYearDropdownOpen.value = false
+  isExamDropdownOpen.value = false
+  isAddModalOpen.value = true
+}
+
+/**
+ * Insert or update result.
+ */
 const saveNewResult = async () => {
-  if (isSaving.value) {
+  if (isSaving.value) return
+
+  // Do not allow Result Entry to update an existing result, even if the
+  // edit method is invoked accidentally from the UI.
+  if (isResultEntry && isEditMode.value) {
+    alert('You are not allowed to edit existing results.')
     return
   }
 
@@ -1446,71 +1260,67 @@ const saveNewResult = async () => {
     return
   }
 
-  // Validate entered marks before sending the request.
-  const enteredSubjects = form.subjects.filter(
-    (subject) => subject.marks !== null && subject.marks !== undefined && subject.marks !== '',
+  const missingSubjects = currentSubjects.value.filter(
+    (subject) => subject.marks === '' || subject.marks === null || subject.marks === undefined,
   )
 
-  if (enteredSubjects.length === 0) {
-    alert('Please enter marks for at least one subject.')
+  if (missingSubjects.length > 0) {
+    const subjectNames = missingSubjects.map((subject) => subject.name).join(', ')
+    alert(`Please enter marks for all subjects. Missing: ${subjectNames}`)
     return
   }
 
-  const invalidMarks = enteredSubjects.some(
-    (subject) => !Number.isFinite(Number(subject.marks)) || Number(subject.marks) < 0,
+  const invalidSubject = form.subjects.some(
+    (subject) =>
+      subject.marks === null ||
+      subject.marks === undefined ||
+      subject.marks === '' ||
+      !Number.isFinite(Number(subject.marks)) ||
+      Number(subject.marks) < 0 ||
+      Number(subject.marks) > 999.99,
   )
 
-  if (invalidMarks) {
-    alert('Marks must be valid non-negative numbers.')
+  if (invalidSubject) {
+    alert('Please enter valid marks for every subject (0–999.99).')
     return
+  }
+
+  const payload = {
+    student_id: form.student_id,
+    student_session_id: Number(form.student_session_id),
+    exam_year: form.exam_year,
+    exam_type: form.exam_type,
+    subjects: form.subjects.map((subject) => ({
+      subject_id: subject.subject_id,
+      marks: Number(subject.marks),
+      is_additional: subject.is_additional,
+    })),
   }
 
   try {
     isSaving.value = true
 
-    const payload = {
-      student_id: form.student_id,
+    let response
 
-      student_session_id: Number(form.student_session_id),
-
-      exam_year: form.exam_year,
-
-      exam_type: form.exam_type,
-
-      subjects: enteredSubjects.map((subject) => ({
-        subject_id: subject.subject_id,
-        marks: Number(subject.marks),
-      })),
+    if (isEditMode.value && editingResultId.value) {
+      response = await api.put(`/results/${editingResultId.value}`, payload)
+    } else {
+      response = await api.post('/results', payload)
     }
 
-    console.log('RESULT SAVE PAYLOAD:', payload)
-
-    const response = await api.post('/results', payload)
-
-    console.log('RESULT SAVE RESPONSE:', response.data)
-
-    if (!response.data.status) {
+    if (response.data?.status === false) {
       alert(response.data.message || 'Failed to save result.')
       return
     }
 
-    await fetchData(1)
-
+    await fetchData(currentPage.value)
     closeAddModal()
+    resetForm()
 
-    form.student_id = ''
-    form.student_session_id = ''
-    form.exam_year = ''
-    form.exam_type = ''
-    form.subjects = []
-
-    studentSearchText.value = ''
-    yearSearchText.value = ''
-    examSearchText.value = ''
-
-    currentSubjects.value = []
-
-    alert(response.data.message || 'Result saved successfully.')
+    alert(
+      response.data?.message ||
+        (isEditMode.value ? 'Result updated successfully.' : 'Result saved successfully.'),
+    )
   } catch (error) {
     console.error('Error saving result:', error)
     console.error('Response:', error.response?.data)
@@ -1519,7 +1329,6 @@ const saveNewResult = async () => {
 
     if (errors && typeof errors === 'object') {
       const firstError = Object.values(errors).flat().find(Boolean)
-
       alert(firstError || error.response?.data?.message || 'Failed to save result.')
     } else {
       alert(error.response?.data?.message || 'Failed to save result. Please try again.')
@@ -1529,30 +1338,17 @@ const saveNewResult = async () => {
   }
 }
 
-/**
- * =========================================================
- * FILTER RESULTS
- * =========================================================
- */
-
 const filteredResults = computed(() => {
   const keyword = search.value.toLowerCase().trim()
 
-  const validResults = resultsList.value.filter(
-    (result) => result !== null && typeof result === 'object',
-  )
+  const validResults = resultsList.value.filter((result) => result && typeof result === 'object')
 
-  if (!keyword) {
-    return validResults
-  }
+  if (!keyword) return validResults
 
   return validResults.filter((result) => {
     const studentId = result.student?.student_id?.toString().toLowerCase() || ''
-
     const studentName = result.student?.full_name?.toString().toLowerCase() || ''
-
     const examType = result.exam_type?.toString().toLowerCase() || ''
-
     const examYear = result.exam_year?.toString().toLowerCase() || ''
 
     return (
@@ -1564,16 +1360,8 @@ const filteredResults = computed(() => {
   })
 })
 
-/**
- * =========================================================
- * GRADE POINT
- * =========================================================
- */
-
 const getPoint = (marks) => {
-  if (marks === null || marks === undefined || marks === '') {
-    return null
-  }
+  if (marks === null || marks === undefined || marks === '') return null
 
   const value = Number(marks)
 
@@ -1587,86 +1375,43 @@ const getPoint = (marks) => {
   return 0.0
 }
 
-/**
- * =========================================================
- * CALCULATE RESULT DETAILS
- * =========================================================
- */
-
 const calculateResultDetails = (result) => {
-  if (!result) {
-    return {
-      gpa: 0,
-      status: 'Fail',
-    }
-  }
+  if (!result) return { gpa: 0, status: 'Fail' }
 
   const subjects = result.result_subjects || result.resultSubjects || []
-
   let totalPoints = 0
   let subjectCount = 0
   let hasFailed = false
 
   subjects
-    .filter((resultSubject) => resultSubject !== null && typeof resultSubject === 'object')
-    .forEach((resultSubject) => {
-      const marks = resultSubject.marks
+    .filter((item) => item && typeof item === 'object')
+    .forEach((item) => {
+      if (item.marks === null || item.marks === undefined) return
 
-      if (marks === null || marks === undefined) {
-        return
-      }
-
-      const point = getPoint(marks)
-
-      if (point === null) {
-        return
-      }
+      const point = getPoint(item.marks)
+      if (point === null) return
 
       totalPoints += point
       subjectCount++
 
-      if (point === 0) {
-        hasFailed = true
-      }
+      if (point === 0) hasFailed = true
     })
 
-  if (subjectCount === 0 || hasFailed) {
-    return {
-      gpa: 0,
-      status: 'Fail',
-    }
-  }
-
-  const gpa = Math.min(5, totalPoints / subjectCount)
+  if (subjectCount === 0 || hasFailed) return { gpa: 0, status: 'Fail' }
 
   return {
-    gpa: Number(gpa.toFixed(2)),
+    gpa: Number(Math.min(5, totalPoints / subjectCount).toFixed(2)),
     status: 'Pass',
   }
 }
 
-/**
- * =========================================================
- * DASHBOARD COUNTS
- * =========================================================
- */
-
-const totalStudents = computed(() => {
-  return filteredTotal.value
-})
-
-const publishedResults = computed(() => {
-  return filteredTotal.value
-})
+const totalStudents = computed(() => filteredTotal.value)
+const publishedResults = computed(() => filteredTotal.value)
 
 const passRate = computed(() => {
-  const validResults = resultsList.value.filter(
-    (result) => result !== null && typeof result === 'object',
-  )
+  const validResults = resultsList.value.filter((result) => result && typeof result === 'object')
 
-  if (validResults.length === 0) {
-    return '0.0'
-  }
+  if (validResults.length === 0) return '0.0'
 
   const passed = validResults.filter(
     (result) => calculateResultDetails(result).status === 'Pass',
@@ -1675,42 +1420,15 @@ const passRate = computed(() => {
   return ((passed / validResults.length) * 100).toFixed(1)
 })
 
-/**
- * =========================================================
- * TOTAL GPA 5.00
- * =========================================================
- */
-
 const totalGpaFive = computed(() => {
-  const validResults = resultsList.value.filter(
-    (result) => result !== null && typeof result === 'object',
-  )
+  const validResults = resultsList.value.filter((result) => result && typeof result === 'object')
 
   return validResults.filter((result) => {
     const details = calculateResultDetails(result)
     const gpa = Number(details.gpa)
-
     return details.status === 'Pass' && Number.isFinite(gpa) && gpa >= 5
   }).length
 })
-
-/**
- * =========================================================
- * CLOSE DROPDOWNS
- * =========================================================
- */
-
-const closeDropdowns = () => {
-  isStudentDropdownOpen.value = false
-  isYearDropdownOpen.value = false
-  isExamDropdownOpen.value = false
-}
-
-/**
- * =========================================================
- * ON MOUNT
- * =========================================================
- */
 
 onMounted(async () => {
   await Promise.all([fetchData(1), fetchExaminations()])
@@ -1753,20 +1471,11 @@ onMounted(async () => {
   font-size: 22px;
 }
 
-/* =========================================================
-   ADD RESULT BUTTON
-========================================================= */
-
 .result-add-btn {
   position: relative;
   z-index: 10;
   cursor: pointer;
 }
-
-/* =========================================================
-   RESULT INSERT MODAL
-   Completely independent from Bootstrap modal CSS
-========================================================= */
 
 .result-modal-overlay {
   position: fixed !important;
@@ -1817,15 +1526,11 @@ onMounted(async () => {
   overflow-y: auto;
 }
 
-/* Modal footer */
-
 .result-modal-body .modal-footer {
   display: flex;
   justify-content: flex-end;
   align-items: center;
 }
-
-/* Prevent Bootstrap modal rules from interfering */
 
 .result-modal-overlay .modal,
 .result-modal-overlay .fade,
@@ -1833,10 +1538,6 @@ onMounted(async () => {
 .result-modal-overlay .d-block {
   display: block;
 }
-
-/* =========================================================
-   RESPONSIVE
-========================================================= */
 
 @media (max-width: 992px) {
   .result-page-wrapper {
