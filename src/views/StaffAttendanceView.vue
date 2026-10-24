@@ -1,40 +1,51 @@
 <template>
   <!-- Main Dashboard Wrapper for Flex Layout -->
+
   <div class="dashboard-layout bg-light min-vh-100 d-flex">
     <!-- Left Sidebar Component -->
+
     <aside class="sidebar-wrapper">
       <dashPageView />
     </aside>
 
     <!-- Right Main Content Area -->
+
     <main class="main-wrapper flex-grow-1 min-vh-100 d-flex flex-column">
       <!-- Dynamic Router View -->
+
       <RouterView />
 
       <!-- Staff Attendance Main Section -->
+
       <div class="attendance-section py-3 py-md-4 px-2 px-md-3">
         <div class="attendance-container bg-white rounded-3 shadow-sm p-3 p-md-4">
           <!-- Holiday Banner (যদি আজ ছুটি থাকে) -->
+
           <div
             v-if="holidayInfo"
             class="alert alert-info d-flex align-items-center gap-3 mb-4 shadow-sm border-0 bg-info bg-opacity-10 text-info"
           >
             <i class="bi bi-calendar-event-fill fs-4"></i>
+
             <div>
               <h5 class="alert-heading fw-bold mb-1">Today is a Holiday!</h5>
+
               <p class="mb-0 small">
                 Reason / Occasion:
+
                 <strong>{{ holidayInfo.title || holidayInfo.name || 'Public Holiday' }}</strong>
               </p>
             </div>
           </div>
 
           <!-- Title & Action Section -->
+
           <div
             class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4"
           >
             <div>
               <h2 class="h4 h3-md mb-0 fw-bold text-dark">Staff Attendance</h2>
+
               <p class="text-muted mb-0 small">
                 Manage daily staff attendance, check-in, check-out and working hours
               </p>
@@ -42,26 +53,31 @@
 
             <div class="d-flex flex-wrap align-items-center gap-2 gap-md-3">
               <!-- Syncing / Saving Status Indicator -->
+
               <div
                 v-if="isSyncing"
                 class="d-flex align-items-center text-primary small fw-semibold"
               >
                 <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+
                 Saving...
               </div>
 
               <div v-else-if="saveSuccess" class="text-success small fw-semibold">
                 <i class="bi bi-check-circle-fill me-1"></i>
+
                 Saved!
               </div>
 
               <!-- Date Selector -->
+
               <div
                 class="date-select-wrapper px-3 py-1 py-md-2 bg-light border rounded d-flex align-items-center gap-2 shadow-sm flex-grow-1 flex-md-grow-0"
               >
                 <label for="date-select" class="form-label mb-0 fw-semibold text-secondary small">
                   Date:
                 </label>
+
                 <input
                   type="date"
                   id="date-select"
@@ -72,18 +88,21 @@
               </div>
 
               <!-- Bulk Attendance Button -->
+
               <button
                 class="btn btn-primary btn-sm btn-md-md d-flex align-items-center justify-content-center gap-2 fw-semibold shadow-sm flex-grow-1 flex-md-grow-0"
                 @click="markAllPresent"
                 :disabled="holidayInfo"
               >
                 <i class="bi bi-person-check-fill"></i>
+
                 <span>Mark All Present</span>
               </button>
             </div>
           </div>
 
           <!-- Shift Filter Buttons -->
+
           <div
             class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3 bg-light p-2 rounded border"
           >
@@ -111,6 +130,7 @@
 
             <div class="text-muted small">
               Filtering Shift:
+
               <strong class="text-uppercase text-dark">
                 {{ selectedShift || 'All Shifts' }}
               </strong>
@@ -118,6 +138,7 @@
           </div>
 
           <!-- Search Bar & Summary Row -->
+
           <div
             class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3"
           >
@@ -126,6 +147,7 @@
                 <span class="input-group-text bg-white border-end-0 text-muted ps-3">
                   <i class="bi bi-search"></i>
                 </span>
+
                 <input
                   type="text"
                   v-model="searchQuery"
@@ -138,12 +160,14 @@
             <div class="text-muted small align-self-start align-self-sm-center">
               <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill shadow-sm">
                 Total Records:
+
                 <strong>{{ filteredStaffs.length }}</strong>
               </span>
             </div>
           </div>
 
           <!-- Attendance Table Card -->
+
           <div class="card border-0 shadow-sm">
             <div class="card-body p-0">
               <div class="table-responsive">
@@ -151,10 +175,13 @@
                   <thead class="table-light">
                     <tr class="fw-semibold text-secondary small">
                       <th scope="col" class="ps-3 ps-md-4">STAFF ID</th>
+
                       <th scope="col">STAFF NAME</th>
+
                       <th scope="col">SHIFT & START TIME</th>
 
                       <!-- PRESENT -->
+
                       <th scope="col" class="text-center">
                         <div class="d-flex align-items-center justify-content-center gap-1">
                           <input
@@ -164,18 +191,25 @@
                             @change="toggleSelectAll"
                             :disabled="holidayInfo"
                           />
+
                           <span class="ms-1 d-none d-sm-inline"> PRESENT </span>
                         </div>
                       </th>
 
                       <th scope="col" class="text-center">CHECK IN</th>
+
                       <th scope="col" class="text-center">CHECK OUT</th>
+
                       <th scope="col" class="text-center">WORKING TIME</th>
+
                       <th scope="col" class="text-center">LATE</th>
+
                       <th scope="col" class="text-center">EDIT</th>
+
                       <th scope="col" class="text-end pe-3 pe-md-4">ACTION</th>
 
                       <!-- LEAVE -->
+
                       <th scope="col" class="text-center">
                         <div class="d-flex align-items-center justify-content-center gap-1">
                           <span class="d-none d-sm-inline"> LEAVE </span>
@@ -186,29 +220,36 @@
 
                   <tbody>
                     <!-- Loading -->
+
                     <tr v-if="loading">
                       <td colspan="11" class="text-center py-4 text-muted">
                         <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+
                         Loading staff attendance...
                       </td>
                     </tr>
 
                     <!-- Staff Rows -->
+
                     <tr
                       v-else
-                      v-for="staffMember in filteredStaffs"
+                      v-for="staffMember in paginatedStaffs"
                       :key="staffMember.uniqueKey"
                       class="attendance-row"
                       :class="{
                         'present-row':
                           !holidayInfo && staffMember.isPresent && !staffMember.isLeave,
+
                         'absent-row':
                           !holidayInfo && !staffMember.isPresent && !staffMember.isLeave,
+
                         'leave-row': !holidayInfo && staffMember.isLeave,
+
                         'holiday-row': holidayInfo,
                       }"
                     >
                       <!-- STAFF ID -->
+
                       <td class="ps-3 ps-md-4">
                         <div class="fw-semibold text-dark text-uppercase small">
                           {{ staffMember.staff_code }}
@@ -216,6 +257,7 @@
                       </td>
 
                       <!-- STAFF NAME -->
+
                       <td>
                         <div class="d-flex align-items-center gap-2 gap-md-3">
                           <img
@@ -223,10 +265,12 @@
                             class="rounded-circle staff-photo-placeholder flex-shrink-0 object-fit-cover"
                             alt="Staff"
                           />
+
                           <div>
                             <div class="fw-bold text-dark text-uppercase small text-nowrap">
                               {{ staffMember.name }}
                             </div>
+
                             <small class="text-muted text-uppercase small d-block">
                               {{ staffMember.skill || 'N/A' }}
                             </small>
@@ -235,6 +279,7 @@
                       </td>
 
                       <!-- SHIFT -->
+
                       <td>
                         <div class="d-flex flex-column">
                           <span class="badge bg-secondary text-white w-fit mb-1">
@@ -244,6 +289,7 @@
                       </td>
 
                       <!-- PRESENT -->
+
                       <td class="text-center">
                         <div class="form-check d-flex justify-content-center m-0">
                           <input
@@ -257,6 +303,7 @@
                       </td>
 
                       <!-- CHECK IN -->
+
                       <td class="text-center font-monospace small text-nowrap">
                         <span
                           v-if="!holidayInfo && staffMember.checkInTime && !staffMember.isLeave"
@@ -264,10 +311,12 @@
                         >
                           {{ staffMember.checkInTime }}
                         </span>
+
                         <span v-else class="text-muted"> - </span>
                       </td>
 
                       <!-- CHECK OUT -->
+
                       <td class="text-center font-monospace small text-nowrap">
                         <div
                           class="d-flex align-items-center justify-content-center gap-2"
@@ -280,15 +329,19 @@
                             @change="toggleOutTime(staffMember, $event)"
                             :disabled="holidayInfo"
                           />
+
                           <span v-if="staffMember.rawOutTime" class="fw-semibold text-dark">
                             {{ formatTimeTo12Hr(staffMember.rawOutTime) }}
                           </span>
+
                           <span v-else class="text-muted small"> Checkout </span>
                         </div>
+
                         <span v-else class="text-muted"> - </span>
                       </td>
 
                       <!-- WORKING TIME -->
+
                       <td class="text-center font-monospace small text-nowrap">
                         <span
                           v-if="!holidayInfo && staffMember.workingHours && !staffMember.isLeave"
@@ -296,10 +349,12 @@
                         >
                           {{ staffMember.workingHours }}
                         </span>
+
                         <span v-else class="text-muted"> - </span>
                       </td>
 
                       <!-- LATE -->
+
                       <td class="text-center text-nowrap">
                         <span
                           v-if="!holidayInfo && !staffMember.isLeave && staffMember.lateMinutes > 0"
@@ -307,16 +362,19 @@
                         >
                           LATE: {{ staffMember.lateMinutes }} MIN
                         </span>
+
                         <span
                           v-else-if="!holidayInfo && !staffMember.isLeave && staffMember.isPresent"
                           class="badge bg-success rounded-pill fw-bold text-uppercase fs-8 px-2 px-md-3 py-1"
                         >
                           ON TIME
                         </span>
+
                         <span v-else class="text-muted fs-8"> - </span>
                       </td>
 
                       <!-- EDIT -->
+
                       <td class="text-center">
                         <div class="form-check d-flex justify-content-center m-0">
                           <button
@@ -331,6 +389,7 @@
                       </td>
 
                       <!-- LEAVE -->
+
                       <td class="text-center">
                         <div class="form-check d-flex justify-content-center m-0">
                           <input
@@ -344,6 +403,7 @@
                       </td>
 
                       <!-- ACTION / STATUS -->
+
                       <td class="text-end pe-3 pe-md-4">
                         <span
                           class="badge rounded-pill px-2 px-md-3 py-1 py-md-2 text-uppercase fs-8 fw-bold pill-status"
@@ -371,6 +431,7 @@
                     </tr>
 
                     <!-- No Staff -->
+
                     <tr v-if="!loading && filteredStaffs.length === 0">
                       <td colspan="11" class="text-center py-4 text-muted">
                         No staff found matching your criteria.
@@ -383,20 +444,43 @@
           </div>
 
           <!-- Footer / Pagination -->
+
           <div
             class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2 mt-3 text-muted small"
           >
-            <div>Showing {{ filteredStaffs.length }} of {{ staffList.length }} entries</div>
+            <div>
+              Showing {{ startEntry }}–{{ endEntry }} of {{ filteredStaffs.length }} entries
+            </div>
             <nav aria-label="Page navigation">
               <ul class="pagination pagination-sm m-0">
-                <li class="page-item disabled">
-                  <a class="page-link" href="#" tabindex="-1" aria-disabled="true"> Previous </a>
+                <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                  <a
+                    class="page-link"
+                    href="#"
+                    :aria-disabled="currentPage === 1"
+                    @click.prevent="goToPage(currentPage - 1)"
+                    >Previous</a
+                  >
                 </li>
-                <li class="page-item active" aria-current="page">
-                  <a class="page-link" href="#"> 1 </a>
+                <li
+                  v-for="page in totalPages"
+                  :key="page"
+                  class="page-item"
+                  :class="{ active: currentPage === page }"
+                  :aria-current="currentPage === page ? 'page' : null"
+                >
+                  <a class="page-link" href="#" @click.prevent="goToPage(page)">
+                    {{ page }}
+                  </a>
                 </li>
-                <li class="page-item">
-                  <a class="page-link" href="#"> Next </a>
+                <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                  <a
+                    class="page-link"
+                    href="#"
+                    :aria-disabled="currentPage === totalPages"
+                    @click.prevent="goToPage(currentPage + 1)"
+                    >Next</a
+                  >
                 </li>
               </ul>
             </nav>
@@ -406,6 +490,7 @@
     </main>
 
     <!-- Edit Time Modal -->
+
     <div
       class="modal fade"
       id="editStaffTimeModal"
@@ -419,6 +504,7 @@
             <h5 class="modal-title fw-bold text-dark fs-6" id="editStaffTimeModalLabel">
               Edit Attendance Time - {{ editingStaff?.name }}
             </h5>
+
             <button
               type="button"
               class="btn-close shadow-none"
@@ -429,10 +515,12 @@
 
           <div class="modal-body p-4" v-if="editingStaff">
             <!-- Check In -->
+
             <div class="mb-3">
               <label for="editInTime" class="form-label fw-semibold small">
                 Check-in Time (Entry)
               </label>
+
               <input
                 type="time"
                 id="editInTime"
@@ -443,10 +531,12 @@
             </div>
 
             <!-- Check Out -->
+
             <div class="mb-3">
               <label for="editOutTime" class="form-label fw-semibold small">
                 Check-out Time (Exit)
               </label>
+
               <input
                 type="time"
                 id="editOutTime"
@@ -461,6 +551,7 @@
             <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
               Cancel
             </button>
+
             <button
               type="button"
               class="btn btn-primary btn-sm"
@@ -475,6 +566,7 @@
     </div>
 
     <!-- Holiday Notice Modal -->
+
     <div
       class="modal fade"
       id="holidayNoticeModal"
@@ -486,6 +578,7 @@
         <div class="modal-content border-0 shadow-lg rounded-4 p-3 text-center">
           <div class="modal-body">
             <!-- Icon -->
+
             <div class="mb-3">
               <div
                 class="d-inline-flex align-items-center justify-content-center bg-warning bg-opacity-10 text-warning rounded-circle p-3"
@@ -496,6 +589,7 @@
             </div>
 
             <!-- Badge -->
+
             <span
               class="badge bg-warning text-dark fw-bold px-3 py-1 rounded-pill mb-2 text-uppercase"
               style="letter-spacing: 0.5px"
@@ -504,31 +598,38 @@
             </span>
 
             <!-- Holiday Title -->
+
             <h4 class="fw-bold text-dark mb-2">
               {{ holidayInfo?.title || holidayInfo?.name || 'Public Holiday' }}
             </h4>
 
             <!-- Duration -->
+
             <p class="text-muted small mb-3">
               <i class="bi bi-clock-history me-1"></i> Duration:
+
               <strong>{{ holidayInfo?.date || selectedDate }}</strong>
             </p>
 
             <!-- Description Box -->
+
             <div class="bg-light border rounded-3 p-3 text-start mb-3">
               <label class="form-label fw-semibold text-secondary fs-8 text-uppercase mb-1">
                 Description / Notes:
               </label>
+
               <p class="mb-0 text-dark small">
                 {{ holidayInfo?.description || holidayInfo?.note || 'No description provided.' }}
               </p>
             </div>
 
             <!-- Lock Warning -->
+
             <div
               class="text-danger small fw-semibold d-flex align-items-center justify-content-center gap-1"
             >
               <i class="bi bi-exclamation-circle-fill"></i>
+
               <span>System is locked for attendance tracking today.</span>
             </div>
           </div>
@@ -549,37 +650,54 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+
 import dashPageView from './dashPageView.vue'
+
 import api from '@/services/api'
+
 import 'bootstrap/js/dist/modal.js'
+
 import * as bootstrap from 'bootstrap'
 
 // =====================================================
+
 // STATES
+
 // =====================================================
 
 const today = new Date().toISOString().split('T')[0]
 
 const selectedDate = ref(today)
+
 const searchQuery = ref('')
+
 const selectedShift = ref('')
 
 const staffList = ref([])
 
 const loading = ref(false)
+
 const isSyncing = ref(false)
+
 const saveSuccess = ref(false)
 
 const editingStaff = ref(null)
 
 const holidayInfo = ref(null)
 
+const currentPage = ref(1)
+
+const perPage = ref(10)
+
 let modalInstance = null
+
 let holidayModalInstance = null
 
 // =====================================================
+
 // FETCH STAFF, ATTENDANCE & HOLIDAY DATA
+
 // =====================================================
 
 const fetchAttendanceData = async () => {
@@ -587,7 +705,9 @@ const fetchAttendanceData = async () => {
 
   try {
     // ===================================================
+
     // FETCH HOLIDAYS
+
     // ===================================================
 
     try {
@@ -601,25 +721,24 @@ const fetchAttendanceData = async () => {
         ? holidayRes.data
         : holidayRes.data?.data || []
 
-      /*
-       * Holiday detect
-       *
-       * প্রথমে exact date check করবে।
-       * তারপর start_date/end_date range check করবে।
-       */
+      /* Holiday detect: exact date first, then start_date/end_date range. */
+
       holidayInfo.value =
         holidays.find((h) => {
           // যদি API থেকে date সরাসরি আসে
+
           if (h.date === selectedDate.value) {
             return true
           }
 
           // start_date + end_date দিয়ে Holiday check
+
           if (h.start_date && h.end_date) {
             return selectedDate.value >= h.start_date && selectedDate.value <= h.end_date
           }
 
           // Single day holiday হলে start_date check
+
           if (h.start_date === selectedDate.value) {
             return true
           }
@@ -628,7 +747,9 @@ const fetchAttendanceData = async () => {
         }) || null
 
       // =================================================
+
       // HOLIDAY MODAL
+
       // =================================================
 
       if (holidayInfo.value) {
@@ -651,15 +772,29 @@ const fetchAttendanceData = async () => {
     }
 
     // ===================================================
+
     // FETCH STAFFS
+
     // ===================================================
 
     const staffRes = await api.get('/staff')
 
-    const rawStaffs = Array.isArray(staffRes.data) ? staffRes.data : staffRes.data?.staff || []
+    console.log('Staff API Response:', staffRes.data)
+
+    const rawStaffs = Array.isArray(staffRes.data)
+      ? staffRes.data
+      : Array.isArray(staffRes.data?.staff)
+        ? staffRes.data.staff
+        : Array.isArray(staffRes.data?.data)
+          ? staffRes.data.data
+          : []
+
+    console.log('Total staff received:', rawStaffs.length)
 
     // ===================================================
+
     // FETCH ATTENDANCE
+
     // ===================================================
 
     let rawAttendance = []
@@ -679,7 +814,9 @@ const fetchAttendanceData = async () => {
     }
 
     // ===================================================
+
     // EXPAND STAFFS
+
     // ===================================================
 
     const expandedStaffs = []
@@ -692,7 +829,9 @@ const fetchAttendanceData = async () => {
         : [
             {
               id: 'default',
+
               name: 'General Shift',
+
               start_time: '09:00:00',
             },
           ]
@@ -703,9 +842,12 @@ const fetchAttendanceData = async () => {
         const shiftName = shift.name || 'General Shift'
 
         const shiftStartTime = shift.start_time || '09:00:00'
+        const shiftEndTime = shift.end_time || null
 
         // =================================================
+
         // FIND ATTENDANCE RECORD
+
         // =================================================
 
         const record = rawAttendance.find(
@@ -715,54 +857,54 @@ const fetchAttendanceData = async () => {
         )
 
         // =================================================
+
         // DEFAULT VALUES
+
         // =================================================
 
         let isPresent = false
+
         let isLeave = false
+
         let isHoliday = !!holidayInfo.value
 
         let checkInTime = null
 
         let rawInTime = null
+
         let rawOutTime = null
 
         let lateMinutes = 0
+
         let workingHours = null
 
         let attendanceId = null
 
         // =================================================
+
         // ATTENDANCE RECORD EXISTS
+
         // =================================================
 
         if (record) {
-          /*
-           * Leave check
-           */
+          /* Leave check */
+
           isLeave =
             record.leave === true ||
             record.leave === 1 ||
             record.leave === '1' ||
             record.status === 'Leave'
 
-          /*
-           * Holiday / Off Day check
-           *
-           * Backend থেকে Off Day এলে এটাও Holiday হিসেবে
-           * treat করা হবে।
-           */
+          /* Holiday / Off Day check; backend Off Day is treated as a holiday. */
+
           const isOffDay = record.status === 'Off Day'
 
           if (isOffDay) {
             isHoliday = true
           }
 
-          /*
-           * Present check
-           *
-           * Off Day বা Leave হলে Present হবে না।
-           */
+          /* Present check; Leave and Off Day are not Present. */
+
           isPresent =
             !isLeave && !isOffDay && (record.status === 'Present' || record.status === 'Late')
 
@@ -774,15 +916,18 @@ const fetchAttendanceData = async () => {
 
           lateMinutes = !isLeave && !isOffDay ? calculateLateMinutes(rawInTime, shiftStartTime) : 0
 
-          workingHours = !isLeave && !isOffDay ? calculateWorkingHours(rawInTime, rawOutTime) : null
+          workingHours =
+            !isLeave && !isOffDay
+              ? calculateWorkingHours(rawInTime, rawOutTime, shiftEndTime)
+              : null
 
           attendanceId = record.id
 
-          /*
-           * Leave হলে time clear
-           */
+          /* Clear times when on leave. */
+
           if (isLeave) {
             rawInTime = null
+
             rawOutTime = null
 
             checkInTime = null
@@ -792,11 +937,11 @@ const fetchAttendanceData = async () => {
             workingHours = null
           }
 
-          /*
-           * Off Day হলে time clear
-           */
+          /* Clear times on an off day. */
+
           if (isOffDay) {
             rawInTime = null
+
             rawOutTime = null
 
             checkInTime = null
@@ -812,7 +957,9 @@ const fetchAttendanceData = async () => {
         }
 
         // =================================================
+
         // HOLIDAY SELECTED DATE
+
         // =================================================
 
         if (holidayInfo.value) {
@@ -834,7 +981,9 @@ const fetchAttendanceData = async () => {
         }
 
         // =================================================
+
         // PUSH STAFF OBJECT
+
         // =================================================
 
         expandedStaffs.push({
@@ -849,6 +998,7 @@ const fetchAttendanceData = async () => {
           shift_name: shiftName,
 
           shiftStartTime: shiftStartTime,
+          shiftEndTime: shiftEndTime,
 
           staff_code: s.user_name ? `STF-${s.id}` : `STF-${staffId}`,
 
@@ -886,7 +1036,9 @@ const fetchAttendanceData = async () => {
 }
 
 // =====================================================
+
 // PRESENT CHECKBOX CHANGE
+
 // =====================================================
 
 const onCheckboxChange = (staffMember) => {
@@ -903,10 +1055,15 @@ const onCheckboxChange = (staffMember) => {
 
     staffMember.lateMinutes = calculateLateMinutes(
       staffMember.rawInTime,
+
       staffMember.shiftStartTime,
     )
 
-    staffMember.workingHours = calculateWorkingHours(staffMember.rawInTime, staffMember.rawOutTime)
+    staffMember.workingHours = calculateWorkingHours(
+      staffMember.rawInTime,
+      staffMember.rawOutTime,
+      staffMember.shiftEndTime,
+    )
   } else {
     staffMember.checkInTime = null
 
@@ -923,7 +1080,9 @@ const onCheckboxChange = (staffMember) => {
 }
 
 // =====================================================
+
 // LEAVE CHECKBOX CHANGE
+
 // =====================================================
 
 const onLeaveChange = (staffMember) => {
@@ -961,7 +1120,9 @@ const onLeaveChange = (staffMember) => {
 }
 
 // =====================================================
+
 // CHECK-OUT CHECKBOX
+
 // =====================================================
 
 const toggleOutTime = (staffMember, event) => {
@@ -979,13 +1140,19 @@ const toggleOutTime = (staffMember, event) => {
     staffMember.rawOutTime = null
   }
 
-  staffMember.workingHours = calculateWorkingHours(staffMember.rawInTime, staffMember.rawOutTime)
+  staffMember.workingHours = calculateWorkingHours(
+    staffMember.rawInTime,
+    staffMember.rawOutTime,
+    staffMember.shiftEndTime,
+  )
 
   autoSaveSingleStaff(staffMember)
 }
 
 // =====================================================
+
 // OPEN EDIT MODAL
+
 // =====================================================
 
 const openEditModal = (staffMember) => {
@@ -1013,7 +1180,9 @@ const openEditModal = (staffMember) => {
 }
 
 // =====================================================
+
 // SAVE MODAL TIMES
+
 // =====================================================
 
 const saveModalTimes = async () => {
@@ -1032,10 +1201,15 @@ const saveModalTimes = async () => {
 
     staffMember.lateMinutes = calculateLateMinutes(
       staffMember.rawInTime,
+
       staffMember.shiftStartTime,
     )
 
-    staffMember.workingHours = calculateWorkingHours(staffMember.rawInTime, staffMember.rawOutTime)
+    staffMember.workingHours = calculateWorkingHours(
+      staffMember.rawInTime,
+      staffMember.rawOutTime,
+      staffMember.shiftEndTime,
+    )
 
     await autoSaveSingleStaff(staffMember)
   }
@@ -1046,14 +1220,14 @@ const saveModalTimes = async () => {
 }
 
 // =====================================================
+
 // SMART SAVE / UPDATE
+
 // =====================================================
 
 const autoSaveSingleStaff = async (staffMember) => {
-  /*
-   * Holiday হলে কোনো frontend save হবে না।
-   * Backend-এও Holiday protection আছে।
-   */
+  /* Do not save from frontend on a holiday; backend also protects this. */
+
   if (holidayInfo.value) {
     return
   }
@@ -1068,7 +1242,9 @@ const autoSaveSingleStaff = async (staffMember) => {
 
   try {
     // =================================================
+
     // LEAVE
+
     // =================================================
 
     if (staffMember.isLeave) {
@@ -1114,7 +1290,9 @@ const autoSaveSingleStaff = async (staffMember) => {
     }
 
     // =================================================
+
     // NORMAL ATTENDANCE
+
     // =================================================
     else {
       const payload = {
@@ -1166,7 +1344,9 @@ const autoSaveSingleStaff = async (staffMember) => {
     }
 
     // =================================================
+
     // SUCCESS
+
     // =================================================
 
     saveSuccess.value = true
@@ -1182,7 +1362,9 @@ const autoSaveSingleStaff = async (staffMember) => {
 }
 
 // =====================================================
+
 // UTILITIES - TIME
+
 // =====================================================
 
 const getCurrent24HrTime = () => {
@@ -1227,17 +1409,18 @@ const calculateLateMinutes = (checkInTime24, shiftStartTime) => {
   return 0
 }
 
-const calculateWorkingHours = (inTime24, outTime24) => {
-  if (!inTime24 || !outTime24) {
+const calculateWorkingHours = (inTime24, outTime24, shiftEndTime = null) => {
+  // Checkout থাকলে actual checkout time, না থাকলে shift end time
+  const effectiveOutTime = outTime24 || shiftEndTime
+
+  if (!inTime24 || !effectiveOutTime) {
     return null
   }
 
   const [inH, inM] = inTime24.split(':').map(Number)
-
-  const [outH, outM] = outTime24.split(':').map(Number)
+  const [outH, outM] = effectiveOutTime.split(':').map(Number)
 
   const inTotalMins = inH * 60 + inM
-
   const outTotalMins = outH * 60 + outM
 
   if (outTotalMins <= inTotalMins) {
@@ -1245,16 +1428,16 @@ const calculateWorkingHours = (inTime24, outTime24) => {
   }
 
   const diffMins = outTotalMins - inTotalMins
-
   const hours = Math.floor(diffMins / 60)
-
   const minutes = diffMins % 60
 
   return `${hours}h ${minutes}m`
 }
 
 // =====================================================
+
 // BULK ACTIONS
+
 // =====================================================
 
 const markAllPresent = async () => {
@@ -1273,10 +1456,15 @@ const markAllPresent = async () => {
 
     staffMember.lateMinutes = calculateLateMinutes(
       staffMember.rawInTime,
+
       staffMember.shiftStartTime,
     )
 
-    staffMember.workingHours = calculateWorkingHours(staffMember.rawInTime, staffMember.rawOutTime)
+    staffMember.workingHours = calculateWorkingHours(
+      staffMember.rawInTime,
+      staffMember.rawOutTime,
+      staffMember.shiftEndTime,
+    )
   })
 
   for (const staffMember of filteredStaffs.value) {
@@ -1303,11 +1491,13 @@ const toggleSelectAll = async (event) => {
 
       staffMember.lateMinutes = calculateLateMinutes(
         staffMember.rawInTime,
+
         staffMember.shiftStartTime,
       )
 
       staffMember.workingHours = calculateWorkingHours(
         staffMember.rawInTime,
+
         staffMember.rawOutTime,
       )
     } else {
@@ -1333,7 +1523,9 @@ const toggleSelectAll = async (event) => {
 }
 
 // =====================================================
+
 // COMPUTED PROPERTIES
+
 // =====================================================
 
 const availableShifts = computed(() => {
@@ -1365,6 +1557,34 @@ const filteredStaffs = computed(() => {
   })
 })
 
+const totalPages = computed(() =>
+  Math.max(1, Math.ceil(filteredStaffs.value.length / perPage.value)),
+)
+
+const paginatedStaffs = computed(() => {
+  const start = (currentPage.value - 1) * perPage.value
+
+  return filteredStaffs.value.slice(start, start + perPage.value)
+})
+
+const startEntry = computed(() =>
+  filteredStaffs.value.length === 0 ? 0 : (currentPage.value - 1) * perPage.value + 1,
+)
+
+const endEntry = computed(() =>
+  Math.min(currentPage.value * perPage.value, filteredStaffs.value.length),
+)
+
+function goToPage(page) {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page
+  }
+}
+
+watch(filteredStaffs, () => {
+  currentPage.value = 1
+})
+
 const isAllSelected = computed(() => {
   return (
     filteredStaffs.value.length > 0 &&
@@ -1377,13 +1597,16 @@ const getStaffPhoto = () => {
 }
 
 // =====================================================
+
 // ON MOUNTED
+
 // =====================================================
 
 onMounted(() => {
   fetchAttendanceData()
 })
 </script>
+
 <style scoped>
 /* Main Layout Container */
 .dashboard-layout {

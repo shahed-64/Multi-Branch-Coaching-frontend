@@ -335,6 +335,63 @@
         <span>Holidays</span>
       </router-link>
 
+      <!-- SMS NOTIFICATION -->
+      <div class="menu-item-has-children" :class="{ open: openMenus.smsNotification }">
+        <button
+          class="menu-btn-toggle"
+          :disabled="isResultEntry"
+          @click="toggleMenu('smsNotification')"
+        >
+          <span class="btn-text">
+            <i class="fa-solid fa-comment-sms menu-icon"></i>
+            <span>SMS Notification</span>
+          </span>
+          <i class="fa-solid fa-chevron-right chevron-icon"></i>
+        </button>
+
+        <div class="submenu-container">
+          <router-link
+            to="/smsNotification"
+            class="submenu-link"
+            active-class="active-submenu"
+            @click="handleMenuClick($event)"
+          >
+            <i class="fa-solid fa-list"></i>
+            <span>All SMS Notifications</span>
+          </router-link>
+
+          <button
+            type="button"
+            class="submenu-link text-start border-0 bg-transparent"
+            :disabled="isResultEntry"
+            @click="openSmsAction('Send New SMS')"
+          >
+            <i class="fa-solid fa-paper-plane"></i>
+            <span>Send New SMS</span>
+          </button>
+
+          <button
+            type="button"
+            class="submenu-link text-start border-0 bg-transparent"
+            :disabled="isResultEntry"
+            @click="openSmsAction('Due Reminder')"
+          >
+            <i class="fa-solid fa-bell"></i>
+            <span>Due Reminder</span>
+          </button>
+
+          <button
+            type="button"
+            class="submenu-link text-start border-0 bg-transparent"
+            :disabled="isResultEntry"
+            @click="openSmsAction('Attendance SMS')"
+          >
+            <i class="fa-solid fa-user-check"></i>
+            <span>Attendance SMS</span>
+          </button>
+        </div>
+      </div>
+
       <!-- ACCOUNT -->
       <div v-if="['Manager', 'Branch Manager'].includes(role)" class="menu-section-title">
         Account
@@ -403,6 +460,10 @@ const message = ref('')
 const isError = ref(false)
 const institute = ref(null)
 
+const branches = ref([])
+const branchLoading = ref(false)
+const selectedBranchId = ref(localStorage.getItem('selected_branch_id') || '')
+
 const openMenus = reactive({
   institute: false,
   students: false,
@@ -411,6 +472,7 @@ const openMenus = reactive({
   classInfo: false,
   exam: false,
   instituteResult: false,
+  smsNotification: false,
 })
 
 const instituteItems = [
@@ -458,6 +520,14 @@ const classItems = [
   { path: '/section', label: 'Sections', icon: 'fa-solid fa-object-group' },
 ]
 
+const closeSidebar = () => {
+  isSidebarOpen.value = false
+}
+
+const toggleSidebar = () => {
+  isSidebarOpen.value = !isSidebarOpen.value
+}
+
 const autoOpenMenuByRoute = () => {
   const path = route.path
 
@@ -496,9 +566,14 @@ const autoOpenMenuByRoute = () => {
     ].includes(path)
   ) {
     openMenus.exam = true
-    if (path === '/instituteresult' || path === '/finalAvrageResultMerit') {
+
+    if (['/instituteresult', '/finalAvrageResultMerit'].includes(path)) {
       openMenus.instituteResult = true
     }
+  } else if (
+    ['/smsNotification', '/sms/send-new', '/sms/due-reminder', '/sms/attendance'].includes(path)
+  ) {
+    openMenus.smsNotification = true
   }
 }
 
@@ -527,19 +602,37 @@ const toggleMenu = (menuKey) => {
       openMenus[key] = false
     }
   })
+
   openMenus[menuKey] = !openMenus[menuKey]
 }
 
-const branches = ref([])
-const branchLoading = ref(false)
-const selectedBranchId = ref(localStorage.getItem('selected_branch_id') || '')
+// Sidebar SMS action navigation.
+// SmsNotificationView.vue must read the action query to open the matching UI.
+const openSmsAction = (action) => {
+  if (isResultEntry) return
+
+  const allowedActions = ['Send New SMS', 'Due Reminder', 'Attendance SMS']
+
+  if (!allowedActions.includes(action)) return
+
+  closeSidebar()
+
+  router.push({
+    path: '/smsNotification',
+    query: { action },
+  })
+}
 
 const getLogoUrl = (logo) => {
   if (!logo) return ''
-  if (logo.startsWith('http://') || logo.startsWith('https://') || logo.startsWith('data:image'))
+
+  if (logo.startsWith('http://') || logo.startsWith('https://') || logo.startsWith('data:image')) {
     return logo
+  }
+
   if (logo.startsWith('/storage/')) return logo
   if (logo.startsWith('storage/')) return `/${logo}`
+
   return `/storage/${logo}`
 }
 
@@ -555,7 +648,9 @@ const fetchInstitute = async () => {
 
 const fetchBranches = async () => {
   if (role !== 'Manager') return
+
   branchLoading.value = true
+
   try {
     const response = await api.get('/branches')
     branches.value = response.data.branches || []
@@ -569,11 +664,13 @@ const fetchBranches = async () => {
 
 const changeBranch = () => {
   if (isResultEntry) return
+
   if (selectedBranchId.value) {
     localStorage.setItem('selected_branch_id', selectedBranchId.value)
   } else {
     localStorage.removeItem('selected_branch_id')
   }
+
   window.location.reload()
 }
 
@@ -586,6 +683,7 @@ const runBackup = async () => {
 
   try {
     const token = localStorage.getItem('token')
+
     const response = await api.post(
       '/backup',
       {},
@@ -606,6 +704,7 @@ const runBackup = async () => {
 
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
+
     link.href = url
     link.setAttribute('download', fileName)
     document.body.appendChild(link)
@@ -629,6 +728,7 @@ const handleMenuClick = (event) => {
     event.stopPropagation()
     return
   }
+
   closeSidebar()
 }
 
@@ -637,14 +737,6 @@ const logout = () => {
   localStorage.removeItem('role')
   localStorage.removeItem('selected_branch_id')
   router.push('/login')
-}
-
-const closeSidebar = () => {
-  isSidebarOpen.value = false
-}
-
-const toggleSidebar = () => {
-  isSidebarOpen.value = !isSidebarOpen.value
 }
 
 onMounted(() => {
@@ -659,6 +751,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* আপনার আগের সমস্ত CSS স্টাইলগুলো এখানে অপরিবর্তিত থাকবে */
 .sidebar {
   width: 260px;
   min-height: 100vh;
@@ -1048,7 +1141,6 @@ onMounted(() => {
   }
 }
 
-/* Result Entry restrictions */
 .result-entry-disabled {
   pointer-events: none;
   opacity: 0.5;

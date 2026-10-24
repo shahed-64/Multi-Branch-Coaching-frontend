@@ -1,30 +1,15 @@
 <template>
-  <!-- Main Dashboard Wrapper for Flex Layout -->
-
   <div class="dashboard-layout bg-light min-vh-100 d-flex">
-    <!-- Left Sidebar Component -->
-
     <aside class="sidebar-wrapper">
       <dashPageView />
     </aside>
 
-    <!-- Right Main Content Area -->
-
     <div class="main-wrapper flex-grow-1 min-vh-100 d-flex flex-column">
-      <!-- Dynamic Router View -->
-
       <RouterView />
-
-      <!-- Teacher Attendance Main Section -->
 
       <main class="attendance-section py-3 py-md-4 px-2 px-md-3">
         <div class="attendance-container bg-white rounded-3 shadow-sm p-3 p-md-4 position-relative">
-          <!-- ======================================================= -->
-
-          <!-- সেন্ট্রাল পপআপ স্কয়ার বক্স নোটিশ (মাঝখানে থাকবে, কিন্তু মেনুতে ক্লিক করা যাবে) -->
-
-          <!-- ======================================================= -->
-
+          <!-- Holiday Notice -->
           <div
             v-if="activeHoliday"
             class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center p-3"
@@ -34,8 +19,6 @@
               class="card border-0 shadow-lg rounded-4 overflow-hidden bg-white text-center p-4 p-md-5 border-top border-warning border-5"
               style="max-width: 480px; width: 100%; pointer-events: auto"
             >
-              <!-- Top Icon -->
-
               <div class="mb-3">
                 <div
                   class="d-inline-flex align-items-center justify-content-center bg-warning bg-opacity-10 text-warning rounded-circle p-3 shadow-sm"
@@ -44,8 +27,6 @@
                   <i class="bi bi-calendar-event-fill fs-2"></i>
                 </div>
               </div>
-
-              <!-- Badge & Title -->
 
               <div
                 class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold text-uppercase mb-2 shadow-sm d-inline-block mx-auto"
@@ -57,23 +38,16 @@
                 {{ activeHoliday.title }}
               </h3>
 
-              <!-- Date Duration -->
-
               <p class="text-muted small mb-3 fw-semibold">
                 <i class="bi bi-clock-history me-1 text-warning"></i>
-
                 Duration: <span class="text-dark">{{ activeHoliday.start_date }}</span> to
-
                 <span class="text-dark">{{ activeHoliday.end_date }}</span>
               </p>
-
-              <!-- Description Box -->
 
               <div class="bg-light p-3 rounded-3 border mb-4 text-start">
                 <h6 class="fw-semibold text-secondary small text-uppercase mb-1">
                   Description / Notes:
                 </h6>
-
                 <p class="mb-0 text-dark small" style="white-space: pre-line">
                   {{
                     activeHoliday.description ||
@@ -82,52 +56,39 @@
                 </p>
               </div>
 
-              <!-- System Locked Footer Info -->
-
               <div
                 class="text-muted small border-top pt-3 d-flex align-items-center justify-content-center gap-1"
               >
                 <i class="bi bi-shield-lock-fill text-danger"></i>
-
                 <span>System is locked for attendance tracking today.</span>
               </div>
             </div>
           </div>
 
-          <!-- ======================================================= -->
-
-          <!-- Title & Action Section -->
-
+          <!-- Title & Actions -->
           <div
             class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4"
           >
             <div>
               <h2 class="h4 h3-md mb-0 fw-bold text-dark">Teacher Attendance</h2>
-
               <p class="text-muted mb-0 small">
                 Manage daily teacher attendance, check-in, check-out and working hours
               </p>
             </div>
 
             <div class="d-flex flex-wrap align-items-center gap-2 gap-md-3">
-              <!-- Syncing / Saving Status Indicator -->
-
               <div
                 v-if="isSyncing"
                 class="d-flex align-items-center text-primary small fw-semibold"
               >
                 <div class="spinner-border spinner-border-sm me-2" role="status"></div>
-
                 Saving...
               </div>
 
               <div v-else-if="saveSuccess" class="text-success small fw-semibold">
                 <i class="bi bi-check-circle-fill me-1"></i>
-
                 Saved!
               </div>
-
-              <!-- Date Selector -->
 
               <div
                 class="date-select-wrapper px-3 py-1 py-md-2 bg-light border rounded d-flex align-items-center gap-2 shadow-sm flex-grow-1 flex-md-grow-0"
@@ -135,7 +96,6 @@
                 <label for="date-select" class="form-label mb-0 fw-semibold text-secondary small">
                   Date:
                 </label>
-
                 <input
                   type="date"
                   id="date-select"
@@ -145,22 +105,18 @@
                 />
               </div>
 
-              <!-- Bulk Attendance Button -->
-
               <button
                 class="btn btn-primary btn-sm btn-md-md d-flex align-items-center justify-content-center gap-2 fw-semibold shadow-sm flex-grow-1 flex-md-grow-0"
                 @click="markAllPresent"
                 :disabled="activeHoliday"
               >
                 <i class="bi bi-person-check-fill"></i>
-
                 <span>Mark All Present</span>
               </button>
             </div>
           </div>
 
-          <!-- Shift Filter Buttons -->
-
+          <!-- Shift Filters -->
           <div
             class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3 bg-light p-2 rounded border"
           >
@@ -188,15 +144,13 @@
 
             <div class="text-muted small">
               Filtering Shift:
-
               <strong class="text-uppercase text-dark">
                 {{ selectedShift || 'All Shifts' }}
               </strong>
             </div>
           </div>
 
-          <!-- Search Bar & Summary Row -->
-
+          <!-- Search & Summary -->
           <div
             class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3"
           >
@@ -205,7 +159,6 @@
                 <span class="input-group-text bg-white border-end-0 text-muted ps-3">
                   <i class="bi bi-search"></i>
                 </span>
-
                 <input
                   type="text"
                   v-model="searchQuery"
@@ -218,14 +171,12 @@
             <div class="text-muted small align-self-start align-self-sm-center">
               <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill shadow-sm">
                 Total Records:
-
                 <strong>{{ filteredTeachers.length }}</strong>
               </span>
             </div>
           </div>
 
-          <!-- Attendance Table Card -->
-
+          <!-- Attendance Table -->
           <div class="card border-0 shadow-sm">
             <div class="card-body p-0">
               <div class="table-responsive">
@@ -233,12 +184,8 @@
                   <thead class="table-light">
                     <tr class="fw-semibold text-secondary small">
                       <th scope="col" class="ps-3 ps-md-4">TEACHER ID</th>
-
                       <th scope="col">TEACHER NAME</th>
-
                       <th scope="col">SHIFT & START TIME</th>
-
-                      <!-- PRESENT -->
 
                       <th scope="col" class="text-center">
                         <div class="d-flex align-items-center justify-content-center gap-1">
@@ -249,72 +196,52 @@
                             @change="toggleSelectAll"
                             :disabled="activeHoliday"
                           />
-
-                          <span class="ms-1 d-none d-sm-inline"> PRESENT </span>
+                          <span class="ms-1 d-none d-sm-inline">PRESENT</span>
                         </div>
                       </th>
 
                       <th scope="col" class="text-center">CHECK IN</th>
-
                       <th scope="col" class="text-center">CHECK OUT</th>
-
                       <th scope="col" class="text-center">WORKING TIME</th>
-
                       <th scope="col" class="text-center">LATE</th>
-
                       <th scope="col" class="text-center">EDIT</th>
-
                       <th scope="col" class="text-end pe-3 pe-md-4">ACTION</th>
-
-                      <!-- LEAVE -->
 
                       <th scope="col" class="text-center">
                         <div class="d-flex align-items-center justify-content-center gap-1">
-                          <span class="d-none d-sm-inline"> LEAVE </span>
+                          <span class="d-none d-sm-inline">LEAVE</span>
                         </div>
                       </th>
                     </tr>
                   </thead>
 
                   <tbody>
-                    <!-- Loading -->
-
                     <tr v-if="loading">
                       <td colspan="11" class="text-center py-4 text-muted">
                         <div class="spinner-border spinner-border-sm me-2" role="status"></div>
-
                         Loading teacher attendance...
                       </td>
                     </tr>
 
-                    <!-- Teacher Rows -->
-
                     <tr
                       v-else
-                      v-for="teacherMember in filteredTeachers"
+                      v-for="teacherMember in paginatedTeachers"
                       :key="teacherMember.uniqueKey"
                       class="attendance-row"
                       :class="{
                         'present-row':
                           teacherMember.isPresent && !teacherMember.isLeave && !activeHoliday,
-
                         'absent-row':
                           !teacherMember.isPresent && !teacherMember.isLeave && !activeHoliday,
-
                         'leave-row': teacherMember.isLeave,
-
                         'table-warning': activeHoliday,
                       }"
                     >
-                      <!-- TEACHER ID -->
-
                       <td class="ps-3 ps-md-4">
                         <div class="fw-semibold text-dark text-uppercase small">
                           {{ teacherMember.teacher_code }}
                         </div>
                       </td>
-
-                      <!-- TEACHER NAME -->
 
                       <td>
                         <div class="d-flex align-items-center gap-2 gap-md-3">
@@ -324,20 +251,16 @@
                             alt="Teacher"
                             style="width: 32px; height: 32px"
                           />
-
                           <div>
                             <div class="fw-bold text-dark text-uppercase small text-nowrap">
                               {{ teacherMember.name }}
                             </div>
-
                             <small class="text-muted text-uppercase small d-block">
                               {{ teacherMember.subject || 'N/A' }}
                             </small>
                           </div>
                         </div>
                       </td>
-
-                      <!-- SHIFT -->
 
                       <td>
                         <div class="d-flex flex-column">
@@ -346,8 +269,6 @@
                           </span>
                         </div>
                       </td>
-
-                      <!-- PRESENT -->
 
                       <td class="text-center">
                         <div class="form-check d-flex justify-content-center m-0">
@@ -361,8 +282,6 @@
                         </div>
                       </td>
 
-                      <!-- CHECK IN -->
-
                       <td class="text-center font-monospace small text-nowrap">
                         <span
                           v-if="
@@ -372,11 +291,8 @@
                         >
                           {{ teacherMember.checkInTime }}
                         </span>
-
-                        <span v-else class="text-muted"> - </span>
+                        <span v-else class="text-muted">-</span>
                       </td>
-
-                      <!-- CHECK OUT -->
 
                       <td class="text-center font-monospace small text-nowrap">
                         <div
@@ -389,18 +305,13 @@
                             :checked="teacherMember.rawOutTime ? true : false"
                             @change="toggleOutTime(teacherMember, $event)"
                           />
-
                           <span v-if="teacherMember.rawOutTime" class="fw-semibold text-dark">
                             {{ formatTimeTo12Hr(teacherMember.rawOutTime) }}
                           </span>
-
-                          <span v-else class="text-muted small"> Checkout </span>
+                          <span v-else class="text-muted small">Checkout</span>
                         </div>
-
-                        <span v-else class="text-muted"> - </span>
+                        <span v-else class="text-muted">-</span>
                       </td>
-
-                      <!-- WORKING TIME -->
 
                       <td class="text-center font-monospace small text-nowrap">
                         <span
@@ -411,11 +322,8 @@
                         >
                           {{ teacherMember.workingHours }}
                         </span>
-
-                        <span v-else class="text-muted"> - </span>
+                        <span v-else class="text-muted">-</span>
                       </td>
-
-                      <!-- LATE -->
 
                       <td class="text-center text-nowrap">
                         <span
@@ -428,7 +336,6 @@
                         >
                           LATE: {{ teacherMember.lateMinutes }} MIN
                         </span>
-
                         <span
                           v-else-if="
                             !activeHoliday && !teacherMember.isLeave && teacherMember.isPresent
@@ -437,11 +344,8 @@
                         >
                           ON TIME
                         </span>
-
-                        <span v-else class="text-muted fs-8"> - </span>
+                        <span v-else class="text-muted fs-8">-</span>
                       </td>
-
-                      <!-- EDIT -->
 
                       <td class="text-center">
                         <div class="form-check d-flex justify-content-center m-0">
@@ -457,22 +361,6 @@
                           </button>
                         </div>
                       </td>
-
-                      <!-- LEAVE -->
-
-                      <td class="text-center">
-                        <div class="form-check d-flex justify-content-center m-0">
-                          <input
-                            class="form-check-input custom-checkbox"
-                            type="checkbox"
-                            v-model="teacherMember.isLeave"
-                            :disabled="activeHoliday"
-                            @change="onLeaveChange(teacherMember)"
-                          />
-                        </div>
-                      </td>
-
-                      <!-- ACTION / STATUS -->
 
                       <td class="text-end pe-3 pe-md-4">
                         <span
@@ -498,9 +386,19 @@
                           }}
                         </span>
                       </td>
-                    </tr>
 
-                    <!-- No Teacher -->
+                      <td class="text-center">
+                        <div class="form-check d-flex justify-content-center m-0">
+                          <input
+                            class="form-check-input custom-checkbox"
+                            type="checkbox"
+                            v-model="teacherMember.isLeave"
+                            :disabled="activeHoliday"
+                            @change="onLeaveChange(teacherMember)"
+                          />
+                        </div>
+                      </td>
+                    </tr>
 
                     <tr v-if="!loading && filteredTeachers.length === 0">
                       <td colspan="11" class="text-center py-4 text-muted">
@@ -513,25 +411,54 @@
             </div>
           </div>
 
-          <!-- Footer / Pagination -->
-
+          <!-- Pagination -->
           <div
             class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2 mt-3 text-muted small"
           >
-            <div>Showing {{ filteredTeachers.length }} of {{ teachers.length }} entries</div>
+            <div>
+              Showing
+              {{ filteredTeachers.length ? (currentPage - 1) * perPage + 1 : 0 }}
+              to
+              {{ Math.min(currentPage * perPage, filteredTeachers.length) }}
+              of {{ filteredTeachers.length }} entries
+            </div>
 
             <nav aria-label="Page navigation">
               <ul class="pagination pagination-sm m-0">
-                <li class="page-item disabled">
-                  <a class="page-link" href="#" tabindex="-1" aria-disabled="true"> Previous </a>
+                <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                  <button
+                    type="button"
+                    class="page-link"
+                    :disabled="currentPage === 1"
+                    @click="goToPage(currentPage - 1)"
+                  >
+                    Previous
+                  </button>
                 </li>
 
-                <li class="page-item active" aria-current="page">
-                  <a class="page-link" href="#"> 1 </a>
+                <li
+                  v-for="page in totalPages"
+                  :key="page"
+                  class="page-item"
+                  :class="{ active: currentPage === page }"
+                >
+                  <button type="button" class="page-link" @click="goToPage(page)">
+                    {{ page }}
+                  </button>
                 </li>
 
-                <li class="page-item">
-                  <a class="page-link" href="#"> Next </a>
+                <li
+                  class="page-item"
+                  :class="{ disabled: currentPage === totalPages || totalPages === 0 }"
+                >
+                  <button
+                    type="button"
+                    class="page-link"
+                    :disabled="currentPage === totalPages || totalPages === 0"
+                    @click="goToPage(currentPage + 1)"
+                  >
+                    Next
+                  </button>
                 </li>
               </ul>
             </nav>
@@ -541,7 +468,6 @@
     </div>
 
     <!-- Edit Time Modal -->
-
     <div
       class="modal fade"
       id="editTeacherTimeModal"
@@ -555,7 +481,6 @@
             <h5 class="modal-title fw-bold text-dark fs-6" id="editTeacherTimeModalLabel">
               Edit Attendance Time - {{ editingTeacher?.name }}
             </h5>
-
             <button
               type="button"
               class="btn-close shadow-none"
@@ -565,13 +490,10 @@
           </div>
 
           <div class="modal-body p-4" v-if="editingTeacher">
-            <!-- Check In -->
-
             <div class="mb-3">
               <label for="editInTime" class="form-label fw-semibold small">
                 Check-in Time (Entry)
               </label>
-
               <input
                 type="time"
                 id="editInTime"
@@ -581,13 +503,10 @@
               />
             </div>
 
-            <!-- Check Out -->
-
             <div class="mb-3">
               <label for="editOutTime" class="form-label fw-semibold small">
                 Check-out Time (Exit)
               </label>
-
               <input
                 type="time"
                 id="editOutTime"
@@ -602,7 +521,6 @@
             <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
               Cancel
             </button>
-
             <button
               type="button"
               class="btn btn-primary btn-sm"
@@ -619,51 +537,32 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-
+import { ref, computed, onMounted, watch } from 'vue'
 import dashPageView from './dashPageView.vue'
-
 import api from '@/services/api'
-
 import 'bootstrap/js/dist/modal.js'
-
 import * as bootstrap from 'bootstrap'
 
-// রিয়্যাক্টিভ স্টেট
-
 const today = new Date().toISOString().split('T')[0]
-
 const selectedDate = ref(today)
-
 const searchQuery = ref('')
-
 const selectedShift = ref('')
-
 const teachers = ref([])
-
 const loading = ref(false)
-
 const isSyncing = ref(false)
-
 const saveSuccess = ref(false)
-
 const editingTeacher = ref(null)
-
 let modalInstance = null
-
 const holidays = ref([])
 
 const fetchHolidays = async () => {
   try {
     const response = await api.get('/holidays')
-
     holidays.value = response.data.data || response.data || []
   } catch (error) {
     console.error('Error fetching holidays for attendance:', error)
   }
 }
-
-// সিলেক্টেড ডেটে কোনো ছুটি আছে কিনা তা চেক করার কম্পিউটেড প্রপার্টি
 
 const activeHoliday = computed(() => {
   if (!holidays.value || !Array.isArray(holidays.value)) return null
@@ -673,11 +572,8 @@ const activeHoliday = computed(() => {
   })
 })
 
-// হেল্পার ফাংশনসমূহ
-
 const getCurrent24HrTime = () => {
   const now = new Date()
-
   return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
 }
 
@@ -685,11 +581,8 @@ const formatTimeTo12Hr = (time24) => {
   if (!time24) return null
 
   const [h, m] = time24.split(':')
-
   let hours = parseInt(h)
-
   const ampm = hours >= 12 ? 'PM' : 'AM'
-
   hours = hours % 12 || 12
 
   return `${String(hours).padStart(2, '0')}:${m} ${ampm}`
@@ -699,11 +592,9 @@ const calculateLateMinutes = (checkInTime24, shiftStartTime) => {
   if (!checkInTime24 || !shiftStartTime) return 0
 
   const [shiftHours, shiftMinutes] = shiftStartTime.split(':').map(Number)
-
   const [checkInHours, checkInMinutes] = checkInTime24.split(':').map(Number)
 
   const scheduledTotalMinutes = shiftHours * 60 + shiftMinutes
-
   const checkInTotalMinutes = checkInHours * 60 + checkInMinutes
 
   if (checkInTotalMinutes > scheduledTotalMinutes) {
@@ -713,35 +604,34 @@ const calculateLateMinutes = (checkInTime24, shiftStartTime) => {
   return 0
 }
 
-const calculateWorkingHours = (inTime24, outTime24) => {
-  if (!inTime24 || !outTime24) return null
+// Checkout থাকলে actual checkout, না থাকলে shift-এর end_time ব্যবহার হবে।
+const calculateWorkingHours = (inTime24, outTime24, shiftEndTime = null) => {
+  const effectiveOutTime = outTime24 || shiftEndTime
+
+  if (!inTime24 || !effectiveOutTime) return null
 
   const [inH, inM] = inTime24.split(':').map(Number)
-
-  const [outH, outM] = outTime24.split(':').map(Number)
+  const [outH, outM] = effectiveOutTime.split(':').map(Number)
 
   const inTotalMins = inH * 60 + inM
-
   const outTotalMins = outH * 60 + outM
 
   if (outTotalMins <= inTotalMins) return '0h 0m'
 
   const diffMins = outTotalMins - inTotalMins
-
   const hours = Math.floor(diffMins / 60)
-
   const minutes = diffMins % 60
 
   return `${hours}h ${minutes}m`
 }
 
-// ডেটা ফেচ করার মূল ফাংশন
-
 const fetchAttendanceData = async () => {
   loading.value = true
 
   try {
-    const teachersRes = await api.get('/teachers')
+    const teachersRes = await api.get('/teachers', {
+      params: { per_page: 100 },
+    })
 
     console.log('Raw Teachers Response:', teachersRes.data)
 
@@ -779,14 +669,13 @@ const fetchAttendanceData = async () => {
       const teacherShifts =
         t.shifts && Array.isArray(t.shifts) && t.shifts.length > 0
           ? t.shifts
-          : [{ id: 'default', name: 'General Shift', start_time: '09:00:00' }]
+          : [{ id: 'default', name: 'General Shift', start_time: '09:00:00', end_time: null }]
 
       teacherShifts.forEach((shift) => {
         const shiftId = shift.id || 'default'
-
         const shiftName = shift.name || 'General Shift'
-
         const shiftStartTime = shift.start_time || '09:00:00'
+        const shiftEndTime = shift.end_time || null
 
         const record = rawAttendance.find(
           (att) =>
@@ -796,75 +685,49 @@ const fetchAttendanceData = async () => {
         )
 
         let isPresent = false
-
         let isLeave = false
-
         let checkInTime = null
-
         let rawInTime = null
-
         let rawOutTime = null
-
         let lateMinutes = 0
-
         let workingHours = null
-
         let attendanceId = null
 
         if (record) {
           isLeave = record.status === 'Leave'
-
           isPresent = record.status === 'Present' || record.status === 'Late'
-
           rawInTime = record.in_time || null
-
           rawOutTime = record.out_time || null
-
           checkInTime = rawInTime ? formatTimeTo12Hr(rawInTime) : null
-
           lateMinutes = calculateLateMinutes(rawInTime, shiftStartTime)
 
-          workingHours = calculateWorkingHours(rawInTime, rawOutTime)
+          workingHours = !isLeave
+            ? calculateWorkingHours(rawInTime, rawOutTime, shiftEndTime)
+            : null
 
           attendanceId = record.id
         }
 
         expandedTeachers.push({
           uniqueKey: `${teacherId}_${shiftId}`,
-
           id: teacherId,
-
           attendance_id: attendanceId,
-
           shift_id: shiftId,
-
           shift_name: shiftName,
-
-          shiftStartTime: shiftStartTime,
-
+          shiftStartTime,
+          shiftEndTime,
           teacher_code: t.teacher_code || t.teacher_id || `TCH-${teacherId}`,
-
           name: t.full_name || t.name || 'Unknown',
-
           subject: t.department || t.subject || 'N/A',
-
           image: t.image || null,
-
           gender: (t.gender || 'male').toLowerCase(),
-
-          isPresent: isPresent,
-
-          isLeave: isLeave,
-
-          checkInTime: checkInTime,
-
-          rawInTime: rawInTime,
-
-          rawOutTime: rawOutTime,
-
-          workingHours: workingHours,
-
-          lateMinutes: lateMinutes,
+          isPresent,
+          isLeave,
+          checkInTime,
+          rawInTime,
+          rawOutTime,
+          workingHours,
+          lateMinutes,
         })
       })
     })
@@ -877,30 +740,24 @@ const fetchAttendanceData = async () => {
   }
 }
 
-// চেকবক্স ও অন্যান্য অ্যাকশন হ্যান্ডলার
-
 const onCheckboxChange = (teacher) => {
   if (activeHoliday.value) return
 
   if (teacher.isPresent) {
     teacher.isLeave = false
-
     teacher.rawInTime = getCurrent24HrTime()
-
     teacher.checkInTime = formatTimeTo12Hr(teacher.rawInTime)
-
     teacher.lateMinutes = calculateLateMinutes(teacher.rawInTime, teacher.shiftStartTime)
-
-    teacher.workingHours = calculateWorkingHours(teacher.rawInTime, teacher.rawOutTime)
+    teacher.workingHours = calculateWorkingHours(
+      teacher.rawInTime,
+      teacher.rawOutTime,
+      teacher.shiftEndTime,
+    )
   } else {
     teacher.checkInTime = null
-
     teacher.rawInTime = null
-
     teacher.rawOutTime = null
-
     teacher.workingHours = null
-
     teacher.lateMinutes = 0
   }
 
@@ -912,15 +769,10 @@ const onLeaveChange = (teacher) => {
 
   if (teacher.isLeave) {
     teacher.isPresent = false
-
     teacher.checkInTime = null
-
     teacher.rawInTime = null
-
     teacher.rawOutTime = null
-
     teacher.workingHours = null
-
     teacher.lateMinutes = 0
   }
 
@@ -931,10 +783,13 @@ const toggleOutTime = (teacher, event) => {
   if (activeHoliday.value) return
 
   const isChecked = event.target.checked
-
   teacher.rawOutTime = isChecked ? getCurrent24HrTime() : null
 
-  teacher.workingHours = calculateWorkingHours(teacher.rawInTime, teacher.rawOutTime)
+  teacher.workingHours = calculateWorkingHours(
+    teacher.rawInTime,
+    teacher.rawOutTime,
+    teacher.shiftEndTime,
+  )
 
   autoSaveSingleTeacher(teacher)
 }
@@ -944,16 +799,12 @@ const openEditModal = (teacher) => {
 
   editingTeacher.value = {
     ...teacher,
-
     tempInTime: teacher.rawInTime || '',
-
     tempOutTime: teacher.rawOutTime || '',
   }
 
   const modalElement = document.getElementById('editTeacherTimeModal')
-
   modalInstance = new bootstrap.Modal(modalElement)
-
   modalInstance.show()
 }
 
@@ -964,14 +815,15 @@ const saveModalTimes = async () => {
 
   if (teacher) {
     teacher.rawInTime = editingTeacher.value.tempInTime || null
-
     teacher.rawOutTime = editingTeacher.value.tempOutTime || null
-
     teacher.checkInTime = teacher.rawInTime ? formatTimeTo12Hr(teacher.rawInTime) : null
-
     teacher.lateMinutes = calculateLateMinutes(teacher.rawInTime, teacher.shiftStartTime)
 
-    teacher.workingHours = calculateWorkingHours(teacher.rawInTime, teacher.rawOutTime)
+    teacher.workingHours = calculateWorkingHours(
+      teacher.rawInTime,
+      teacher.rawOutTime,
+      teacher.shiftEndTime,
+    )
 
     await autoSaveSingleTeacher(teacher)
   }
@@ -983,7 +835,6 @@ const autoSaveSingleTeacher = async (teacher) => {
   if (activeHoliday.value) return
 
   isSyncing.value = true
-
   saveSuccess.value = false
 
   try {
@@ -996,12 +847,9 @@ const autoSaveSingleTeacher = async (teacher) => {
     }
 
     const payload = {
-      status: status,
-
+      status,
       in_time: teacher.isPresent ? teacher.rawInTime || getCurrent24HrTime() : null,
-
       out_time: teacher.isPresent ? teacher.rawOutTime || null : null,
-
       note: teacher.lateMinutes > 0 ? `Late by ${teacher.lateMinutes} mins` : null,
     }
 
@@ -1014,13 +862,10 @@ const autoSaveSingleTeacher = async (teacher) => {
     } else {
       const createPayload = {
         date: selectedDate.value,
-
         attendances: [
           {
             teacher_id: teacher.id,
-
             shift_name: teacher.shift_name,
-
             ...payload,
           },
         ],
@@ -1050,16 +895,16 @@ const markAllPresent = async () => {
 
   filteredTeachers.value.forEach((teacher) => {
     teacher.isPresent = true
-
     teacher.isLeave = false
-
     teacher.rawInTime = getCurrent24HrTime()
-
     teacher.checkInTime = formatTimeTo12Hr(teacher.rawInTime)
-
     teacher.lateMinutes = calculateLateMinutes(teacher.rawInTime, teacher.shiftStartTime)
 
-    teacher.workingHours = calculateWorkingHours(teacher.rawInTime, teacher.rawOutTime)
+    teacher.workingHours = calculateWorkingHours(
+      teacher.rawInTime,
+      teacher.rawOutTime,
+      teacher.shiftEndTime,
+    )
   })
 
   for (const teacher of filteredTeachers.value) {
@@ -1077,23 +922,20 @@ const toggleSelectAll = async (event) => {
 
     if (checkState) {
       teacher.isLeave = false
-
       teacher.rawInTime = getCurrent24HrTime()
-
       teacher.checkInTime = formatTimeTo12Hr(teacher.rawInTime)
-
       teacher.lateMinutes = calculateLateMinutes(teacher.rawInTime, teacher.shiftStartTime)
 
-      teacher.workingHours = calculateWorkingHours(teacher.rawInTime, teacher.rawOutTime)
+      teacher.workingHours = calculateWorkingHours(
+        teacher.rawInTime,
+        teacher.rawOutTime,
+        teacher.shiftEndTime,
+      )
     } else {
       teacher.checkInTime = null
-
       teacher.rawInTime = null
-
       teacher.rawOutTime = null
-
       teacher.workingHours = null
-
       teacher.lateMinutes = 0
     }
   })
@@ -1102,8 +944,6 @@ const toggleSelectAll = async (event) => {
     await autoSaveSingleTeacher(teacher)
   }
 }
-
-// কম্পিউটেড প্রপার্টিসমূহ
 
 const availableShifts = computed(() => {
   if (!teachers.value || !Array.isArray(teachers.value)) return []
@@ -1141,6 +981,25 @@ const filteredTeachers = computed(() => {
   })
 })
 
+const currentPage = ref(1)
+const perPage = ref(10)
+
+const totalPages = computed(() => Math.ceil(filteredTeachers.value.length / perPage.value))
+
+const paginatedTeachers = computed(() => {
+  const start = (currentPage.value - 1) * perPage.value
+  return filteredTeachers.value.slice(start, start + perPage.value)
+})
+
+const goToPage = (page) => {
+  if (page < 1 || page > totalPages.value) return
+  currentPage.value = page
+}
+
+watch([searchQuery, selectedShift], () => {
+  currentPage.value = 1
+})
+
 const isAllSelected = computed(() => {
   return filteredTeachers.value.length > 0 && filteredTeachers.value.every((t) => t.isPresent)
 })
@@ -1153,43 +1012,28 @@ const getTeacherPhoto = (gender) => {
 
 onMounted(async () => {
   await fetchHolidays()
-
   fetchAttendanceData()
 })
 </script>
 
 <style scoped>
-/* Main Layout Container */
-
 .dashboard-layout {
   display: flex;
-
   width: 100%;
-
   overflow-x: hidden;
 }
 
-/* Sidebar Area Wrapper */
-
 .sidebar-wrapper {
   flex-shrink: 0;
-
   min-width: 250px;
-
   z-index: 1000;
 }
 
-/* Main Content Right Wrapper */
-
 .main-wrapper {
   flex-grow: 1;
-
   width: calc(100% - 250px);
-
   overflow-y: auto;
 }
-
-/* Responsive Handling for Mobile & Tablet */
 
 @media (max-width: 768px) {
   .dashboard-layout {
@@ -1198,7 +1042,6 @@ onMounted(async () => {
 
   .sidebar-wrapper {
     width: 100%;
-
     min-width: 100%;
   }
 
@@ -1210,7 +1053,6 @@ onMounted(async () => {
 .search-box-wrapper .input-group-text,
 .search-box-wrapper .form-control {
   border-color: #e2e8f0;
-
   border-radius: 6px;
 }
 
@@ -1220,19 +1062,14 @@ onMounted(async () => {
 
 .attendance-table {
   border-collapse: separate;
-
   border-spacing: 0;
 }
 
 .attendance-table thead th {
   border-bottom: 2px solid #e2e8f0 !important;
-
   font-size: 0.75rem;
-
   letter-spacing: 0.05em;
-
   padding-top: 0.85rem;
-
   padding-bottom: 0.85rem;
 }
 
@@ -1242,53 +1079,39 @@ onMounted(async () => {
 
 .pill-status {
   letter-spacing: 0.05em;
-
   border: 1px solid transparent;
 }
 
 .status-present {
   background-color: rgba(25, 135, 84, 0.1) !important;
-
   color: #198754 !important;
-
   border-color: rgba(25, 135, 84, 0.2) !important;
 }
 
 .status-absent {
   background-color: rgba(220, 53, 69, 0.1) !important;
-
   color: #dc3545 !important;
-
   border-color: rgba(220, 53, 69, 0.2) !important;
 }
 
 .custom-checkbox {
   width: 1.25rem;
-
   height: 1.25rem;
-
   cursor: pointer;
-
   border-radius: 4px;
 }
 
 .custom-checkbox:checked {
   background-color: #198754;
-
   border-color: #198754;
 }
 
 .teacher-photo-placeholder {
   width: 32px;
-
   height: 32px;
-
   background-color: #e2e8f0;
-
   display: flex;
-
   align-items: center;
-
   justify-content: center;
 }
 
@@ -1300,7 +1123,6 @@ onMounted(async () => {
   .attendance-table th,
   .attendance-table td {
     padding-left: 0.5rem !important;
-
     padding-right: 0.5rem !important;
   }
 }

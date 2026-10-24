@@ -460,6 +460,15 @@ const router = createRouter({
         role: ['Admin', 'Manager', 'Branch Manager'],
       },
     },
+    {
+      path: '/smsNotification',
+      name: 'SmsNotificationView',
+      component: () => import('../views/SmsNotificationView.vue'),
+      meta: {
+        requiresAuth: true,
+        role: ['Admin', 'Manager', 'Branch Manager'],
+      },
+    },
 
     {
       path: '/:pathMatch(.*)*',

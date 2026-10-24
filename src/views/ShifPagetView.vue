@@ -8,7 +8,6 @@
     <div class="row mb-4 align-items-center">
       <div class="col">
         <h2 class="fw-bold text-dark mb-1">Shift Management</h2>
-
         <p class="text-muted mb-0">Manage all teacher shifts and schedules easily.</p>
       </div>
 
@@ -31,7 +30,6 @@
       role="alert"
     >
       {{ message }}
-
       <button type="button" class="btn-close" @click="message = ''"></button>
     </div>
 
@@ -43,31 +41,27 @@
             <thead class="table-light text-uppercase fs-7 text-secondary">
               <tr>
                 <th class="py-3 ps-4">#ID</th>
-
                 <th class="py-3">Shift Name</th>
-
                 <th class="py-3">Start Time</th>
-
+                <th class="py-3">End Time</th>
                 <th class="py-3">Assigned Teachers</th>
-
                 <th class="py-3 text-end pe-4">Actions</th>
               </tr>
             </thead>
 
             <tbody>
               <tr v-if="loading">
-                <td colspan="5" class="text-center py-5 text-muted">
+                <td colspan="6" class="text-center py-5 text-muted">
                   <div
                     class="spinner-border spinner-border-sm text-primary me-2"
                     role="status"
                   ></div>
-
                   Loading shifts...
                 </td>
               </tr>
 
               <tr v-else-if="shifts.length === 0">
-                <td colspan="5" class="text-center py-5 text-muted">No shifts found.</td>
+                <td colspan="6" class="text-center py-5 text-muted">No shifts found.</td>
               </tr>
 
               <tr v-for="(shift, index) in shifts" :key="shift.id">
@@ -81,25 +75,25 @@
 
                 <td>
                   <span class="badge bg-light text-dark border font-monospace">
-                    Starts: {{ formatTime12Hour(shift.start_time) }}
+                    {{ formatTime12Hour(shift.start_time) }}
                   </span>
                 </td>
 
                 <td>
-                  <div
-                    v-if="shift.teachers && shift.teachers.length > 0"
-                    class="d-flex flex-wrap gap-1"
-                  >
-                    <span
-                      v-for="teacher in shift.teachers"
-                      :key="teacher.id"
-                      class="badge bg-primary bg-opacity-10 text-primary px-2 py-1"
-                    >
-                      {{ teacher.full_name }}
-                    </span>
-                  </div>
+                  <span class="badge bg-light text-dark border font-monospace">
+                    {{ formatTime12Hour(shift.end_time) }}
+                  </span>
+                </td>
 
-                  <span v-else class="text-muted fst-italic small"> No teachers assigned </span>
+                <td>
+                  <span
+                    v-if="shift.teachers && shift.teachers.length > 0"
+                    class="badge bg-primary bg-opacity-10 text-primary px-3 py-2"
+                  >
+                    {{ shift.teachers.length }} Teachers
+                  </span>
+
+                  <span v-else class="text-muted fst-italic small"> 0 Teachers </span>
                 </td>
 
                 <td class="text-end pe-4">
@@ -143,8 +137,7 @@
               <!-- Manager Branch Selection -->
               <div v-if="role === 'Manager'" class="mb-3">
                 <label class="form-label fw-semibold text-secondary small">
-                  Select Branch
-                  <span class="text-danger">*</span>
+                  Select Branch <span class="text-danger">*</span>
                 </label>
 
                 <select
@@ -166,8 +159,7 @@
               <!-- Shift Name -->
               <div class="mb-3">
                 <label class="form-label fw-semibold text-secondary small">
-                  Shift Name
-                  <span class="text-danger">*</span>
+                  Shift Name <span class="text-danger">*</span>
                 </label>
 
                 <input
@@ -182,11 +174,27 @@
               <!-- Start Time -->
               <div class="mb-3">
                 <label class="form-label fw-semibold text-secondary small">
-                  Shift Start Time
-                  <span class="text-danger">*</span>
+                  Shift Start Time <span class="text-danger">*</span>
                 </label>
 
                 <input type="time" v-model="form.start_time" class="form-control" required />
+              </div>
+
+              <!-- End Time -->
+              <div class="mb-3">
+                <label class="form-label fw-semibold text-secondary small">
+                  Shift End Time <span class="text-danger">*</span>
+                </label>
+
+                <input
+                  type="time"
+                  v-model="form.end_time"
+                  class="form-control"
+                  required
+                  :min="form.start_time || undefined"
+                />
+
+                <small class="text-muted"> Set the scheduled ending time for this shift. </small>
               </div>
             </div>
 
@@ -208,69 +216,41 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-
 import api from '../services/api'
-
 import dashPageView from './dashPageView.vue'
 
-/* =========================================================
-   ROLE
-========================================================= */
-
+/* ROLE */
 const role = localStorage.getItem('role')
 
-/* =========================================================
-   SHIFTS
-========================================================= */
-
+/* SHIFTS */
 const shifts = ref([])
-
 const loading = ref(false)
 
-/* =========================================================
-   BRANCHES
-========================================================= */
-
+/* BRANCHES */
 const branches = ref([])
-
 const branchesLoading = ref(false)
 
-/* =========================================================
-   MODAL
-========================================================= */
-
+/* MODAL */
 const showModal = ref(false)
-
 const isEditMode = ref(false)
-
 const currentShiftId = ref(null)
-
 const saving = ref(false)
 
-/* =========================================================
-   FORM
-========================================================= */
-
-const form = ref({
+/* FORM */
+const defaultForm = () => ({
   name: '',
-
   start_time: '09:00',
-
+  end_time: '17:00',
   branch_id: '',
 })
 
-/* =========================================================
-   ALERT
-========================================================= */
+const form = ref(defaultForm())
 
+/* ALERT */
 const message = ref('')
-
 const isError = ref(false)
 
-/* =========================================================
-   FETCH BRANCHES
-========================================================= */
-
+/* FETCH BRANCHES */
 const fetchBranches = async () => {
   branchesLoading.value = true
 
@@ -279,28 +259,23 @@ const fetchBranches = async () => {
 
     if (Array.isArray(response.data)) {
       branches.value = response.data
-    } else if (response.data && Array.isArray(response.data.data)) {
+    } else if (Array.isArray(response.data?.data)) {
       branches.value = response.data.data
-    } else if (response.data && Array.isArray(response.data.branches)) {
+    } else if (Array.isArray(response.data?.branches)) {
       branches.value = response.data.branches
     } else {
       branches.value = []
     }
   } catch (error) {
     console.error('Failed to fetch branches:', error)
-
     branches.value = []
-
     showAlert(error.response?.data?.message || 'Failed to fetch branches.', true)
   } finally {
     branchesLoading.value = false
   }
 }
 
-/* =========================================================
-   FETCH SHIFTS
-========================================================= */
-
+/* FETCH SHIFTS */
 const fetchShifts = async () => {
   loading.value = true
 
@@ -308,40 +283,25 @@ const fetchShifts = async () => {
     const response = await api.get('/shifts')
 
     if (response.data.status) {
-      shifts.value = response.data.data
+      shifts.value = response.data.data || []
     } else {
       shifts.value = []
     }
   } catch (error) {
     console.error('Failed to fetch shifts:', error)
-
     showAlert(error.response?.data?.message || 'Failed to fetch shifts.', true)
   } finally {
     loading.value = false
   }
 }
 
-/* =========================================================
-   OPEN ADD MODAL
-========================================================= */
-
+/* OPEN ADD MODAL */
 const openAddModal = async () => {
   isEditMode.value = false
-
   currentShiftId.value = null
-
-  form.value = {
-    name: '',
-
-    start_time: '09:00',
-
-    branch_id: '',
-  }
-
+  form.value = defaultForm()
   message.value = ''
-
   isError.value = false
-
   showModal.value = true
 
   if (role === 'Manager') {
@@ -349,27 +309,20 @@ const openAddModal = async () => {
   }
 }
 
-/* =========================================================
-   OPEN EDIT MODAL
-========================================================= */
-
+/* OPEN EDIT MODAL */
 const openEditModal = async (shift) => {
   isEditMode.value = true
-
   currentShiftId.value = shift.id
 
   form.value = {
     name: shift.name || '',
-
-    start_time: shift.start_time || '09:00',
-
+    start_time: shift.start_time ? shift.start_time.substring(0, 5) : '09:00',
+    end_time: shift.end_time ? shift.end_time.substring(0, 5) : '17:00',
     branch_id: shift.branch_id ? Number(shift.branch_id) : '',
   }
 
   message.value = ''
-
   isError.value = false
-
   showModal.value = true
 
   if (role === 'Manager') {
@@ -377,60 +330,37 @@ const openEditModal = async (shift) => {
   }
 }
 
-/* =========================================================
-   CLOSE MODAL
-========================================================= */
-
+/* CLOSE MODAL */
 const closeModal = () => {
-  if (saving.value) {
-    return
-  }
+  if (saving.value) return
 
   showModal.value = false
-
   isEditMode.value = false
-
   currentShiftId.value = null
-
-  form.value = {
-    name: '',
-
-    start_time: '09:00',
-
-    branch_id: '',
-  }
+  form.value = defaultForm()
 }
 
-/* =========================================================
-   SAVE / UPDATE SHIFT
-========================================================= */
-
+/* SAVE / UPDATE SHIFT */
 const saveShift = async () => {
-  if (saving.value) {
-    return
-  }
-
-  /*
-  |--------------------------------------------------------------------------
-  | Basic validation
-  |--------------------------------------------------------------------------
-  */
+  if (saving.value) return
 
   if (!form.value.name.trim()) {
     showAlert('Please enter shift name.', true)
-
     return
   }
 
-  /*
-  |--------------------------------------------------------------------------
-  | Manager branch validation
-  |--------------------------------------------------------------------------
-  */
+  if (!form.value.start_time || !form.value.end_time) {
+    showAlert('Please select both shift start and end times.', true)
+    return
+  }
+
+  if (form.value.end_time <= form.value.start_time) {
+    showAlert('Shift end time must be later than start time.', true)
+    return
+  }
 
   if (role === 'Manager' && !form.value.branch_id) {
     showAlert('Please select a branch.', true)
-
     return
   }
 
@@ -439,62 +369,33 @@ const saveShift = async () => {
   try {
     const payload = {
       name: form.value.name.trim(),
-
       start_time: form.value.start_time,
+      end_time: form.value.end_time,
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Manager sends selected branch
-    |--------------------------------------------------------------------------
-    */
 
     if (role === 'Manager') {
       payload.branch_id = Number(form.value.branch_id)
     }
 
-    console.log('Shift save payload:', payload)
-
     let response
-
-    /*
-    |--------------------------------------------------------------------------
-    | UPDATE
-    |--------------------------------------------------------------------------
-    */
 
     if (isEditMode.value) {
       response = await api.put(`/shifts/${currentShiftId.value}`, payload)
     } else {
-      /*
-    |--------------------------------------------------------------------------
-    | CREATE
-    |--------------------------------------------------------------------------
-    */
       response = await api.post('/shifts', payload)
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | SUCCESS
-    |--------------------------------------------------------------------------
-    */
-
     if (response.data.status) {
       showAlert(response.data.message || 'Shift saved successfully.')
-
       closeModal()
-
       await fetchShifts()
     }
   } catch (error) {
     console.error('Failed to save shift:', error)
-
     console.error('Validation errors:', error.response?.data?.errors)
 
     if (error.response?.status === 422) {
       const validationErrors = error.response?.data?.errors || {}
-
       const firstError = Object.values(validationErrors)[0]?.[0]
 
       showAlert(
@@ -509,37 +410,26 @@ const saveShift = async () => {
   }
 }
 
-/* =========================================================
-   DELETE SHIFT
-========================================================= */
-
+/* DELETE SHIFT */
 const deleteShift = async (id) => {
-  if (!confirm('Are you sure you want to delete this shift?')) {
-    return
-  }
+  if (!confirm('Are you sure you want to delete this shift?')) return
 
   try {
     const response = await api.delete(`/shifts/${id}`)
 
     if (response.data.status) {
-      showAlert(response.data.message)
-
+      showAlert(response.data.message || 'Shift deleted successfully.')
       await fetchShifts()
     }
   } catch (error) {
     console.error('Failed to delete shift:', error)
-
     showAlert(error.response?.data?.message || 'Failed to delete shift.', true)
   }
 }
 
-/* =========================================================
-   ALERT
-========================================================= */
-
+/* ALERT */
 const showAlert = (msg, error = false) => {
   message.value = msg
-
   isError.value = error
 
   setTimeout(() => {
@@ -547,36 +437,24 @@ const showAlert = (msg, error = false) => {
   }, 3000)
 }
 
-/* =========================================================
-   FORMAT TIME
-========================================================= */
-
+/* FORMAT TIME */
 const formatTime12Hour = (time24) => {
-  if (!time24) {
-    return 'N/A'
-  }
+  if (!time24) return 'N/A'
 
   if (time24.includes('AM') || time24.includes('PM')) {
     return time24
   }
 
   const [hours, minutes] = time24.split(':')
+  let hour = parseInt(hours, 10)
 
-  let h = parseInt(hours, 10)
+  const ampm = hour >= 12 ? 'PM' : 'AM'
+  hour = hour % 12 || 12
 
-  const ampm = h >= 12 ? 'PM' : 'AM'
-
-  h = h % 12
-
-  h = h ? h : 12
-
-  return `${h}:${minutes} ${ampm}`
+  return `${hour}:${minutes} ${ampm}`
 }
 
-/* =========================================================
-   ON MOUNT
-========================================================= */
-
+/* ON MOUNT */
 onMounted(() => {
   fetchShifts()
 })
@@ -585,16 +463,13 @@ onMounted(() => {
 <style scoped>
 .body {
   width: 86%;
-
   margin-left: 259px;
 }
 
 @media (max-width: 768px) {
   .body {
     width: 100%;
-
     margin-left: 0;
-
     padding: 15px;
   }
 }
