@@ -407,6 +407,18 @@
         <span>Account Dashboard</span>
       </router-link>
 
+      <!--Student Dashboard-->
+      <router-link
+        v-if="['Manager', 'Branch Manager'].includes(role)"
+        to="/students/studentdashboard"
+        class="menu-link"
+        active-class="active-menu"
+        @click="handleMenuClick($event)"
+      >
+        <i class="fa-solid fa-wallet menu-icon"></i>
+        <span>Student Dashboard</span>
+      </router-link>
+      <!--Student Dashboard Finish-->
       <!-- SETTINGS -->
       <router-link
         to="/settings"

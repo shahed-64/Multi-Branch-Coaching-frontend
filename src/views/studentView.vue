@@ -94,7 +94,6 @@
                 </div>
               </td>
 
-              <!-- STUDENT ROLL -->
               <td>
                 <span class="version-badge">
                   {{ item.student_roll || 'N/A' }}
@@ -240,6 +239,41 @@
                 type="text"
                 class="form-control"
                 placeholder="Enter full name"
+              />
+            </div>
+
+            <!-- STUDENT LOGIN PASSWORD -->
+            <div class="mb-3">
+              <label class="form-label">
+                Student Login Password <span class="text-danger">*</span>
+              </label>
+              <input
+                v-model="form.password"
+                type="password"
+                class="form-control"
+                placeholder="Minimum 8 characters"
+                minlength="8"
+                autocomplete="new-password"
+                required
+              />
+              <small class="text-muted">
+                This password will be used by the student to log in to the Student Portal.
+              </small>
+            </div>
+
+            <!-- CONFIRM PASSWORD -->
+            <div class="mb-3">
+              <label class="form-label">
+                Confirm Password <span class="text-danger">*</span>
+              </label>
+              <input
+                v-model="form.password_confirmation"
+                type="password"
+                class="form-control"
+                placeholder="Re-enter password"
+                minlength="8"
+                autocomplete="new-password"
+                required
               />
             </div>
 
@@ -961,6 +995,8 @@ loadCurrentUser()
 /* ADD FORM */
 const form = reactive({
   full_name: '',
+  password: '',
+  password_confirmation: '',
   student_roll: '',
   version: '',
   fathers_name: '',
@@ -1214,10 +1250,6 @@ const loadEnrollmentDetails = (sessionId) => {
 
   const enrollment = getStudentEnrollment(selectedStudent.value, sessionId)
 
-  /*
-   * Only load details from an existing enrollment.
-   * Do not silently copy another session's class information.
-   */
   if (!enrollment) {
     selectedStudent.value.class_group_id = ''
     selectedStudent.value.class_id = ''
@@ -1287,10 +1319,6 @@ watch(
       return
     }
 
-    /*
-     * If the branch was actually changed, reset the session
-     * and dependent academic details.
-     */
     if (oldBranchId && Number(newBranchId) !== Number(oldBranchId)) {
       selectedStudent.value.academic_session_id = ''
       selectedStudent.value.class_group_id = ''
@@ -1430,10 +1458,6 @@ const getStudent = async (page = 1) => {
       per_page: perPage.value,
     }
 
-    /*
-     * Search text is sent to the backend.
-     * StudentController@index must include student_roll in its search query.
-     */
     if (search.value.trim()) {
       params.search = search.value.trim()
     }
@@ -1463,7 +1487,6 @@ const getStudent = async (page = 1) => {
     }
   } catch (error) {
     console.error('Error fetching students:', error.response?.data || error)
-
     students.value = []
   }
 }
@@ -1472,6 +1495,16 @@ const getStudent = async (page = 1) => {
 const student_create = async () => {
   try {
     loading.value = true
+
+    if (!form.password || form.password.length < 8) {
+      alert('Student login password must be at least 8 characters.')
+      return
+    }
+
+    if (form.password !== form.password_confirmation) {
+      alert('Password and Confirm Password do not match.')
+      return
+    }
 
     if (isManager.value) {
       if (!form.branch_id) {
@@ -1533,7 +1566,11 @@ const student_create = async () => {
 
     const errors = error.response?.data?.errors
 
-    if (errors?.academic_session_id?.length) {
+    if (errors?.password?.length) {
+      alert(errors.password[0])
+    } else if (errors?.password_confirmation?.length) {
+      alert(errors.password_confirmation[0])
+    } else if (errors?.academic_session_id?.length) {
       alert(errors.academic_session_id[0])
     } else {
       alert(error.response?.data?.message || 'Failed to create student')
@@ -1641,11 +1678,6 @@ const updateStudent = async () => {
       selectedStudent.value.academic_session_id,
     )
 
-    /*
-     * Do not submit class data for a session that has no enrollment.
-     * The backend can create an enrollment for a selected new session,
-     * but class information must be selected explicitly.
-     */
     if (!enrollment) {
       if (
         !selectedStudent.value.class_id ||

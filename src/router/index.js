@@ -9,12 +9,26 @@ const router = createRouter({
       redirect: '/login',
     },
 
+    // =========================
+    // STAFF LOGIN
+    // =========================
     {
       path: '/login',
       name: 'loginView',
       component: () => import('../views/loginView.vue'),
       meta: { guest: true },
     },
+
+    // =========================
+    // STUDENT LOGIN
+    // =========================
+    {
+      path: '/student/login',
+      name: 'StudentLogin',
+      component: () => import('../views/students/StudentLoginView.vue'),
+      meta: { studentGuest: true },
+    },
+
     {
       path: '/not-allowed',
       name: 'NotAllowed',
@@ -25,6 +39,9 @@ const router = createRouter({
       },
     },
 
+    // =========================
+    // STAFF DASHBOARD
+    // =========================
     {
       path: '/dashboard',
       name: 'dashboardView',
@@ -35,6 +52,9 @@ const router = createRouter({
       },
     },
 
+    // =========================
+    // INSTITUTE & ACADEMIC
+    // =========================
     {
       path: '/Institure-Session',
       name: 'InstituteSession',
@@ -71,7 +91,6 @@ const router = createRouter({
         role: ['Admin', 'Manager', 'Branch Manager'],
       },
     },
-
     {
       path: '/Institure-Info',
       name: 'InstututeInfo',
@@ -81,7 +100,6 @@ const router = createRouter({
         role: ['Admin', 'Manager', 'Branch Manager'],
       },
     },
-
     {
       path: '/shift',
       name: 'shiftView',
@@ -91,7 +109,6 @@ const router = createRouter({
         role: ['Admin', 'Manager', 'Branch Manager'],
       },
     },
-
     {
       path: '/section',
       name: 'SectionView',
@@ -101,7 +118,6 @@ const router = createRouter({
         role: ['Admin', 'Manager', 'Branch Manager'],
       },
     },
-
     {
       path: '/class',
       name: 'ClassView',
@@ -111,7 +127,6 @@ const router = createRouter({
         role: ['Admin', 'Manager', 'Branch Manager'],
       },
     },
-
     {
       path: '/exam',
       name: 'ExaminationView',
@@ -121,7 +136,6 @@ const router = createRouter({
         role: ['Admin', 'Manager', 'Branch Manager'],
       },
     },
-
     {
       path: '/resultShow',
       name: 'ResultPage',
@@ -140,7 +154,6 @@ const router = createRouter({
         role: ['Admin', 'Manager', 'Branch Manager'],
       },
     },
-
     {
       path: '/result',
       name: 'Result',
@@ -159,7 +172,6 @@ const router = createRouter({
         role: ['Admin', 'Manager', 'Branch Manager'],
       },
     },
-
     {
       path: '/resultGrade',
       name: 'ResultGrade',
@@ -169,7 +181,6 @@ const router = createRouter({
         role: ['Admin', 'Manager', 'Branch Manager'],
       },
     },
-
     {
       path: '/finalAvrageResult',
       name: 'FinalAvrageResult',
@@ -179,7 +190,6 @@ const router = createRouter({
         role: ['Admin', 'Manager', 'Branch Manager'],
       },
     },
-
     {
       path: '/finalAvragePdfView',
       name: 'FinalAvragePdf',
@@ -189,7 +199,6 @@ const router = createRouter({
         role: ['Admin', 'Manager', 'Branch Manager'],
       },
     },
-
     {
       path: '/SingularStudentFinalResultView',
       name: 'SingularStudentFinalResul',
@@ -200,6 +209,9 @@ const router = createRouter({
       },
     },
 
+    // =========================
+    // STUDENT MANAGEMENT
+    // =========================
     {
       path: '/student',
       name: 'studentView',
@@ -227,7 +239,6 @@ const router = createRouter({
         role: ['Admin', 'Manager', 'Branch Manager'],
       },
     },
-
     {
       path: '/subject',
       name: 'subjectView',
@@ -238,6 +249,9 @@ const router = createRouter({
       },
     },
 
+    // =========================
+    // STAFF MANAGEMENT
+    // =========================
     {
       path: '/staff',
       name: 'staffView',
@@ -247,7 +261,6 @@ const router = createRouter({
         role: ['Admin', 'Manager', 'Branch Manager'],
       },
     },
-
     {
       path: '/staffAttendance',
       name: 'StaffAttendanceView',
@@ -258,6 +271,9 @@ const router = createRouter({
       },
     },
 
+    // =========================
+    // ACCOUNT
+    // =========================
     {
       path: '/account/dashboard',
       name: 'AccountDashboard',
@@ -267,7 +283,6 @@ const router = createRouter({
         role: ['Accountant', 'Manager', 'Branch Manager'],
       },
     },
-
     {
       path: '/payment/history',
       name: 'PaymentHistory',
@@ -277,7 +292,6 @@ const router = createRouter({
         role: ['Accountant', 'Manager', 'Branch Manager'],
       },
     },
-
     {
       path: '/paymentPDF/:id',
       name: 'paymentPDF',
@@ -305,7 +319,6 @@ const router = createRouter({
         role: ['Accountant', 'Manager', 'Branch Manager'],
       },
     },
-
     {
       path: '/singlePayment/:id',
       name: 'singlePayment',
@@ -315,7 +328,6 @@ const router = createRouter({
         role: ['Accountant', 'Manager', 'Branch Manager'],
       },
     },
-
     {
       path: '/payment/single',
       name: 'singleStudentPayment',
@@ -325,7 +337,6 @@ const router = createRouter({
         role: ['Accountant', 'Manager', 'Branch Manager'],
       },
     },
-
     {
       path: '/student/payment',
       name: 'StudentPayment',
@@ -345,6 +356,9 @@ const router = createRouter({
       },
     },
 
+    // =========================
+    // OTHER EXISTING PAGES
+    // =========================
     {
       path: '/dash-page',
       name: 'dashPageView',
@@ -353,7 +367,6 @@ const router = createRouter({
         requiresAuth: true,
       },
     },
-
     {
       path: '/ClassGroup',
       name: 'ClassGroup',
@@ -362,7 +375,6 @@ const router = createRouter({
         requiresAuth: true,
       },
     },
-
     {
       path: '/others-payment',
       name: 'othersPayment',
@@ -371,7 +383,6 @@ const router = createRouter({
         requiresAuth: true,
       },
     },
-
     {
       path: '/expense',
       name: 'expense',
@@ -380,7 +391,6 @@ const router = createRouter({
         requiresAuth: true,
       },
     },
-
     {
       path: '/teacherView',
       name: 'teacher',
@@ -390,7 +400,6 @@ const router = createRouter({
         role: ['Admin', 'Manager', 'Branch Manager'],
       },
     },
-
     {
       path: '/teachers',
       name: 'teachersView',
@@ -400,7 +409,6 @@ const router = createRouter({
         role: ['Admin', 'Manager', 'Branch Manager'],
       },
     },
-
     {
       path: '/teacherattendance',
       name: 'teacherAttendence',
@@ -410,7 +418,6 @@ const router = createRouter({
         role: ['Admin', 'Manager', 'Branch Manager'],
       },
     },
-
     {
       path: '/AttendanceHistry',
       name: 'teacherAttendanceHistryView',
@@ -420,7 +427,6 @@ const router = createRouter({
         role: ['Admin', 'Manager', 'Branch Manager'],
       },
     },
-
     {
       path: '/StaffAttendanceHistry',
       name: 'StaffAttendanceHistryView',
@@ -430,7 +436,6 @@ const router = createRouter({
         role: ['Admin', 'Manager', 'Branch Manager'],
       },
     },
-
     {
       path: '/AttendancOverview',
       name: 'teacherAttendanceOverview',
@@ -440,7 +445,6 @@ const router = createRouter({
         role: ['Admin', 'Manager', 'Branch Manager'],
       },
     },
-
     {
       path: '/StaffAttendancOverview',
       name: 'StaffAttendanceOverview',
@@ -450,7 +454,6 @@ const router = createRouter({
         role: ['Admin', 'Manager', 'Branch Manager'],
       },
     },
-
     {
       path: '/holiday',
       name: 'HOlidaysView',
@@ -470,6 +473,96 @@ const router = createRouter({
       },
     },
 
+    // =========================
+    // EXISTING STUDENT PORTAL PAGES
+    // =========================
+    {
+      path: '/students/dashboardmenu',
+      name: 'StudentsDAshboardMenue',
+      component: () => import('../views/students/StudentsDashboardMenueView.vue'),
+      meta: {
+        requiresAuth: true,
+        role: ['Admin', 'Manager', 'Branch Manager'],
+      },
+    },
+
+    // Student dashboard: separate student authentication
+    {
+      path: '/student/dashboard',
+      name: 'StudentDashboard',
+      component: () => import('../views/students/StudentDashboardView.vue'),
+      meta: {
+        requiresStudentAuth: true,
+      },
+    },
+
+    {
+      path: '/students/studentResult',
+      name: 'StudentResult',
+      component: () => import('../views/students/StudentResultView.vue'),
+      meta: {
+        requiresAuth: true,
+        role: ['Admin', 'Manager', 'Branch Manager'],
+      },
+    },
+    {
+      path: '/students/payFees',
+      name: 'PayFees',
+      component: () => import('../views/students/PayFeesView.vue'),
+      meta: {
+        requiresAuth: true,
+        role: ['Admin', 'Manager', 'Branch Manager'],
+      },
+    },
+    {
+      path: '/students/paymentHistory',
+      name: 'StudentsPaymentHistory',
+      component: () => import('../views/students/PaymentHistoryView.vue'),
+      meta: {
+        requiresAuth: true,
+        role: ['Admin', 'Manager', 'Branch Manager'],
+      },
+    },
+    {
+      path: '/students/assignmints',
+      name: 'Assignmints',
+      component: () => import('../views/students/AssignmintsView.vue'),
+      meta: {
+        requiresAuth: true,
+        role: ['Admin', 'Manager', 'Branch Manager'],
+      },
+    },
+    {
+      path: '/students/classMembers',
+      name: 'ClassMembers',
+      component: () => import('../views/students/ClassMembersView.vue'),
+      meta: {
+        requiresAuth: true,
+        role: ['Admin', 'Manager', 'Branch Manager'],
+      },
+    },
+    {
+      path: '/students/profile',
+      name: 'Profile',
+      component: () => import('../views/students/ProfileView.vue'),
+      meta: {
+        requiresAuth: true,
+        role: ['Admin', 'Manager', 'Branch Manager'],
+      },
+    },
+    {
+      path: '/students/notifications',
+      name: 'Notifications',
+      component: () => import('../views/students/NotificationsView.vue'),
+      meta: {
+        requiresAuth: true,
+        role: ['Admin', 'Manager', 'Branch Manager'],
+      },
+    },
+
+    // =========================
+    // NOT FOUND
+    // =========================
     {
       path: '/:pathMatch(.*)*',
       name: 'NotFound',
@@ -478,29 +571,51 @@ const router = createRouter({
   ],
 })
 
-/* 🔥 SAFE & INFINITE-LOOP-FREE GLOBAL GUARD */
+/* =========================
+   GLOBAL AUTH GUARD
+========================= */
 
 router.beforeEach((to) => {
-  const token = localStorage.getItem('token')
+  const staffToken = localStorage.getItem('token')
   const role = localStorage.getItem('role')
+  const studentToken = localStorage.getItem('student_token')
 
-  // Login required
-  if (to.meta.requiresAuth && !token) {
+  // Student login page
+  if (to.meta.studentGuest && studentToken) {
+    return { name: 'StudentDashboard' }
+  }
+
+  // Student-only pages
+  if (to.meta.requiresStudentAuth) {
+    if (!studentToken) {
+      return { name: 'StudentLogin' }
+    }
+
+    return true
+  }
+
+  // A student session must not access staff-only pages
+  if (studentToken && !staffToken) {
+    return { name: 'StudentDashboard' }
+  }
+
+  // Staff login required
+  if (to.meta.requiresAuth && !staffToken) {
     return { name: 'loginView' }
   }
 
   // Others can access only the restricted page
-  if (token && role === 'Others' && to.name !== 'NotAllowed') {
+  if (staffToken && role === 'Others' && to.name !== 'NotAllowed') {
     return { name: 'NotAllowed' }
   }
 
   // Result Entry can access only the Result page
-  if (token && role === 'Result Entry' && to.name !== 'Result') {
+  if (staffToken && role === 'Result Entry' && to.name !== 'Result') {
     return { name: 'Result' }
   }
 
-  // Redirect logged-in users away from Login page
-  if (to.meta.guest && token) {
+  // Redirect logged-in staff away from staff login
+  if (to.meta.guest && staffToken) {
     if (role === 'Others') {
       return { name: 'NotAllowed' }
     }
@@ -514,8 +629,8 @@ router.beforeEach((to) => {
       : { name: 'dashboardView' }
   }
 
-  // Check normal role permissions
-  if (to.meta.role && token && !to.meta.role.includes(role)) {
+  // Existing staff role permissions
+  if (to.meta.role && staffToken && !to.meta.role.includes(role)) {
     const targetRoute =
       role === 'Accountant' || role === 'Branch Accountant' ? 'AccountDashboard' : 'dashboardView'
 
