@@ -3,7 +3,7 @@ import axios from 'axios'
 console.log('=== API BASE URL ===', JSON.stringify(import.meta.env.VITE_API_URL))
 
 const api = axios.create({
-  baseURL: 'https://sms.shahedislam.xyz/api',
+  baseURL: 'https://shop.shahedislam.xyz/api',
   headers: {
     Accept: 'application/json',
     'Content-Type': 'application/json',
