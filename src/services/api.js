@@ -3,7 +3,8 @@ import axios from 'axios'
 console.log('=== API BASE URL ===', JSON.stringify(import.meta.env.VITE_API_URL))
 
 const api = axios.create({
-  baseURL: 'https://shop.shahedislam.xyz/api',
+  // Vercel Proxy ব্যবহারের জন্য রিলেটিভ পাথ অথবা VITE_API_URL ব্যবহার করা
+  baseURL: import.meta.env.VITE_API_URL || '/api',
   headers: {
     Accept: 'application/json',
     'Content-Type': 'application/json',
