@@ -3,10 +3,12 @@ import axios from 'axios'
 console.log('=== API BASE URL ===', JSON.stringify(import.meta.env.VITE_API_URL))
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: 'https://sms.shahedislam.xyz/api',
   headers: {
     Accept: 'application/json',
+    'Content-Type': 'application/json',
   },
+  timeout: 15000,
 })
 
 api.interceptors.request.use(
