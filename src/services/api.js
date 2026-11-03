@@ -1,9 +1,7 @@
 import axios from 'axios'
 
-console.log('=== API BASE URL ===', JSON.stringify(import.meta.env.VITE_API_URL))
-
+// Vercel Proxy ব্যবহারের জন্য baseURL '/api' সেট করা হয়েছে
 const api = axios.create({
-  // Vercel Proxy ব্যবহারের জন্য রিলেটিভ পাথ অথবা VITE_API_URL ব্যবহার করা
   baseURL: import.meta.env.VITE_API_URL || '/api',
   headers: {
     Accept: 'application/json',
@@ -12,11 +10,12 @@ const api = axios.create({
   timeout: 15000,
 })
 
+// Request Interceptor: টোকেন এবং ব্রাঞ্চ আইডি যুক্ত করার জন্য
 api.interceptors.request.use(
   (config) => {
     const isStudentRequest = config.url?.startsWith('/student/')
 
-    // Student API uses student_token; Staff API keeps using token
+    // Student API ব্যবহার করবে student_token; Staff API ব্যবহার করবে token
     const token = isStudentRequest
       ? localStorage.getItem('student_token')
       : localStorage.getItem('token')
@@ -27,15 +26,14 @@ api.interceptors.request.use(
       delete config.headers.Authorization
     }
 
-    // FormData: let the browser set Content-Type and multipart boundary
+    // FormData হলে ব্রাউজার স্বয়ংক্রয়ভাবে Content-Type সেট করবে
     if (config.data instanceof FormData) {
       delete config.headers['Content-Type']
     } else {
       config.headers['Content-Type'] = 'application/json'
     }
 
-    // Manager selected branch
-    // Keep existing branch behavior for Staff; don't send it for Student APIs
+    // Staff দের জন্য Selected Branch ID যুক্ত করা
     if (isStudentRequest) {
       delete config.headers['X-Branch-Id']
     } else {
@@ -53,6 +51,7 @@ api.interceptors.request.use(
   (error) => Promise.reject(error),
 )
 
+// Response Interceptor
 api.interceptors.response.use(
   (response) => response,
   (error) => Promise.reject(error),
