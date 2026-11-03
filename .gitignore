@@ -13,7 +13,6 @@ dist
 dist-ssr
 coverage
 *.local
-.env
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -23,7 +22,9 @@ coverage
 *.njsproj
 *.sln
 *.sw?
-
+.env
+.env.*
+!.env.example
 *.tsbuildinfo
 
 .eslintcache
