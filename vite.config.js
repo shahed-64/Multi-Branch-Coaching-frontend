@@ -45,9 +45,22 @@ export default defineConfig({
 
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        // Workbox Service Worker যেন /api রাউটগুলোকে ফ্রন্টএন্ড স্ট্যাটিক ক্যাশ থেকে ইগノール করে সরাসরি ব্যাকএন্ডে পাঠায়
+        navigateFallbackDenylist: [/^\/api/],
       },
     }),
   ],
+
+  // Localhost (XAMPP / Dev Server) এর জন্য প্রক্সি কনফিগারেশন
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:8000', // আপনার লোকাল ল্যারাভেল/XAMPP পোর্ট (যেমন 8000 বা localhost/your-project)
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
 
   resolve: {
     alias: {
