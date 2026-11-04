@@ -3,6 +3,10 @@
     {
       "source": "/api/:path*",
       "destination": "https://shop.shahedislam.xyz/api/:path*"
+    },
+    {
+      "source": "/:path*",
+      "destination": "/index.html"
     }
   ]
 }
