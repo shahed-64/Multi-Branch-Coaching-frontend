@@ -18,9 +18,9 @@ export default defineConfig({
       },
 
       manifest: {
-        name: 'Icon Academy',
-        short_name: 'ICON',
-        description: 'iCON ACADEMY Management System',
+        name: 'Global Academy',
+        short_name: 'Global',
+        description: 'Global Academy Management System',
 
         theme_color: '#2563eb',
         background_color: '#ffffff',
