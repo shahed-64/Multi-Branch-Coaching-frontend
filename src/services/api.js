@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // Vercel Proxy ব্যবহারের জন্য baseURL '/api' সেট করা হয়েছে
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
   headers: {
     Accept: 'application/json',
     'Content-Type': 'application/json',
